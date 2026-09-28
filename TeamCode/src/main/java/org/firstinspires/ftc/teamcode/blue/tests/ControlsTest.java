@@ -14,6 +14,8 @@ public class ControlsTest extends OpMode {
     int autoDistance = 0;
     int hood = 0;
     int rpm = 0;
+    int liftFlower = 0;
+    int liftDown = 0;
 
     @Override
     public void init() {
@@ -30,6 +32,8 @@ public class ControlsTest extends OpMode {
         if (controls.hoodDown()) hood--;
         if (controls.rpmUp()) rpm += 100;
         if (controls.rpmDown()) rpm -= 100;
+        if (controls.liftFlower()) liftFlower++;
+        if (controls.liftDown()) liftDown++;
 
         telemetry.addLine("DRIVER (gamepad 1)");
         telemetry.addData("forward", "%.2f", controls.forward());
@@ -52,6 +56,9 @@ public class ControlsTest extends OpMode {
         telemetry.addData("auto distance (Y)", autoDistance);
         telemetry.addData("hood (dpad U/D)", hood);
         telemetry.addData("rpm (dpad L/R)", rpm);
+        telemetry.addData("lift flower (B)", liftFlower);
+        telemetry.addData("lift down (X)", liftDown);
+        telemetry.addData("lift manual (right stick)", "%.2f", controls.liftManual());
 
         if (gamepad1.guideWasPressed()) controls.rumbleDriver(300);
         if (gamepad2.guideWasPressed()) controls.rumbleOperator(300);

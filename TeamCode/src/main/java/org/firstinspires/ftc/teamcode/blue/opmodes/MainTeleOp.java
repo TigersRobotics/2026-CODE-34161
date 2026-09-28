@@ -1,15 +1,23 @@
 package org.firstinspires.ftc.teamcode.blue.opmodes;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 import org.firstinspires.ftc.teamcode.blue.Alliance;
 import org.firstinspires.ftc.teamcode.blue.controls.Controls;
+import org.firstinspires.ftc.teamcode.blue.drive.Odometry;
 import org.firstinspires.ftc.teamcode.blue.drive.SwerveDrive;
+import org.firstinspires.ftc.teamcode.blue.mechanisms.BallSensor;
 import org.firstinspires.ftc.teamcode.blue.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.blue.mechanisms.Launcher;
+import org.firstinspires.ftc.teamcode.blue.mechanisms.Lift;
 import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
+import org.firstinspires.ftc.teamcode.blue.util.MatchTimer;
+import org.firstinspires.ftc.teamcode.blue.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.blue.vision.Limelight;
 import org.firstinspires.ftc.teamcode.blue.vision.Target;
 
@@ -20,13 +28,19 @@ public class MainTeleOp extends OpMode {
     Intake intake;
     Launcher launcher;
     Controls controls;
+    Odometry odometry;
+    BallSensor ballSensor;
+    Lift lift;
+    MatchTimer matchTimer = new MatchTimer();
 
-    Alliance alliance = Alliance.BLUE;
+    Alliance alliance = PoseStorage.alliance;
     boolean fieldCentric = true;
     boolean launcherOn = false;
     boolean autoDistance = true;
+    boolean liftManual = false;
     double manualRpm = 3000;
     double manualHood = 0.5;
+    Target.Type lastBall = null;
 
     @Override
     public void init() {
@@ -35,6 +49,17 @@ public class MainTeleOp extends OpMode {
         intake = new Intake(hardwareMap);
         launcher = new Launcher(hardwareMap);
         controls = new Controls(gamepad1, gamepad2);
+
+        if (hardwareMap.tryGet(GoBildaPinpointDriver.class, "pinpoint") != null) {
+            odometry = new Odometry(hardwareMap);
+            drive.useOdometry(odometry);
+        }
+        if (hardwareMap.tryGet(NormalizedColorSensor.class, "ballColor") != null) {
+            ballSensor = new BallSensor(hardwareMap);
+        }
+        if (hardwareMap.tryGet(DcMotorEx.class, "lift") != null) {
+            lift = new Lift(hardwareMap);
+        }
     }
 
     @Override
@@ -45,16 +70,27 @@ public class MainTeleOp extends OpMode {
         telemetry.addLine("X = blue, B = red");
         telemetry.addData("Alliance", alliance);
         telemetry.addData("Limelight", limelight.isConnected() ? "connected" : "NOT CONNECTED");
+        telemetry.addData("Odometry", odometry == null ? "not found" : "ok");
+        telemetry.addData("Pose from auto", PoseStorage.lastPose == null ? "none" : PoseStorage.lastPose);
+        telemetry.addData("Ball sensor", ballSensor == null ? "not found" : "ok");
+        telemetry.addData("Lift", lift == null ? "not found" : "ok");
     }
 
     @Override
     public void start() {
         limelight.setPipeline(Limelight.TAG_PIPELINE);
+        matchTimer.start();
+
+        if (odometry != null && PoseStorage.lastPose != null) {
+            odometry.setPose(PoseStorage.lastPose);
+        }
     }
 
     @Override
     public void loop() {
+        if (odometry != null) odometry.update();
         limelight.update(drive.getHeadingDegrees());
+        matchTimer.update(gamepad1, gamepad2);
 
         if (controls.resetHeading()) drive.resetHeading();
         if (controls.toggleFieldCentric()) fieldCentric = !fieldCentric;
@@ -133,15 +169,42 @@ public class MainTeleOp extends OpMode {
             intake.stop();
         }
 
+        if (lift != null) {
+            double liftPower = controls.liftManual();
+            if (controls.liftFlower()) {
+                lift.flower();
+                liftManual = false;
+            } else if (controls.liftDown()) {
+                lift.down();
+                liftManual = false;
+            } else if (liftPower != 0) {
+                lift.manual(liftPower);
+                liftManual = true;
+            } else if (liftManual) {
+                lift.holdHere();
+                liftManual = false;
+            }
+        }
+
+        if (ballSensor != null) {
+            Target.Type ball = ballSensor.getBall();
+            if (ball != null && ball != lastBall) controls.rumbleOperator(150);
+            lastBall = ball;
+        }
+
+        telemetry.addData("Time", matchTimer.display());
         telemetry.addData("Alliance", alliance);
         telemetry.addData("Field centric", fieldCentric);
         telemetry.addData("Heading", "%.1f", drive.getHeadingDegrees());
+        if (odometry != null) telemetry.addData("Pose", odometry.getPose());
         telemetry.addData("Tag", tag == null ? "none" : tag.getFiducialId() + "  tx " + String.format("%.1f", tag.getTargetXDegrees()));
         telemetry.addData("Distance", "%.1f", distance);
         telemetry.addData("Aimed", aimed);
         telemetry.addData("Launcher", "%s  %.0f / %.0f rpm  hood %.2f", launcherOn ? "ON" : "off", launcher.getRpm(), launcher.getTargetRpm(), launcher.getHood());
         telemetry.addData("Auto distance", autoDistance);
         telemetry.addData("Ready", launcher.isReady());
+        if (ballSensor != null) telemetry.addData("Loaded", lastBall == null ? "nothing" : lastBall);
+        if (lift != null) telemetry.addData("Lift", "%d / %d", lift.getPosition(), lift.getTarget());
     }
 
     @Override
@@ -149,6 +212,8 @@ public class MainTeleOp extends OpMode {
         drive.stop();
         intake.stop();
         launcher.stop();
+        if (lift != null) lift.stop();
         limelight.stop();
+        PoseStorage.lastPose = null;
     }
 }

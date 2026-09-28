@@ -6,10 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.blue.Alliance;
-import org.firstinspires.ftc.teamcode.blue.drive.DriveToPoint;
-import org.firstinspires.ftc.teamcode.blue.drive.FieldPoses;
-import org.firstinspires.ftc.teamcode.blue.drive.Odometry;
-import org.firstinspires.ftc.teamcode.blue.drive.Pose;
 import org.firstinspires.ftc.teamcode.blue.drive.SwerveDrive;
 import org.firstinspires.ftc.teamcode.blue.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.blue.mechanisms.Launcher;
@@ -18,26 +14,20 @@ import org.firstinspires.ftc.teamcode.blue.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.blue.vision.Limelight;
 import org.firstinspires.ftc.teamcode.blue.vision.Target;
 
-@Autonomous(name = "Blue Auto", group = "Blue", preselectTeleOp = "Blue TeleOp")
-public class MainAuto extends LinearOpMode {
+@Autonomous(name = "Blue Auto Timed", group = "Blue", preselectTeleOp = "Blue TeleOp")
+public class TimedAuto extends LinearOpMode {
     SwerveDrive drive;
-    Odometry odometry;
-    DriveToPoint mover;
     Limelight limelight;
     Intake intake;
     Launcher launcher;
-    ElapsedTime matchTimer = new ElapsedTime();
 
     Alliance alliance = Alliance.BLUE;
     double delay = 0;
-    int cycles = 1;
+    boolean grabMore = true;
 
     @Override
     public void runOpMode() {
         drive = new SwerveDrive(hardwareMap);
-        odometry = new Odometry(hardwareMap);
-        drive.useOdometry(odometry);
-        mover = new DriveToPoint(drive, odometry);
         limelight = new Limelight(hardwareMap);
         intake = new Intake(hardwareMap);
         launcher = new Launcher(hardwareMap);
@@ -47,76 +37,51 @@ public class MainAuto extends LinearOpMode {
             if (gamepad1.bWasPressed()) alliance = Alliance.RED;
             if (gamepad1.dpadUpWasPressed()) delay += 0.5;
             if (gamepad1.dpadDownWasPressed()) delay = Math.max(0, delay - 0.5);
-            if (gamepad1.dpadRightWasPressed()) cycles = Math.min(3, cycles + 1);
-            if (gamepad1.dpadLeftWasPressed()) cycles = Math.max(0, cycles - 1);
+            if (gamepad1.yWasPressed()) grabMore = !grabMore;
 
-            odometry.update();
             limelight.update(drive.getHeadingDegrees());
+            LLResultTypes.FiducialResult tag = limelight.getCellTag(alliance);
 
-            telemetry.addLine("X = blue, B = red, dpad U/D = delay, dpad L/R = cycles");
+            telemetry.addLine("X = blue, B = red, dpad = delay, Y = grab more");
             telemetry.addData("Alliance", alliance);
             telemetry.addData("Delay", delay);
-            telemetry.addData("Extra cycles", cycles);
-            telemetry.addData("Sees cell", limelight.getCellTag(alliance) != null);
-            telemetry.addData("Start", pose(FieldPoses.START));
+            telemetry.addData("Grab more", grabMore);
+            telemetry.addData("Sees cell", tag != null);
             telemetry.update();
         }
 
         if (isStopRequested()) return;
 
-        matchTimer.reset();
+        drive.resetHeading();
         PoseStorage.alliance = alliance;
-        odometry.setPose(pose(FieldPoses.START));
         sleep((long) (delay * 1000));
 
         launcher.setRpm(3000);
-        goTo(pose(FieldPoses.SHOOT), 3);
+        driveFor(0.5, 0, 0, 0.6);
         aim(1.5);
-        shoot(3);
+        shoot(3.0);
 
-        for (int i = 0; i < cycles && timeLeft() > 9; i++) {
-            launcher.idle();
-            goTo(pose(FieldPoses.PICKUP), 3);
-            chasePollen(2);
-            launcher.setRpm(3000);
-            goTo(pose(FieldPoses.SHOOT), 3);
-            aim(1);
+        if (grabMore) {
+            chasePollen(2.5);
+            driveFor(-0.5, 0, 0, 0.8);
+            aim(1.5);
             shoot(2.5);
         }
 
         launcher.stop();
         intake.stop();
-        goTo(pose(FieldPoses.PARK), Math.max(0.5, timeLeft() - 0.5));
+        driveFor(-0.5, 0, 0, 1.0);
         drive.stop();
-
-        odometry.update();
-        PoseStorage.lastPose = odometry.getPose();
         limelight.stop();
     }
 
-    Pose pose(Pose redPose) {
-        return FieldPoses.get(redPose, alliance);
-    }
-
-    double timeLeft() {
-        return 30 - matchTimer.seconds();
-    }
-
-    void goTo(Pose target, double timeout) {
-        mover.setTarget(target);
+    void driveFor(double forward, double left, double turn, double seconds) {
         ElapsedTime timer = new ElapsedTime();
-
-        while (opModeIsActive() && timer.seconds() < timeout) {
-            odometry.update();
-            if (mover.update(BlueConstants.AUTO_SPEED)) break;
-
-            PoseStorage.lastPose = odometry.getPose();
-            telemetry.addData("Target", target);
-            telemetry.addData("Pose", odometry.getPose());
-            telemetry.addData("Left", "%.1f in  %.1f deg", mover.getDistanceLeft(), Math.toDegrees(mover.getHeadingLeft()));
-            telemetry.update();
+        while (opModeIsActive() && timer.seconds() < seconds) {
+            drive.drive(forward, left, turn, false);
+            idle();
         }
-        drive.move(0, 0, 0);
+        drive.drive(0, 0, 0, false);
     }
 
     void aim(double seconds) {
@@ -124,28 +89,31 @@ public class MainAuto extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
 
         while (opModeIsActive() && timer.seconds() < seconds) {
-            odometry.update();
             limelight.update(drive.getHeadingDegrees());
             LLResultTypes.FiducialResult tag = limelight.getCellTag(alliance);
 
             if (tag == null) {
-                drive.move(0, 0, 0);
+                drive.drive(0, 0, 0, false);
                 continue;
             }
 
             double tx = tag.getTargetXDegrees();
-            launcher.aimFor(limelight.getDistance(tag));
-            if (Math.abs(tx) < BlueConstants.AIM_TOLERANCE) break;
-            drive.move(0, 0, -BlueConstants.AIM_P * tx);
+            if (Math.abs(tx) < BlueConstants.AIM_TOLERANCE) {
+                launcher.aimFor(limelight.getDistance(tag));
+                break;
+            }
+            drive.drive(0, 0, -BlueConstants.AIM_P * tx, false);
+
+            telemetry.addData("tx", tx);
+            telemetry.update();
         }
-        drive.move(0, 0, 0);
+        drive.drive(0, 0, 0, false);
     }
 
     void shoot(double seconds) {
         ElapsedTime timer = new ElapsedTime();
         while (opModeIsActive() && timer.seconds() < seconds) {
-            odometry.update();
-            drive.move(0, 0, 0);
+            drive.drive(0, 0, 0, false);
             if (launcher.isReady()) {
                 launcher.feed();
                 intake.in();
@@ -153,6 +121,8 @@ public class MainAuto extends LinearOpMode {
                 launcher.stopFeed();
                 intake.stop();
             }
+            telemetry.addData("rpm", launcher.getRpm());
+            telemetry.update();
         }
         launcher.stopFeed();
         intake.stop();
@@ -163,18 +133,17 @@ public class MainAuto extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
 
         while (opModeIsActive() && timer.seconds() < seconds) {
-            odometry.update();
             limelight.update(drive.getHeadingDegrees());
             Target pollen = limelight.getClosest(Target.Type.POLLEN);
             intake.in();
 
             if (pollen == null) {
-                drive.move(0, 0, 0.3);
+                drive.drive(0, 0, 0.3, false);
             } else {
-                drive.move(0.4, 0, -BlueConstants.PICKUP_P * pollen.tx);
+                drive.drive(0.4, 0, -BlueConstants.PICKUP_P * pollen.tx, false);
             }
         }
-        drive.move(0, 0, 0);
+        drive.drive(0, 0, 0, false);
         limelight.setPipeline(Limelight.TAG_PIPELINE);
     }
 }

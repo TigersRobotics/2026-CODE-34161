@@ -87,6 +87,19 @@ public class Controls {
         return operator.dpadLeftWasPressed();
     }
 
+    public boolean liftFlower() {
+        return operator.bWasPressed();
+    }
+
+    public boolean liftDown() {
+        return operator.xWasPressed();
+    }
+
+    public double liftManual() {
+        double stick = -operator.right_stick_y;
+        return Math.abs(stick) > 0.1 ? stick : 0;
+    }
+
     public void rumbleDriver(int ms) {
         driver.rumble(ms);
     }

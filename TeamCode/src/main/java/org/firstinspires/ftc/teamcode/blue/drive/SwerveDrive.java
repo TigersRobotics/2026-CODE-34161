@@ -13,6 +13,8 @@ public class SwerveDrive {
 
     private final IMU imu;
     private final double[][] positions;
+    private Odometry odometry;
+    private double headingOffset = 0;
 
     public SwerveDrive(HardwareMap hardwareMap) {
         fl = new SwerveModule(hardwareMap, "fl", BlueConstants.FL_OFFSET, BlueConstants.FL_REVERSED);
@@ -29,7 +31,12 @@ public class SwerveDrive {
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(BlueConstants.HUB_LOGO, BlueConstants.HUB_USB)));
     }
 
+    public void useOdometry(Odometry odometry) {
+        this.odometry = odometry;
+    }
+
     public double getHeading() {
+        if (odometry != null) return AngleUnit.normalizeRadians(odometry.getHeading() - headingOffset);
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
@@ -39,6 +46,7 @@ public class SwerveDrive {
 
     public void resetHeading() {
         imu.resetYaw();
+        if (odometry != null) headingOffset = odometry.getHeading();
     }
 
     public void drive(double forward, double left, double turn, boolean fieldCentric) {
@@ -46,17 +54,21 @@ public class SwerveDrive {
         if (Math.abs(left) < BlueConstants.DEADBAND) left = 0;
         if (Math.abs(turn) < BlueConstants.DEADBAND) turn = 0;
 
-        if (forward == 0 && left == 0 && turn == 0) {
-            for (SwerveModule m : modules) m.hold();
-            return;
-        }
-
         if (fieldCentric) {
             double h = -getHeading();
             double f = forward * Math.cos(h) - left * Math.sin(h);
             double l = forward * Math.sin(h) + left * Math.cos(h);
             forward = f;
             left = l;
+        }
+
+        move(forward, left, turn);
+    }
+
+    public void move(double forward, double left, double turn) {
+        if (Math.abs(forward) < 0.001 && Math.abs(left) < 0.001 && Math.abs(turn) < 0.001) {
+            for (SwerveModule m : modules) m.hold();
+            return;
         }
 
         double r = Math.hypot(positions[0][0], positions[0][1]);

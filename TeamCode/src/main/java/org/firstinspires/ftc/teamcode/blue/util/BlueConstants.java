@@ -43,4 +43,33 @@ public class BlueConstants {
     public static double HOOD_MAX = 0.9;
     public static double INTAKE_POWER = 1.0;
     public static double FEED_POWER = 1.0;
+
+    public static double PINPOINT_X_OFFSET = 0;
+    public static double PINPOINT_Y_OFFSET = 0;
+    public static boolean PINPOINT_X_REVERSED = false;
+    public static boolean PINPOINT_Y_REVERSED = false;
+
+    public static double MOVE_P = 0.06;
+    public static double MOVE_D = 0.004;
+    public static double HEADING_P = 1.2;
+    public static double HEADING_D = 0.02;
+    public static double POSITION_TOLERANCE = 1.0;
+    public static double HEADING_TOLERANCE = Math.toRadians(3);
+    public static double AUTO_SPEED = 0.7;
+
+    public static int LIFT_DOWN = 0;
+    public static int LIFT_FLOWER = 1500;
+    public static int LIFT_MAX = 1800;
+    public static double LIFT_POWER = 1.0;
+
+    public static float COLOR_GAIN = 8;
+    public static double BALL_DISTANCE = 4.0;
+    public static double YELLOW_MIN = 40;
+    public static double YELLOW_MAX = 90;
+    public static double BLUE_MIN = 180;
+    public static double BLUE_MAX = 260;
+    public static double RED_LOW = 25;
+    public static double RED_HIGH = 330;
+
+    public static double TELEOP_LENGTH = 120;
 }
