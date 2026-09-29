@@ -45,7 +45,8 @@ public class SwerveModule {
     }
 
     public double getRawAngle() {
-        return encoder.getVoltage() / encoder.getMaxVoltage() * 2 * Math.PI;
+        double angle = encoder.getVoltage() / encoder.getMaxVoltage() * 2 * Math.PI;
+        return BlueConstants.ENCODER_REVERSED ? 2 * Math.PI - angle : angle;
     }
 
     public double getAngle() {
@@ -77,6 +78,7 @@ public class SwerveModule {
             error = AngleUnit.normalizeRadians(angle - getAngle());
         }
 
+        if (Math.abs(AngleUnit.normalizeRadians(angle - targetAngle)) > Math.PI / 4) pid.reset();
         targetAngle = angle;
         lastSpeed = speed * Math.cos(error);
 

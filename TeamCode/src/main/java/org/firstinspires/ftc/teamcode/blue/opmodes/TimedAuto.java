@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.blue.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.blue.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
 import org.firstinspires.ftc.teamcode.blue.util.PoseStorage;
+import org.firstinspires.ftc.teamcode.blue.vision.Cell;
 import org.firstinspires.ftc.teamcode.blue.vision.Limelight;
 import org.firstinspires.ftc.teamcode.blue.vision.Target;
 
@@ -54,6 +55,7 @@ public class TimedAuto extends LinearOpMode {
 
         drive.resetHeading();
         PoseStorage.alliance = alliance;
+        PoseStorage.lastPose = null;
         sleep((long) (delay * 1000));
 
         launcher.setRpm(3000);
@@ -90,18 +92,16 @@ public class TimedAuto extends LinearOpMode {
 
         while (opModeIsActive() && timer.seconds() < seconds) {
             limelight.update(drive.getHeadingDegrees());
-            LLResultTypes.FiducialResult tag = limelight.getCellTag(alliance);
+            Cell cell = limelight.getCell(alliance);
 
-            if (tag == null) {
+            if (cell == null) {
                 drive.drive(0, 0, 0, false);
                 continue;
             }
 
-            double tx = tag.getTargetXDegrees();
-            if (Math.abs(tx) < BlueConstants.AIM_TOLERANCE) {
-                launcher.aimFor(limelight.getDistance(tag));
-                break;
-            }
+            double tx = cell.tx;
+            launcher.aimFor(limelight.getDistance(cell));
+            if (Math.abs(tx) < BlueConstants.AIM_TOLERANCE) break;
             drive.drive(0, 0, -BlueConstants.AIM_P * tx, false);
 
             telemetry.addData("tx", tx);

@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.blue.controls.Controls;
 import org.firstinspires.ftc.teamcode.blue.drive.SwerveDrive;
 import org.firstinspires.ftc.teamcode.blue.vision.Limelight;
 
@@ -44,7 +45,7 @@ public class SnapshotCapture extends OpMode {
         }
 
         if (drive != null) {
-            drive.drive(-gamepad1.left_stick_y * 0.4, -gamepad1.left_stick_x * 0.4, -gamepad1.right_stick_x * 0.4, false);
+            drive.drive(Controls.deadband(-gamepad1.left_stick_y) * 0.4, Controls.deadband(-gamepad1.left_stick_x) * 0.4, Controls.deadband(-gamepad1.right_stick_x) * 0.4, false);
         }
 
         telemetry.addLine("dpad L/R = label, A = snap, Y = auto snap, BACK = delete all");

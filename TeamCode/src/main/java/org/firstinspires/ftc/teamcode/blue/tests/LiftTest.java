@@ -43,8 +43,10 @@ public class LiftTest extends OpMode {
             manual = false;
         }
 
-        if (gamepad1.aWasPressed()) lift.down();
-        if (gamepad1.yWasPressed()) lift.flower();
+        boolean down = gamepad1.aWasPressed();
+        boolean flower = gamepad1.yWasPressed();
+        if (!ignoreLimits && down) lift.down();
+        if (!ignoreLimits && flower) lift.flower();
         if (gamepad1.xWasPressed()) savedFlower = lift.getPosition();
         if (gamepad1.bWasPressed()) savedMax = lift.getPosition();
         if (gamepad1.backWasPressed()) lift.resetEncoder();

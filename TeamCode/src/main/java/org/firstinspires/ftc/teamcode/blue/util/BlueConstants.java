@@ -16,6 +16,7 @@ public class BlueConstants {
     public static boolean BL_REVERSED = false;
     public static boolean BR_REVERSED = false;
     public static boolean TURN_REVERSED = false;
+    public static boolean ENCODER_REVERSED = false;
 
     public static double TURN_P = 0.6;
     public static double TURN_I = 0;
@@ -35,6 +36,7 @@ public class BlueConstants {
     public static double AIM_TOLERANCE = 1.5;
     public static double PICKUP_P = 0.02;
     public static double MIN_CONFIDENCE = 0.5;
+    public static long MAX_STALE_MS = 100;
 
     public static double LAUNCHER_TICKS_PER_REV = 28;
     public static double LAUNCHER_RPM_TOLERANCE = 100;
@@ -72,4 +74,16 @@ public class BlueConstants {
     public static double RED_HIGH = 330;
 
     public static double TELEOP_LENGTH = 120;
+
+    public static double LAUNCHER_P = 1.2;
+    public static double LAUNCHER_I = 0.12;
+    public static double LAUNCHER_D = 0;
+    public static double LAUNCHER_F = 11.7;
+
+    public static double HOLD_P = 0.8;
+    public static double HOLD_D = 0.02;
+    public static double HOLD_DELAY = 0.25;
+    public static double HOLD_MAX = 0.5;
+
+    public static double LOW_BATTERY = 12.3;
 }

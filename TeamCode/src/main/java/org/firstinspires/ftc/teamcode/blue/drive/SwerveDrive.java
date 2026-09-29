@@ -15,6 +15,8 @@ public class SwerveDrive {
     private final double[][] positions;
     private Odometry odometry;
     private double headingOffset = 0;
+    private boolean cacheHeading = false;
+    private double cachedHeading = 0;
 
     public SwerveDrive(HardwareMap hardwareMap) {
         fl = new SwerveModule(hardwareMap, "fl", BlueConstants.FL_OFFSET, BlueConstants.FL_REVERSED);
@@ -35,7 +37,20 @@ public class SwerveDrive {
         this.odometry = odometry;
     }
 
+    public void cacheHeading(boolean on) {
+        cacheHeading = on;
+        if (on) updateHeading();
+    }
+
+    public void updateHeading() {
+        cachedHeading = readHeading();
+    }
+
     public double getHeading() {
+        return cacheHeading ? cachedHeading : readHeading();
+    }
+
+    private double readHeading() {
         if (odometry != null) return AngleUnit.normalizeRadians(odometry.getHeading() - headingOffset);
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
@@ -47,13 +62,10 @@ public class SwerveDrive {
     public void resetHeading() {
         imu.resetYaw();
         if (odometry != null) headingOffset = odometry.getHeading();
+        cachedHeading = 0;
     }
 
     public void drive(double forward, double left, double turn, boolean fieldCentric) {
-        if (Math.abs(forward) < BlueConstants.DEADBAND) forward = 0;
-        if (Math.abs(left) < BlueConstants.DEADBAND) left = 0;
-        if (Math.abs(turn) < BlueConstants.DEADBAND) turn = 0;
-
         if (fieldCentric) {
             double h = -getHeading();
             double f = forward * Math.cos(h) - left * Math.sin(h);

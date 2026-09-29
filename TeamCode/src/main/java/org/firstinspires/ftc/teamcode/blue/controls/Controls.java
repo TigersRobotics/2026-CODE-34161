@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.blue.controls;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
+
 public class Controls {
     private final Gamepad driver;
     private final Gamepad operator;
@@ -11,16 +13,33 @@ public class Controls {
         this.operator = operator;
     }
 
+    public static double deadband(double value) {
+        return Math.abs(value) < BlueConstants.DEADBAND ? 0 : value;
+    }
+
     public double forward() {
-        return -driver.left_stick_y;
+        return deadband(-driver.left_stick_y);
     }
 
     public double strafe() {
-        return -driver.left_stick_x;
+        return deadband(-driver.left_stick_x);
     }
 
     public double turn() {
-        return -driver.right_stick_x;
+        return deadband(-driver.right_stick_x);
+    }
+
+    public void clearPresses() {
+        driver.optionsWasPressed();
+        driver.shareWasPressed();
+        operator.aWasPressed();
+        operator.bWasPressed();
+        operator.xWasPressed();
+        operator.yWasPressed();
+        operator.dpadUpWasPressed();
+        operator.dpadDownWasPressed();
+        operator.dpadLeftWasPressed();
+        operator.dpadRightWasPressed();
     }
 
     public boolean slow() {

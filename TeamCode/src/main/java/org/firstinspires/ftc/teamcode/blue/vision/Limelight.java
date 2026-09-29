@@ -19,23 +19,23 @@ public class Limelight {
     private final Limelight3A limelight;
     private LLResult result;
     private int pipeline = -1;
+    public boolean megaTag = false;
 
     public Limelight(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
-        setPipeline(TAG_PIPELINE);
         limelight.start();
+        setPipeline(TAG_PIPELINE);
     }
 
     public void update(double headingDegrees) {
-        limelight.updateRobotOrientation(headingDegrees);
+        if (megaTag) limelight.updateRobotOrientation(headingDegrees);
         result = limelight.getLatestResult();
     }
 
     public void setPipeline(int index) {
         if (index == pipeline) return;
-        limelight.pipelineSwitch(index);
-        pipeline = index;
+        if (limelight.pipelineSwitch(index)) pipeline = index;
     }
 
     public int getPipeline() {
@@ -43,7 +43,7 @@ public class Limelight {
     }
 
     public boolean hasResult() {
-        return result != null && result.isValid();
+        return result != null && result.isValid() && result.getStaleness() < BlueConstants.MAX_STALE_MS;
     }
 
     public LLResult getResult() {
@@ -68,9 +68,48 @@ public class Limelight {
         return best;
     }
 
+    public Cell getCell(Alliance alliance) {
+        double[] txSum = new double[2];
+        double[] tySum = new double[2];
+        int[] count = new int[2];
+
+        for (LLResultTypes.FiducialResult tag : getTags()) {
+            int id = tag.getFiducialId();
+            if (!alliance.ownsTag(id)) continue;
+            int i = (id - alliance.firstTag) / 4;
+            txSum[i] += tag.getTargetXDegrees();
+            tySum[i] += tag.getTargetYDegrees();
+            count[i]++;
+        }
+
+        Cell best = null;
+        for (int i = 0; i < 2; i++) {
+            if (count[i] == 0) continue;
+            Cell c = new Cell(alliance.firstTag + i * 4, txSum[i] / count[i], tySum[i] / count[i], count[i]);
+            if (best == null || c.ty > best.ty) best = c;
+        }
+        return best;
+    }
+
     public double getDistance(LLResultTypes.FiducialResult tag) {
-        double angle = Math.toRadians(BlueConstants.CAMERA_PITCH + tag.getTargetYDegrees());
+        return getDistance(tag.getTargetYDegrees());
+    }
+
+    public double getDistance(Cell cell) {
+        return getDistance(cell.ty);
+    }
+
+    public double getDistance(double ty) {
+        double angle = Math.toRadians(BlueConstants.CAMERA_PITCH + ty);
         return (BlueConstants.TAG_HEIGHT - BlueConstants.CAMERA_HEIGHT) / Math.tan(angle);
+    }
+
+    public double getFps() {
+        return limelight.getStatus().getFps();
+    }
+
+    public double getTemp() {
+        return limelight.getStatus().getTemp();
     }
 
     public List<Target> getTargets() {

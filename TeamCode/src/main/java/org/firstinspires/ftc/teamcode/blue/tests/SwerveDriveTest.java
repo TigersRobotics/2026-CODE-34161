@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.blue.controls.Controls;
 import org.firstinspires.ftc.teamcode.blue.drive.SwerveDrive;
 import org.firstinspires.ftc.teamcode.blue.drive.SwerveModule;
 import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
@@ -42,7 +43,7 @@ public class SwerveDriveTest extends OpMode {
         if (gamepad1.x) {
             drive.lock();
         } else {
-            drive.drive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, fieldCentric);
+            drive.drive(Controls.deadband(-gamepad1.left_stick_y), Controls.deadband(-gamepad1.left_stick_x), Controls.deadband(-gamepad1.right_stick_x), fieldCentric);
         }
 
         logger.log(String.format("%.3f", timer.seconds()), String.format("%.2f", drive.getHeadingDegrees()),

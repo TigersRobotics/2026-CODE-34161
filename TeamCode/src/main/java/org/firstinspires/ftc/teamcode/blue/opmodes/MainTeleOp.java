@@ -1,36 +1,28 @@
 package org.firstinspires.ftc.teamcode.blue.opmodes;
 
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.blue.Alliance;
+import org.firstinspires.ftc.teamcode.blue.Robot;
 import org.firstinspires.ftc.teamcode.blue.controls.Controls;
-import org.firstinspires.ftc.teamcode.blue.drive.Odometry;
-import org.firstinspires.ftc.teamcode.blue.drive.SwerveDrive;
-import org.firstinspires.ftc.teamcode.blue.mechanisms.BallSensor;
-import org.firstinspires.ftc.teamcode.blue.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.blue.mechanisms.Launcher;
-import org.firstinspires.ftc.teamcode.blue.mechanisms.Lift;
+import org.firstinspires.ftc.teamcode.blue.drive.FieldPoses;
+import org.firstinspires.ftc.teamcode.blue.drive.HeadingHold;
+import org.firstinspires.ftc.teamcode.blue.drive.Pose;
 import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
 import org.firstinspires.ftc.teamcode.blue.util.MatchTimer;
 import org.firstinspires.ftc.teamcode.blue.util.PoseStorage;
+import org.firstinspires.ftc.teamcode.blue.vision.Cell;
 import org.firstinspires.ftc.teamcode.blue.vision.Limelight;
 import org.firstinspires.ftc.teamcode.blue.vision.Target;
 
 @TeleOp(name = "Blue TeleOp", group = "Blue")
 public class MainTeleOp extends OpMode {
-    SwerveDrive drive;
-    Limelight limelight;
-    Intake intake;
-    Launcher launcher;
+    Robot robot;
     Controls controls;
-    Odometry odometry;
-    BallSensor ballSensor;
-    Lift lift;
+    HeadingHold hold = new HeadingHold();
     MatchTimer matchTimer = new MatchTimer();
 
     Alliance alliance = PoseStorage.alliance;
@@ -44,176 +36,183 @@ public class MainTeleOp extends OpMode {
 
     @Override
     public void init() {
-        drive = new SwerveDrive(hardwareMap);
-        limelight = new Limelight(hardwareMap);
-        intake = new Intake(hardwareMap);
-        launcher = new Launcher(hardwareMap);
+        robot = new Robot(hardwareMap, false);
         controls = new Controls(gamepad1, gamepad2);
-
-        if (hardwareMap.tryGet(GoBildaPinpointDriver.class, "pinpoint") != null) {
-            odometry = new Odometry(hardwareMap);
-            drive.useOdometry(odometry);
-        }
-        if (hardwareMap.tryGet(NormalizedColorSensor.class, "ballColor") != null) {
-            ballSensor = new BallSensor(hardwareMap);
-        }
-        if (hardwareMap.tryGet(DcMotorEx.class, "lift") != null) {
-            lift = new Lift(hardwareMap);
-        }
     }
 
     @Override
     public void init_loop() {
+        robot.update();
         if (gamepad1.xWasPressed()) alliance = Alliance.BLUE;
         if (gamepad1.bWasPressed()) alliance = Alliance.RED;
+        if (gamepad1.yWasPressed()) hold.enabled = !hold.enabled;
 
-        telemetry.addLine("X = blue, B = red");
+        telemetry.addLine("X = blue, B = red, Y = heading hold");
         telemetry.addData("Alliance", alliance);
-        telemetry.addData("Limelight", limelight.isConnected() ? "connected" : "NOT CONNECTED");
-        telemetry.addData("Odometry", odometry == null ? "not found" : "ok");
+        telemetry.addData("Heading hold", hold.enabled);
+        telemetry.addData("Limelight", robot.limelight.isConnected() ? "connected" : "NOT CONNECTED");
+        telemetry.addData("Odometry", robot.odometry == null ? "not found" : "ok");
         telemetry.addData("Pose from auto", PoseStorage.lastPose == null ? "none" : PoseStorage.lastPose);
-        telemetry.addData("Ball sensor", ballSensor == null ? "not found" : "ok");
-        telemetry.addData("Lift", lift == null ? "not found" : "ok");
+        telemetry.addData("Ball sensor", robot.ballSensor == null ? "not found" : "ok");
+        telemetry.addData("Lift", robot.lift == null ? "not found" : "ok");
+        telemetry.addData("Battery", "%.2f V%s", robot.getBattery(), robot.getBattery() < BlueConstants.LOW_BATTERY ? "  LOW" : "");
     }
 
     @Override
     public void start() {
-        limelight.setPipeline(Limelight.TAG_PIPELINE);
+        robot.limelight.setPipeline(Limelight.TAG_PIPELINE);
+        controls.clearPresses();
         matchTimer.start();
 
-        if (odometry != null && PoseStorage.lastPose != null) {
-            odometry.setPose(PoseStorage.lastPose);
+        if (robot.odometry != null && PoseStorage.lastPose != null) {
+            robot.odometry.setPose(PoseStorage.lastPose);
         }
     }
 
     @Override
     public void loop() {
-        if (odometry != null) odometry.update();
-        limelight.update(drive.getHeadingDegrees());
+        robot.update();
         matchTimer.update(gamepad1, gamepad2);
 
-        if (controls.resetHeading()) drive.resetHeading();
+        if (controls.resetHeading()) {
+            robot.drive.resetHeading();
+            hold.release();
+        }
         if (controls.toggleFieldCentric()) fieldCentric = !fieldCentric;
 
         double speed = controls.slow() ? BlueConstants.SLOW_SPEED : 1.0;
         double forward = controls.forward() * speed;
         double strafe = controls.strafe() * speed;
-        double turn = controls.turn() * speed;
+        boolean translating = Math.hypot(forward, strafe) > BlueConstants.DEADBAND;
+        double turn = hold.update(controls.turn() * speed, robot.drive.getHeading(), translating);
 
-        LLResultTypes.FiducialResult tag = limelight.getCellTag(alliance);
-        double distance = tag != null ? limelight.getDistance(tag) : -1;
+        Pose pose = robot.getPose();
+        Pose hive = FieldPoses.get(FieldPoses.HIVE, alliance);
+        Cell cell = robot.limelight.getCell(alliance);
+
+        double distance = -1;
+        if (cell != null) {
+            distance = robot.limelight.getDistance(cell);
+        } else if (pose != null) {
+            distance = pose.distanceTo(hive);
+        }
+
         boolean aimed = false;
         boolean chasing = false;
 
         if (controls.autoAim()) {
-            limelight.setPipeline(Limelight.TAG_PIPELINE);
-            if (tag != null) {
-                turn = -BlueConstants.AIM_P * tag.getTargetXDegrees();
-                aimed = Math.abs(tag.getTargetXDegrees()) < BlueConstants.AIM_TOLERANCE;
+            hold.release();
+            robot.limelight.setPipeline(Limelight.TAG_PIPELINE);
+            if (cell != null) {
+                turn = -BlueConstants.AIM_P * cell.tx;
+                aimed = Math.abs(cell.tx) < BlueConstants.AIM_TOLERANCE;
+            } else if (pose != null) {
+                double error = AngleUnit.normalizeRadians(FieldPoses.headingTo(pose, hive) - pose.heading);
+                turn = Range.clip(BlueConstants.HEADING_P * error, -0.6, 0.6);
+                aimed = Math.abs(Math.toDegrees(error)) < BlueConstants.AIM_TOLERANCE;
             }
         } else if (controls.chasePollen()) {
-            limelight.setPipeline(Limelight.DETECTOR_PIPELINE);
-            Target pollen = limelight.getClosest(Target.Type.POLLEN);
+            hold.release();
+            robot.limelight.setPipeline(Limelight.DETECTOR_PIPELINE);
+            Target pollen = robot.limelight.getClosest(Target.Type.POLLEN);
             if (pollen != null) {
                 turn = -BlueConstants.PICKUP_P * pollen.tx;
                 chasing = true;
             }
         } else {
-            limelight.setPipeline(Limelight.TAG_PIPELINE);
+            robot.limelight.setPipeline(Limelight.TAG_PIPELINE);
         }
 
         if (controls.lockWheels()) {
-            drive.lock();
+            robot.drive.lock();
         } else {
-            drive.drive(forward, strafe, turn, fieldCentric);
+            robot.drive.drive(forward, strafe, turn, fieldCentric);
         }
 
         if (controls.toggleLauncher()) launcherOn = !launcherOn;
         if (controls.toggleAutoDistance()) autoDistance = !autoDistance;
 
-        if (controls.rpmUp()) manualRpm += 100;
-        if (controls.rpmDown()) manualRpm -= 100;
+        if (controls.rpmUp()) manualRpm = Math.min(6000, manualRpm + 100);
+        if (controls.rpmDown()) manualRpm = Math.max(500, manualRpm - 100);
         if (controls.hoodUp()) {
-            manualHood += 0.05;
+            manualHood = Math.min(BlueConstants.HOOD_MAX, manualHood + 0.05);
             autoDistance = false;
         }
         if (controls.hoodDown()) {
-            manualHood -= 0.05;
+            manualHood = Math.max(BlueConstants.HOOD_MIN, manualHood - 0.05);
             autoDistance = false;
         }
 
         if (!launcherOn) {
-            launcher.stop();
+            robot.launcher.stop();
         } else if (autoDistance && distance > 0) {
-            launcher.aimFor(distance);
+            robot.launcher.aimFor(distance);
         } else {
-            launcher.setRpm(manualRpm);
-            launcher.setHood(manualHood);
+            robot.launcher.setRpm(manualRpm);
+            robot.launcher.setHood(manualHood);
         }
 
-        boolean shooting = controls.shoot() && launcher.isReady();
+        boolean shooting = controls.shoot() && robot.launcher.isReady();
 
         if (shooting) {
-            launcher.feed();
+            robot.launcher.feed();
         } else if (controls.unjam()) {
-            launcher.unjam();
+            robot.launcher.unjam();
         } else {
-            launcher.stopFeed();
+            robot.launcher.stopFeed();
         }
 
         if (controls.intakeOut()) {
-            intake.out();
+            robot.intake.out();
         } else if (controls.intakeIn() || chasing || shooting) {
-            intake.in();
+            robot.intake.in();
         } else {
-            intake.stop();
+            robot.intake.stop();
         }
 
-        if (lift != null) {
+        if (robot.lift != null) {
             double liftPower = controls.liftManual();
             if (controls.liftFlower()) {
-                lift.flower();
+                robot.lift.flower();
                 liftManual = false;
             } else if (controls.liftDown()) {
-                lift.down();
+                robot.lift.down();
                 liftManual = false;
             } else if (liftPower != 0) {
-                lift.manual(liftPower);
+                robot.lift.manual(liftPower);
                 liftManual = true;
             } else if (liftManual) {
-                lift.holdHere();
+                robot.lift.holdHere();
                 liftManual = false;
             }
         }
 
-        if (ballSensor != null) {
-            Target.Type ball = ballSensor.getBall();
+        if (robot.ballSensor != null) {
+            Target.Type ball = robot.ballSensor.getBall();
             if (ball != null && ball != lastBall) controls.rumbleOperator(150);
             lastBall = ball;
         }
 
         telemetry.addData("Time", matchTimer.display());
         telemetry.addData("Alliance", alliance);
-        telemetry.addData("Field centric", fieldCentric);
-        telemetry.addData("Heading", "%.1f", drive.getHeadingDegrees());
-        if (odometry != null) telemetry.addData("Pose", odometry.getPose());
-        telemetry.addData("Tag", tag == null ? "none" : tag.getFiducialId() + "  tx " + String.format("%.1f", tag.getTargetXDegrees()));
-        telemetry.addData("Distance", "%.1f", distance);
+        telemetry.addData("Drive", "%s%s", fieldCentric ? "field" : "robot", hold.isHolding() ? "  holding" : "");
+        telemetry.addData("Heading", "%.1f", robot.drive.getHeadingDegrees());
+        if (pose != null) telemetry.addData("Pose", pose);
+        telemetry.addData("Cell", cell == null ? "none" : cell);
+        telemetry.addData("Distance", "%.1f%s", distance, cell == null && distance > 0 ? " (odo)" : "");
         telemetry.addData("Aimed", aimed);
-        telemetry.addData("Launcher", "%s  %.0f / %.0f rpm  hood %.2f", launcherOn ? "ON" : "off", launcher.getRpm(), launcher.getTargetRpm(), launcher.getHood());
+        telemetry.addData("Launcher", "%s  %.0f / %.0f rpm  hood %.2f", launcherOn ? "ON" : "off",
+                robot.launcher.getRpm(), robot.launcher.getTargetRpm(), robot.launcher.getHood());
         telemetry.addData("Auto distance", autoDistance);
-        telemetry.addData("Ready", launcher.isReady());
-        if (ballSensor != null) telemetry.addData("Loaded", lastBall == null ? "nothing" : lastBall);
-        if (lift != null) telemetry.addData("Lift", "%d / %d", lift.getPosition(), lift.getTarget());
+        telemetry.addData("Ready", robot.launcher.isReady());
+        if (robot.ballSensor != null) telemetry.addData("Loaded", lastBall == null ? "nothing" : lastBall);
+        if (robot.lift != null) telemetry.addData("Lift", "%d / %d", robot.lift.getPosition(), robot.lift.getTarget());
+        telemetry.addData("Loop", "%.0f ms   battery %.1f V", robot.getLoopMs(), robot.getBattery());
     }
 
     @Override
     public void stop() {
-        drive.stop();
-        intake.stop();
-        launcher.stop();
-        if (lift != null) lift.stop();
-        limelight.stop();
+        robot.stop();
         PoseStorage.lastPose = null;
     }
 }

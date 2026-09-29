@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.blue.controls.Controls;
 import org.firstinspires.ftc.teamcode.blue.drive.Odometry;
 import org.firstinspires.ftc.teamcode.blue.drive.Pose;
 import org.firstinspires.ftc.teamcode.blue.drive.SwerveDrive;
@@ -43,7 +44,7 @@ public class OdometryTest extends OpMode {
 
         if (gamepad1.aWasPressed()) odometry.setPose(new Pose(0, 0, 0));
 
-        drive.drive(-gamepad1.left_stick_y * 0.5, -gamepad1.left_stick_x * 0.5, -gamepad1.right_stick_x * 0.5, true);
+        drive.drive(Controls.deadband(-gamepad1.left_stick_y) * 0.5, Controls.deadband(-gamepad1.left_stick_x) * 0.5, Controls.deadband(-gamepad1.right_stick_x) * 0.5, true);
 
         Pose p = odometry.getPose();
         logger.log(String.format("%.3f", timer.seconds()), String.format("%.2f", p.x), String.format("%.2f", p.y),

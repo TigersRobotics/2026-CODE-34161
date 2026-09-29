@@ -25,12 +25,31 @@ public class Launcher {
         flywheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        applyPidf();
 
         setHood(hoodPosition);
     }
 
+    public void applyPidf() {
+        flywheel.setVelocityPIDFCoefficients(BlueConstants.LAUNCHER_P, BlueConstants.LAUNCHER_I,
+                BlueConstants.LAUNCHER_D, BlueConstants.LAUNCHER_F);
+    }
+
+    public void setRawPower(double power) {
+        targetRpm = 0;
+        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheel.setPower(power);
+    }
+
+    public double getTicksPerSecond() {
+        return flywheel.getVelocity();
+    }
+
     public void setRpm(double rpm) {
         targetRpm = rpm;
+        if (flywheel.getMode() != DcMotor.RunMode.RUN_USING_ENCODER) {
+            flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
         flywheel.setVelocity(rpm / 60.0 * BlueConstants.LAUNCHER_TICKS_PER_REV);
     }
 
@@ -73,12 +92,19 @@ public class Launcher {
     }
 
     public void idle() {
-        setRpm(BlueConstants.LAUNCHER_IDLE_RPM);
-        stopFeed();
+        if (BlueConstants.LAUNCHER_IDLE_RPM > 0) {
+            setRpm(BlueConstants.LAUNCHER_IDLE_RPM);
+            stopFeed();
+        } else {
+            stop();
+        }
     }
 
     public void stop() {
         targetRpm = 0;
+        if (flywheel.getMode() != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
+            flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
         flywheel.setPower(0);
         stopFeed();
     }

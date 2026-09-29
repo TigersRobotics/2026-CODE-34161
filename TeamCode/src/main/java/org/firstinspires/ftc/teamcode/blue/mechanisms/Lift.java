@@ -9,12 +9,17 @@ import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
 public class Lift {
     private final DcMotorEx motor;
     private int target = 0;
+    private static boolean zeroed = false;
 
     public Lift(HardwareMap hardwareMap) {
         motor = hardwareMap.get(DcMotorEx.class, "lift");
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setTargetPosition(0);
+        if (!zeroed) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            zeroed = true;
+        }
+        target = motor.getCurrentPosition();
+        motor.setTargetPosition(target);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 

@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.blue.Alliance;
 import org.firstinspires.ftc.teamcode.blue.util.BlueConstants;
 import org.firstinspires.ftc.teamcode.blue.util.DataLogger;
+import org.firstinspires.ftc.teamcode.blue.vision.Cell;
 import org.firstinspires.ftc.teamcode.blue.vision.Limelight;
 import org.firstinspires.ftc.teamcode.blue.vision.Target;
 
@@ -31,7 +32,8 @@ public class LimelightTest extends OpMode {
     @Override
     public void init() {
         limelight = new Limelight(hardwareMap);
-        imu = hardwareMap.get(IMU.class, "imu");
+        limelight.megaTag = true;
+        imu =hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(BlueConstants.HUB_LOGO, BlueConstants.HUB_USB)));
 
         tagLog = new DataLogger("limelight_tags", "time", "pipeline", "id", "tx", "ty", "area", "distance", "botX", "botY", "botYaw");
@@ -84,7 +86,7 @@ public class LimelightTest extends OpMode {
             telemetry.addLine(target.toString());
         }
 
-        LLResultTypes.FiducialResult cell = limelight.getCellTag(alliance);
+        Cell cell = limelight.getCell(alliance);
 
         telemetry.addLine("X = blue, B = red, dpad U/D = pipeline");
         telemetry.addData("Connected", limelight.isConnected());
@@ -92,7 +94,8 @@ public class LimelightTest extends OpMode {
         telemetry.addData("Pipeline", pipeline);
         telemetry.addData("Valid", limelight.hasResult());
         telemetry.addData("Heading", "%.1f", heading);
-        telemetry.addData("Cell tag", cell == null ? "none" : cell.getFiducialId());
+        telemetry.addData("Up cell", cell == null ? "none" : cell);
+        telemetry.addData("Cell distance", cell == null ? "-" : String.format("%.1f", limelight.getDistance(cell)));
         telemetry.addData("Botpose", bot == null ? "none" : botX + ", " + botY + "  yaw " + botYaw);
         telemetry.addData("Tags seen", tags.size());
         telemetry.addData("Targets seen", targets.size());

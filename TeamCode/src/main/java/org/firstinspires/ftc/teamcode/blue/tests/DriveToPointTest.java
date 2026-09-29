@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.blue.controls.Controls;
 import org.firstinspires.ftc.teamcode.blue.drive.DriveToPoint;
 import org.firstinspires.ftc.teamcode.blue.drive.Odometry;
 import org.firstinspires.ftc.teamcode.blue.drive.Pose;
@@ -80,7 +81,7 @@ public class DriveToPointTest extends OpMode {
                     String.format("%.2f", mover.getDistanceLeft()),
                     String.format("%.3f", BlueConstants.MOVE_P), String.format("%.2f", BlueConstants.HEADING_P));
         } else {
-            drive.drive(-gamepad1.left_stick_y * 0.4, -gamepad1.left_stick_x * 0.4, -gamepad1.right_stick_x * 0.4, true);
+            drive.drive(Controls.deadband(-gamepad1.left_stick_y) * 0.4, Controls.deadband(-gamepad1.left_stick_x) * 0.4, Controls.deadband(-gamepad1.right_stick_x) * 0.4, true);
         }
 
         telemetry.addLine("dpad L/R = point, A = go, B = stop");
