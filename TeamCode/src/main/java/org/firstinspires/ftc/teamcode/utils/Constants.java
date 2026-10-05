@@ -25,6 +25,9 @@ public final class Constants {
     public static final String BACK_LEFT_MOTOR_NAME = "backLeft";
     public static final String BACK_RIGHT_MOTOR_NAME = "backRight";
 
+    public static final String UPTAKE_SERVO_NAME = "000";
+    public static final double UPTAKE_SERVO_UP_ANGLE=0.5;
+    public static final double UPTAKE_SERVO_DEFAULT_ANGLE = 0;
     /**
      * Scales a number to an exponent, but keeps the sign of the number
      * e.g., expo(2, 2) = 4, expo(-2, 2) = -4
