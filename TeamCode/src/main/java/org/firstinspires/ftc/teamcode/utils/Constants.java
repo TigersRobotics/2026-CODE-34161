@@ -25,6 +25,8 @@ public final class Constants {
     public static final String BACK_LEFT_MOTOR_NAME = "backLeft";
     public static final String BACK_RIGHT_MOTOR_NAME = "backRight";
 
+    public static final String FLYWHEEL_MOTOR = "flywheel";
+
     /**
      * Scales a number to an exponent, but keeps the sign of the number
      * e.g., expo(2, 2) = 4, expo(-2, 2) = -4
