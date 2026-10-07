@@ -10,10 +10,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class TurretController {
     private final String SERVO_LEFT = "0";
     private final String SERVO_RIGHT = "1";
-    private Servo leftServo;
-    private Servo rightServo;
+    private final Servo leftServo;
+    private final Servo rightServo;
     private Servo hoodServo;
-    private DcMotorEx flywheel;
+    private final DcMotorEx flywheel;
     private double flywheelMaxVel = 0.0;
     private double currentVelocity;
 

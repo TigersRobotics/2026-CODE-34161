@@ -25,6 +25,8 @@ public final class Constants {
     public static final String BACK_LEFT_MOTOR_NAME = "backLeft";
     public static final String BACK_RIGHT_MOTOR_NAME = "backRight";
 
+    public static final String INTAKE_MOTOR_A = "intake_a";
+    public static final String INTAKE_MOTOR_B = "intake_b";
     public static final String UPTAKE_SERVO_NAME = "000";
     public static final double UPTAKE_SERVO_UP_ANGLE=0.5;
     public static final double UPTAKE_SERVO_DEFAULT_ANGLE = 0;
