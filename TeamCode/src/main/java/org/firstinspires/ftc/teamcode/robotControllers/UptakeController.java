@@ -4,14 +4,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.utils.Constants;
+import org.firstinspires.ftc.teamcode.constants.HardwareNames;
+import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 
 public class UptakeController {
     private static Servo upTakeServo;
     private boolean uptakeBusy = false;
     private final Telemetry telemetry;
     public UptakeController(HardwareMap hardwareMap, Telemetry telemetry){
-        upTakeServo = hardwareMap.get(Servo.class, Constants.UPTAKE_SERVO_NAME);
+        upTakeServo = hardwareMap.get(Servo.class, HardwareNames.UPTAKE_SERVO_NAME);
         this.telemetry = telemetry;
         telemetry.addLine("Uptake Controller Initialized");
     }
@@ -22,18 +23,18 @@ public class UptakeController {
             return false;
         }
 
-        upTakeServo.setPosition(Constants.UPTAKE_SERVO_UP_ANGLE);
+        upTakeServo.setPosition(RobotSpecs.UPTAKE_SERVO_UP_ANGLE);
         uptakeBusy = true;
         return true;
     }
 
     public void updateUptake (){
-        if (upTakeServo.getPosition() == Constants.UPTAKE_SERVO_DEFAULT_ANGLE){
+        if (upTakeServo.getPosition() == RobotSpecs.UPTAKE_SERVO_DEFAULT_ANGLE){
             uptakeBusy = false;
         }
-        if (upTakeServo.getPosition() == Constants.UPTAKE_SERVO_UP_ANGLE){
+        if (upTakeServo.getPosition() == RobotSpecs.UPTAKE_SERVO_UP_ANGLE){
             telemetry.addLine("Uptake Moving down");
-            upTakeServo.setPosition(Constants.UPTAKE_SERVO_DEFAULT_ANGLE);
+            upTakeServo.setPosition(RobotSpecs.UPTAKE_SERVO_DEFAULT_ANGLE);
         }
 
         if (uptakeBusy){

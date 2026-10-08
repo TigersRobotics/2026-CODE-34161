@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.constants.MapSpecs;
+import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 
 public class VectorMath {
 
@@ -26,8 +28,8 @@ public class VectorMath {
     public static double[] shotAngle(double d, double h, double r, double camAngle, Telemetry telemetry) {
 /// returns turret vertical angle, and the horizonal angle. Input angleFromTag: facing right is pos
 /// all angles are in degrees, lengths are in meters, speeds are in m/s
-        double [] nV = addV(new double[]{d, camAngle}, new double[]{Constants.APRIL_TAG_HIVE_OFFSET_D, 180-r});
-        double y = h + Constants.APRIL_TAG_HIVE_OFFSET_H;
+        double [] nV = addV(new double[]{d, camAngle}, new double[]{MapSpecs.APRIL_TAG_HIVE_OFFSET_D, 180-r});
+        double y = h + MapSpecs.APRIL_TAG_HIVE_OFFSET_H;
         double x = nV[0];
 
         // it will try to calculate the angle for trajectory
@@ -35,13 +37,13 @@ public class VectorMath {
         double nAngle;
 
         // checks if the angle is valid
-        if (angle >= Constants.MAX_TURRET_ANGLE_UP ||
-                angle <= Constants.MAX_TURRET_ANGLE_DOWN || Double.isNaN(angle)){
+        if (angle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
+                angle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(angle)){
 
             // invalid initial angle will return a second angle
             nAngle = angleCalc((byte) 1, x, y);
-            if (nAngle >= Constants.MAX_TURRET_ANGLE_UP ||
-                    nAngle <= Constants.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)){
+            if (nAngle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
+                    nAngle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)){
 
                 // will log that it cannot find valid angle, shows init angle and backup angle
                 telemetry.addLine(("No valid angle found: " + angle + " " + nAngle));
@@ -56,7 +58,7 @@ public class VectorMath {
     private static double angleCalc(byte add, double x, double y) {
         double g = 9.800665;
 
-        double v = Constants.BALL_SPEED;
+        double v = RobotSpecs.BALL_SPEED;
         double v2 = Math.pow(v, 2);
         double v4 = Math.pow(v, 4);
 

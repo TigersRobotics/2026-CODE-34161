@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.utils.Constants;
+import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 
 public class TwoWheelOdometry {
 
@@ -15,7 +15,7 @@ public class TwoWheelOdometry {
     public TwoWheelOdometry(HardwareMap hardwareMap, String deviceName) {
         odo = hardwareMap.get(GoBildaPinpointDriver.class, deviceName);
 
-        odo.setOffsets(Constants.OFFSETS_OF_ODOMETRY_PODS_MM_X, Constants.OFFSETS_OF_ODOMETRY_PODS_MM_Y, DistanceUnit.MM);
+        odo.setOffsets(RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_MM_X, RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_MM_Y, DistanceUnit.MM);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
 
 

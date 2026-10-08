@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.robotControllers;
 
-import static org.firstinspires.ftc.teamcode.utils.Constants.BACK_LEFT_MOTOR_NAME;
-import static org.firstinspires.ftc.teamcode.utils.Constants.BACK_RIGHT_MOTOR_NAME;
-import static org.firstinspires.ftc.teamcode.utils.Constants.FRONT_LEFT_MOTOR_NAME;
-import static org.firstinspires.ftc.teamcode.utils.Constants.FRONT_RIGHT_MOTOR_NAME;
+import static org.firstinspires.ftc.teamcode.constants.HardwareNames.BACK_LEFT_MOTOR_NAME;
+import static org.firstinspires.ftc.teamcode.constants.HardwareNames.BACK_RIGHT_MOTOR_NAME;
+import static org.firstinspires.ftc.teamcode.constants.HardwareNames.FRONT_LEFT_MOTOR_NAME;
+import static org.firstinspires.ftc.teamcode.constants.HardwareNames.FRONT_RIGHT_MOTOR_NAME;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;

@@ -1,35 +1,9 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+
 public final class Constants {
-    // A class to store values/measurements of the robot
-    // Some (All) values are temp as they are pending measurement
-    // Really, we haven't built most of the robot yet
-
-    // Ball speed is currently a temp value;
-    public static final double BALL_SPEED = 10;
-    // The Camera/Turret offset is a temp value;
-    public static final double[] CAMERA_TURRET_OFFSET= new double[]{};
-    // temp values
-    public static final double MAX_TURRET_ANGLE_UP = 75;
-    public static final double MAX_TURRET_ANGLE_DOWN = 15;
-
-    public static final double APRIL_TAG_HIVE_OFFSET_H = 1;
-    public static final double APRIL_TAG_HIVE_OFFSET_D = 1;
-
-    public static final double OFFSETS_OF_ODOMETRY_PODS_MM_X = -100;
-    public static final double OFFSETS_OF_ODOMETRY_PODS_MM_Y = -100;
 
 
-    public static final String FRONT_LEFT_MOTOR_NAME = "frontLeft";
-    public static final String FRONT_RIGHT_MOTOR_NAME = "frontRight";
-    public static final String BACK_LEFT_MOTOR_NAME = "backLeft";
-    public static final String BACK_RIGHT_MOTOR_NAME = "backRight";
-
-    public static final String INTAKE_MOTOR_A = "intake_a";
-    public static final String INTAKE_MOTOR_B = "intake_b";
-    public static final String UPTAKE_SERVO_NAME = "000";
-    public static final double UPTAKE_SERVO_UP_ANGLE=0.5;
-    public static final double UPTAKE_SERVO_DEFAULT_ANGLE = 0;
     /**
      * Scales a number to an exponent, but keeps the sign of the number
      * e.g., expo(2, 2) = 4, expo(-2, 2) = -4

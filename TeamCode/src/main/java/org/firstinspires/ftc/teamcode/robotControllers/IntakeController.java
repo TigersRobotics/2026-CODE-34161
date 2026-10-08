@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.utils.Constants;
+import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 
 public class IntakeController {
     private final DcMotor intakeMotorA;
@@ -13,8 +13,8 @@ public class IntakeController {
     private double power;
 
     public IntakeController(HardwareMap hardwareMap, Telemetry telemetry) {
-        this.intakeMotorA = hardwareMap.get(DcMotor.class, Constants.INTAKE_MOTOR_A);
-        this.intakeMotorB = hardwareMap.get(DcMotor.class, Constants.INTAKE_MOTOR_B);
+        this.intakeMotorA = hardwareMap.get(DcMotor.class, HardwareNames.INTAKE_MOTOR_A);
+        this.intakeMotorB = hardwareMap.get(DcMotor.class, HardwareNames.INTAKE_MOTOR_B);
 
         intakeMotorA.setDirection(DcMotor.Direction.FORWARD);
         intakeMotorB.setDirection(DcMotor.Direction.REVERSE);
