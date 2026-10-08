@@ -12,4 +12,9 @@ public class RobotSpecs {
     public static final double UPTAKE_SERVO_DEFAULT_ANGLE = 0;
     // Ball speed is currently a temp value;
     public static final double BALL_SPEED = 10;
+
+    public static final double LENGTH_X = 0.4572;
+    public static final double LENGTH_Y = 0.4572;
+
+    public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X, 2) + Math.pow(LENGTH_Y, 2));
 }
