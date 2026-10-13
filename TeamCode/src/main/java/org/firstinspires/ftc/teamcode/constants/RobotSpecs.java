@@ -17,4 +17,6 @@ public class RobotSpecs {
     public static final double LENGTH_Y = 0.4572;
 
     public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X, 2) + Math.pow(LENGTH_Y, 2));
+
+    public static final double flywheelRailsDegPerMm = 360;
 }

@@ -17,6 +17,9 @@ public class TurretController {
     private double flywheelMaxVel = 0.0;
     private double currentVelocity;
 
+    private double flywheelPos = 0.0; ///This is in CM
+    private Servo flywheelPosServo;
+
     public TurretController (HardwareMap hardwareMap, Telemetry telemetry) {
         leftServo = hardwareMap.get(Servo.class, SERVO_LEFT);
         rightServo = hardwareMap.get(Servo.class, SERVO_RIGHT);
@@ -24,9 +27,18 @@ public class TurretController {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
+        flywheelPosServo = hardwareMap.get(Servo.class, "flywheelPos");
+
         telemetry.addLine("TURRET CONTROLLER INITIALIZED");
     }
 
+    public double getFlywheelPos() {
+        return flywheelPos;
+    }
+    public void setFlywheelPos(double pos) {
+        flywheelPosServo.setPosition(pos);
+        flywheelPos = pos;
+    }
 
 
     /// [...](https://docs.revrobotics.com/first-global/fgc-pid)
