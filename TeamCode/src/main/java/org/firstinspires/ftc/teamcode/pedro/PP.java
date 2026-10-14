@@ -34,7 +34,7 @@ public class PP {
 
     public static boolean goTo(Pose pose){
         if (follower.isBusy()) return false;
-
+        return PP.goTo(pose);
     }
 
 }

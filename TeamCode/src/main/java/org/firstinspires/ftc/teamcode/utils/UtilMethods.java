@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 
-public final class Constants {
+public final class UtilMethods {
 
 
     /**
