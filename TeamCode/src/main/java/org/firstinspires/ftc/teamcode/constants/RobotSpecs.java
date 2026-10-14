@@ -20,4 +20,6 @@ public class RobotSpecs {
     public static final double INTAKE_WIDTH = 0.3;
 
     public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X, 2) + Math.pow(LENGTH_Y, 2));
+
+    public static final double flywheelRailsDegPerMm = 360;
 }
