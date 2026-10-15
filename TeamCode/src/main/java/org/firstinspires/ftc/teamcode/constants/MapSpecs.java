@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 
-import static org.firstinspires.ftc.teamcode.pedro.PP.tileToCM;
-import static org.firstinspires.ftc.teamcode.pedro.PP.tileToM;
+import static org.firstinspires.ftc.teamcode.pedro.PathGen.tileToCM;
+import static org.firstinspires.ftc.teamcode.pedro.PathGen.tileToM;
 
 
 import com.pedropathing.math.Pose;

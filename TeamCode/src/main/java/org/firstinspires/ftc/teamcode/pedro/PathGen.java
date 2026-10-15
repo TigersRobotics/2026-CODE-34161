@@ -9,6 +9,7 @@ import com.skeletonarmy.marrow.weaver.PathResult;
 import com.skeletonarmy.marrow.weaver.PedroPathingConverter;
 import com.skeletonarmy.marrow.weaver.Weaver;
 import com.skeletonarmy.marrow.weaver.WeaverBuilder;
+import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.Zone;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -18,15 +19,17 @@ import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.sensors.Odometry;
 
-public class PP {
+import java.util.ArrayList;
+
+public class PathGen {
     /// the pedropathing file
 
     private static Follower follower;
     private static Odometry odometry;
     private static Telemetry telemetry;
     public static void init(Odometry odometry, Telemetry telemetry){
-        PP.odometry = odometry;
-        PP.telemetry = telemetry;
+        PathGen.odometry = odometry;
+        PathGen.telemetry = telemetry;
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH/2.54)
                 .robotWidth(RobotSpecs.LENGTH_X/2.54)
                 .robotHeight(RobotSpecs.HEIGHT/2.54));
@@ -49,7 +52,7 @@ public class PP {
     }
 
 
-    public static boolean goTo(Pose pose){
+    public static boolean goTo(Pose pose, ArrayList<Point> targets){
         if (follower.isBusy()){
             telemetry.addLine("Robot is busy, goTo() method stopped.");
             return false;
