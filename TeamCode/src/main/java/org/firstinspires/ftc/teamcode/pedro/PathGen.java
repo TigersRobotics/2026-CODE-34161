@@ -60,7 +60,7 @@ public class PathGen {
     public static void init(Odometry odometry, Telemetry telemetry){
         PathGen.odometry = odometry;
         PathGen.telemetry = telemetry;
-        Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH/2.54)
+        Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED /2.54)
                 .robotWidth(RobotSpecs.LENGTH_X/2.54)
                 .robotHeight(RobotSpecs.HEIGHT/2.54));
     }
@@ -72,16 +72,6 @@ public class PathGen {
 
     public static void setAutoMode(boolean autoMode){
         PathGen.autoMode = autoMode;
-    }
-
-
-
-    public static double tileToIN(double tiles){
-        return tiles*24;
-    }
-
-    public static double INToTile(double inches){
-        return inches/24;
     }
 
 
@@ -100,9 +90,9 @@ public class PathGen {
         for (Zone obstacle: PathGen.obstacles) notPath.addObstacle(obstacle);
 
         if (autoMode) notPath.addObstacle(MapSpecs.OTHER_SIDE);
+        for (Point target: targets) notPath.addTarget(target);
 
         PathResult builtPath = notPath.build();
-        for (Point target: targets) notPath.addTarget(target);
         try {
             Path path = PedroPathingConverter.toPath(builtPath);
             follower.follow(path);
@@ -130,21 +120,21 @@ public class PathGen {
         return new Pose(odometry.getX(DistanceUnit.CM), odometry.getY(DistanceUnit.CM), odometry.getHeading(AngleUnit.DEGREES));
     }
 
-    public static void goShoot(){
-        if (follower.isBusy()) {
-            telemetry.addLine("Robot busy, unable to execute goShoot()");
-            return;
-        }
-
-        Pose nearestSpot = getCurrentPose();
-        double closest = 1000;
-        for (Pose spot: MapSpecs.SHOOTING_POSITIONS){
-            if (spot.distance(getCurrentPose()) < closest){
-                closest = spot.distance(getCurrentPose());
-                nearestSpot = spot;
-            }
-        }
-        if(goTo(nearestSpot)) telemetry.addLine("Following path to shooting");
-        else telemetry.addLine("Path finding failed. goShoot() -> goTo(nearestSpot)");
-    }
+//    public static void goShoot(){
+//        if (follower.isBusy()) {
+//            telemetry.addLine("Robot busy, unable to execute goShoot()");
+//            return;
+//        }
+//
+//        Pose nearestSpot = getCurrentPose();
+//        double closest = 1000;
+//        for (Pose spot: MapSpecs.SHOOTING_POSITIONS){
+//            if (spot.distance(getCurrentPose()) < closest){
+//                closest = spot.distance(getCurrentPose());
+//                nearestSpot = spot;
+//            }
+//        }
+//        if(goTo(nearestSpot)) telemetry.addLine("Following path to shooting");
+//        else telemetry.addLine("Path finding failed. goShoot() -> goTo(nearestSpot)");
+//    }
 }
