@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.constants;
 
 public class RobotSpecs {
     // The Camera/Turret offset is a temp value;
-    public static final double[] CAMERA_TURRET_OFFSET= new double[]{};
+    public static final double[] CAMERA_TURRET_OFFSET= new double[]{
+            0,0
+    };
     // temp values
     public static final double MAX_TURRET_ANGLE_UP = 75;
     public static final double MAX_TURRET_ANGLE_DOWN = 15;
@@ -17,7 +19,10 @@ public class RobotSpecs {
     public static final double LENGTH_Y = 0.4572;
 
     public static final double HEIGHT = 0.4572;
-    public static final double INTAKE_WIDTH = 0.3;
+
+    // until further notice, intake width should be smaller than it actually is,
+    // as for now, the only program using intake width recommends leaving some same space
+    public static final double INTAKE_WIDTH = 0.2;
 
     public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X, 2) + Math.pow(LENGTH_Y, 2));
 
