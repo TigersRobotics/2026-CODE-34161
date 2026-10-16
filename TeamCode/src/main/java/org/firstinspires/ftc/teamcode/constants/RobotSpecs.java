@@ -22,7 +22,8 @@ public class RobotSpecs {
 
     // until further notice, intake width should be smaller than it actually is,
     // as for now, the only program using intake width recommends leaving some same space
-    public static final double INTAKE_WIDTH = 0.2;
+    public static final double INTAKE_WIDTH_SHORTENED = 0.2;
+    public static final double CLEARANCE = 2;
 
     public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X, 2) + Math.pow(LENGTH_Y, 2));
 
