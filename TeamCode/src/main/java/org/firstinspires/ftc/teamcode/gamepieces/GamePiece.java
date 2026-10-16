@@ -23,11 +23,6 @@ public class GamePiece {
 
 }
 
-/**
-A sorter thing so that you cna make an array that only fits ball types(nectar and pollen)
-*/
-interface Ball {}
-
 class Hive extends GamePiece {
     public double cmHeight;
 

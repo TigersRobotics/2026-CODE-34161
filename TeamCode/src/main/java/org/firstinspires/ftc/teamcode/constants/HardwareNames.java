@@ -9,5 +9,8 @@ public class HardwareNames {
     public static final String INTAKE_MOTOR_B = "intake_b";
     public static final String UPTAKE_SERVO_NAME = "000";
 
+    public static final String SPINDEXER_SERVO_NAME = "spindexer";
+
     public static final String COLOUR_SENSOR = "colour_sensor";
+
 }
