@@ -28,4 +28,7 @@ public class RobotSpecs {
     public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X, 2) + Math.pow(LENGTH_Y, 2));
 
     public static final double FLYWHEEL_RAIL_DEGREES_PER_MM = 360;
+
+    public static final double SPINDEXER_RPM = 60;
+    public static final double SPINDEXER_MAX_ROTATION = 360; //In degrees
 }
