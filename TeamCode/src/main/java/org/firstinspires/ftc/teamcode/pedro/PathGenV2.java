@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedro;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
+import com.skeletonarmy.marrow.weaver.HeadingPolicy;
 import com.skeletonarmy.marrow.weaver.PathConfig;
 import com.skeletonarmy.marrow.weaver.PathResult;
 import com.skeletonarmy.marrow.weaver.PedroPathingConverter;
@@ -27,6 +28,7 @@ public class PathGenV2 {
     private static Follower follower;
     private static WeaverBuilder notPathYet;
     private static boolean on = true;
+    private static boolean debug;
 
     public static double tileToIN(double tiles){
         return tiles*24;
@@ -37,6 +39,7 @@ public class PathGenV2 {
     }
 
     private enum State {
+        MOVING_TO_SHOOT,
         SHOOTING,
         PARKING,
         COLLECTING,
@@ -88,7 +91,7 @@ public class PathGenV2 {
         return new Pose(odometry.getX(DistanceUnit.INCH), odometry.getY(DistanceUnit.INCH), odometry.getHeading(AngleUnit.DEGREES));
     }
 
-    public static void init(Odometry odometry, Telemetry telemetry, Follower follower){
+    public static void init(Odometry odometry, Telemetry telemetry, Follower follower, boolean debug){
         PathGenV2.follower = follower;
         PathGenV2.odometry = odometry;
         PathGenV2.telemetry = telemetry;
@@ -96,6 +99,11 @@ public class PathGenV2 {
                 .robotWidth(RobotSpecs.LENGTH_X/2.54)
                 .robotHeight(RobotSpecs.HEIGHT/2.54).clearance(RobotSpecs.CLEARANCE));
         telemetry.addLine("PathGenV2 initialized!!! YAY!");
+        PathGenV2.debug = debug;
+    }
+
+    public static void init(Odometry odometry, Telemetry telemetry, Follower follower){
+        init(odometry, telemetry, follower, false);
     }
 
     public static void update(ArrayList<Zone> obstacles){
@@ -104,8 +112,12 @@ public class PathGenV2 {
                 telemetry.addLine("Path gen is idling! ٩(^ᗜ^ )");
             } else if (currentState == State.HIJACKED) {
                 telemetry.addLine("Path Gen is HIJACKED! No auto mode for you! Bleh!");
-            } else telemetry.addData("Weird... no destination, but not idle. Ehh!? " +
+            } else if (targets.isEmpty()){
+                telemetry.addData("Weird... no destination, but not idle. Ehh!? " +
                     "Current state is:", currentState);
+                follower.stop();
+                return;
+            }
             if (follower.isBusy()){
                 follower.stop();
             }
@@ -121,14 +133,13 @@ public class PathGenV2 {
 
         PathGenV2.notPathYet = Weaver.builder()
                 .start(PedroPathingConverter.toPoint(getCurrentPose()));
-        if (destination!= null) notPathYet.end(PedroPathingConverter.toPoint(destination));
-
+        if (destination!= null && currentState!=State.MOVING_TO_SHOOT) notPathYet.end(PedroPathingConverter.toPoint(destination));
+        else if (destination != null) notPathYet.end(PedroPathingConverter.toPoint(destination), HeadingPolicy.LOCKED);
         for (Zone obstacle: MapSpecs.OBSTACLES) notPathYet.addObstacle(obstacle);
         for (Zone obstacle: obstacles) notPathYet.addObstacle(obstacle);
         for (Zone obstacle: PathGenV2.obstacles) notPathYet.addObstacle(obstacle);
         for (Point target: targets) notPathYet.addTarget(target);
         if (autoMode) notPathYet.addObstacle(MapSpecs.OTHER_SIDE);
-
 
         PathResult almostPath = notPathYet.build();
         try {
@@ -137,9 +148,9 @@ public class PathGenV2 {
             telemetry.addLine("Path Gen failed... (╥﹏╥)");
         }
 
-        if (currentState == State.SHOOTING){
-            for (Zone shootingZone: MapSpecs.SHOOTING_POSITIONS){
-
+        if (currentState == State.MOVING_TO_SHOOT){
+            if (!follower.isBusy()) {
+                currentState = State.SHOOTING;
             }
         }
     }
@@ -168,6 +179,7 @@ public class PathGenV2 {
     }
 
     public static void goShoot(){
+        double targetHeading;
         Pose nearestSpot = getCurrentPose();
         double closest = 1000;
         for (Zone shootingSpot: MapSpecs.SHOOTING_POSITIONS){
@@ -177,11 +189,23 @@ public class PathGenV2 {
             }
         }
 
-        setDestination(nearestSpot);
-        currentState = State.SHOOTING;
-        telemetry.addData("Going to shoot! ₍₍⚞(˶˃ ᵕ ˂˶)⚟⁾⁾. Going to:", nearestSpot);
+        if (INToTile(nearestSpot.x()) < 3){
+            targetHeading = -90;
+        } else {
+            targetHeading = 90;
+        }
+
+        setDestination(new Pose(nearestSpot.x(),nearestSpot.y(), targetHeading ));
+        currentState = State.MOVING_TO_SHOOT;
+        telemetry.addData("Going to shoot! ₍₍⚞(˶˃ ᵕ ˂˶)⚟⁾⁾. Going to: ", nearestSpot);
     }
 
-
+    public static void goPark(){
+        destination = MapSpecs.PARKING;
+        if (currentState != State.IDLE && currentState != State.PARKING){
+            telemetry.addData("Stopped current object to Park. Current state: ", currentState);
+        } else if(currentState == State.PARKING) telemetry.addLine("I'm already going to park! ᕙ( ᗒᗣᗕ )ᕗ");
+        currentState = State.PARKING;
+    }
 
 }
