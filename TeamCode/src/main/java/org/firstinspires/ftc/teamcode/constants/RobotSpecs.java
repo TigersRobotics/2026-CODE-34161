@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 public class RobotSpecs {
-    // The Camera/Turret offset is a temp value;
+    // Everything is a temp value
+
+    public static final double TICKS_PER_SECOND = 20;
     public static final double[] CAMERA_TURRET_OFFSET= new double[]{
             0,0
     };

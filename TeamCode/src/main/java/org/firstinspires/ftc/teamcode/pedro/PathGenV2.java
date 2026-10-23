@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.sensors.Odometry;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 import java.util.ArrayList;
 
@@ -28,8 +29,6 @@ public class PathGenV2 {
     private static Follower follower;
     private static WeaverBuilder notPathYet;
     private static boolean on = true;
-    private static boolean debug;
-
     public static double tileToIN(double tiles){
         return tiles*24;
     }
@@ -37,14 +36,12 @@ public class PathGenV2 {
     public static double INToTile(double inches){
         return inches/24;
     }
-
-    private enum State {
+    public enum State {
         MOVING_TO_SHOOT,
         SHOOTING,
         PARKING,
         COLLECTING,
         IDLE,
-        HIJACKED
     }
 
     private static State currentState = State.IDLE;
@@ -53,7 +50,7 @@ public class PathGenV2 {
     private static boolean autoMode = true;
     private static Pose destination = null;
     private static ArrayList<Zone> obstacles = new ArrayList<>();
-    private static ArrayList<Point> targets = new ArrayList<>();
+    private static ArrayList<Point> scoreElements = new ArrayList<>();
 
     public static boolean isAutoMode() {
         return autoMode;
@@ -79,12 +76,13 @@ public class PathGenV2 {
         PathGenV2.obstacles = obstacles;
     }
 
-    public static ArrayList<Point> getTargets() {
-        return targets;
+    public static ArrayList<Point> getCurrentTrackedElements() {
+        return scoreElements;
     }
 
-    public static void setTargets(ArrayList<Point> targets) {
-        PathGenV2.targets = targets;
+    public static void collectElements(ArrayList<Point> scoreElements) {
+        currentState=State.COLLECTING;
+        PathGenV2.scoreElements = scoreElements;
     }
 
     public static Pose getCurrentPose(){
@@ -98,8 +96,7 @@ public class PathGenV2 {
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED /2.54)
                 .robotWidth(RobotSpecs.LENGTH_X/2.54)
                 .robotHeight(RobotSpecs.HEIGHT/2.54).clearance(RobotSpecs.CLEARANCE));
-        telemetry.addLine("PathGenV2 initialized!!! YAY!");
-        PathGenV2.debug = debug;
+        TimedTelemetry.addLine("PathGenV2 initialized!!! YAY!", 1000);
     }
 
     public static void init(Odometry odometry, Telemetry telemetry, Follower follower){
@@ -107,29 +104,28 @@ public class PathGenV2 {
     }
 
     public static void update(ArrayList<Zone> obstacles){
-        if (destination == null){
-            if (currentState == State.IDLE){
-                telemetry.addLine("Path gen is idling! ٩(^ᗜ^ )");
-            } else if (currentState == State.HIJACKED) {
-                telemetry.addLine("Path Gen is HIJACKED! No auto mode for you! Bleh!");
-            } else if (targets.isEmpty()){
-                telemetry.addData("Weird... no destination, but not idle. Ehh!? " +
-                    "Current state is:", currentState);
-                follower.stop();
-                return;
-            }
-            if (follower.isBusy()){
-                follower.stop();
-            }
-        }
 
 
-        if (follower.isBusy()) telemetry.addLine("Robot-chan is moving!");
-         else telemetry.addLine("Robot-chan is awaiting commands! :) ");
+        if (follower.isBusy()) TimedTelemetry.addLine("Robot-chan is moving!");
+         else TimedTelemetry.addLine("Robot-chan is awaiting commands! :) ");
 
         if (!on) {
-            telemetry.addLine("Path generation is sleeping... zzz...");
+            TimedTelemetry.addLine("Path generation is sleeping... zzz...");
         }
+        updateMovement(obstacles);
+    }
+    public static void update(ArrayList<Zone> obstacles, boolean pause){
+        if (!pause){
+            update(obstacles);
+        } else {
+            follower.stop();
+            TimedTelemetry.addLine("Path Gen paused");
+        }
+    }
+
+    private static void updateMovement(ArrayList<Zone> obstacles){
+
+
 
         PathGenV2.notPathYet = Weaver.builder()
                 .start(PedroPathingConverter.toPoint(getCurrentPose()));
@@ -138,21 +134,37 @@ public class PathGenV2 {
         for (Zone obstacle: MapSpecs.OBSTACLES) notPathYet.addObstacle(obstacle);
         for (Zone obstacle: obstacles) notPathYet.addObstacle(obstacle);
         for (Zone obstacle: PathGenV2.obstacles) notPathYet.addObstacle(obstacle);
-        for (Point target: targets) notPathYet.addTarget(target);
+        if (currentState!=State.MOVING_TO_SHOOT) for (Point target: scoreElements) notPathYet.addTarget(target);
+
         if (autoMode) notPathYet.addObstacle(MapSpecs.OTHER_SIDE);
 
         PathResult almostPath = notPathYet.build();
         try {
             follower.follow(PedroPathingConverter.toPath(almostPath.getPath()));
         } catch (NullPointerException | IllegalArgumentException e){
-            telemetry.addLine("Path Gen failed... (╥﹏╥)");
+            TimedTelemetry.addLine("Path Gen failed... (╥﹏╥) (˶˃⤙˂˶)!", 1000);
         }
+    }
 
-        if (currentState == State.MOVING_TO_SHOOT){
-            if (!follower.isBusy()) {
-                currentState = State.SHOOTING;
-            }
+    private static void updateSomeStates(){
+        switch (currentState){
+            case PARKING:
+                if (!follower.isBusy()|| destination.distance(getCurrentPose()) < 0.5){
+                    destination= null;
+                    currentState = State.IDLE;
+                }
+                break;
+            case MOVING_TO_SHOOT:
+                if (!follower.isBusy()|| destination.distance(getCurrentPose()) < 0.5){
+                    currentState = State.SHOOTING;
+                    destination = null;
+                }
+                break;
+            case COLLECTING:
+                destination = null;
+
         }
+        TimedTelemetry.addData("Current state: ", currentState);
     }
 
     public static boolean setOn(boolean on){
@@ -197,15 +209,19 @@ public class PathGenV2 {
 
         setDestination(new Pose(nearestSpot.x(),nearestSpot.y(), targetHeading ));
         currentState = State.MOVING_TO_SHOOT;
-        telemetry.addData("Going to shoot! ₍₍⚞(˶˃ ᵕ ˂˶)⚟⁾⁾. Going to: ", nearestSpot);
+        TimedTelemetry.addData("Going to shoot! ₍₍⚞(˶˃ ᵕ ˂˶)⚟⁾⁾. Going to: ", nearestSpot, 1000);
     }
 
     public static void goPark(){
         destination = MapSpecs.PARKING;
         if (currentState != State.IDLE && currentState != State.PARKING){
-            telemetry.addData("Stopped current object to Park. Current state: ", currentState);
-        } else if(currentState == State.PARKING) telemetry.addLine("I'm already going to park! ᕙ( ᗒᗣᗕ )ᕗ");
+            TimedTelemetry.addData("Robot-chan has stopped current state to Park (⸝⸝๑  ̫ ๑⸝⸝⸝). Current state: ", currentState, 1000);
+        } else if(currentState == State.PARKING) TimedTelemetry.addLine("I'm already going to park! ᕙ( ᗒᗣᗕ )ᕗ",1000);
         currentState = State.PARKING;
+    }
+
+    public static State getCurrentState(){
+        return currentState;
     }
 
 }
