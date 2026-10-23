@@ -12,7 +12,7 @@ public class ControllerTest extends OpMode {
     TurretController turretController;
     MecanumDriveTrainController driveController;
 
-    final boolean ENABLE_TURRET_CONTROLLER = true;
+    final boolean ENABLE_TURRET_CONTROLLER = false;
     final boolean ENABLE_DRIVE_CONTROLLER = true;
 
     @Override
@@ -27,8 +27,7 @@ public class ControllerTest extends OpMode {
         if(ENABLE_TURRET_CONTROLLER) {
             turretController.setTurretPosition(gamepad1.left_stick_x*Math.PI, true);
         }
-
-
+        driveController.updateMovement(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
 
         telemetry.update();
     }
