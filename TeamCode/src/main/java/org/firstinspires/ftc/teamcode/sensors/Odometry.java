@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 public class Odometry {
     private final double TICKS_PER_REV = 2048.0;
@@ -19,13 +20,12 @@ public class Odometry {
     private DcMotor horzMotor; ///This uses CYPHER through bore encoder things from studica
     private DcMotor lateralMotor;
     private double x, y, heading; ///0 degrees is forwards
-    private Telemetry telemetry;
     private IMU imu;
     private AngleUnit angleUnit = AngleUnit.DEGREES;
     private DistanceUnit distanceUnit = DistanceUnit.CM;
 
     private double headingOffset = 0;
-    public Odometry(HardwareMap hardwareMap, Telemetry telemetry) {
+    public Odometry(HardwareMap hardwareMap) {
 
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -44,8 +44,7 @@ public class Odometry {
         horzMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lateralMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        this.telemetry = telemetry;
-        telemetry.addLine("Positioning initialized! :D");
+        TimedTelemetry.addLine("Positioning initialized! :D", 1000);
     }
 
 
@@ -111,7 +110,7 @@ public class Odometry {
         horzMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lateralMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        telemetry.addLine("You reset me! Hmmph");
+        TimedTelemetry.addLine("You reset me! Hmmph", 1000);
     }
 
 
@@ -140,7 +139,7 @@ public class Odometry {
         double raw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         headingOffset = newHeading - raw;
         heading = wrapDeg(newHeading);
-        telemetry.addLine("Position Updated! :D");
+        TimedTelemetry.addLine("Position Updated! :D", 1000);
     }
 
 }
