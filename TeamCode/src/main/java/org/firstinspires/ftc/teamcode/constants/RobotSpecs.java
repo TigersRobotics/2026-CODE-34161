@@ -33,4 +33,6 @@ public class RobotSpecs {
 
     public static final double SPINDEXER_RPM = 60;
     public static final double SPINDEXER_MAX_ROTATION = 360; //In degrees
+
+    public static final double ODO_WHEELS_DIA_CM = 5.0;
 }
