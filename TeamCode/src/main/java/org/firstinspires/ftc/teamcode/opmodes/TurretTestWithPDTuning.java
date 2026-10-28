@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.sensors.AprilTagWebcam;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -19,6 +17,7 @@ public class TurretTestWithPDTuning extends OpMode {
     public double lowVelocity = 900;
     public IMU imu;
     double currentTargetVelocity = highVelocity;
+    private boolean showAprilTagTelemetry = true;
 
     double F = 0;
     double P = 0;
@@ -47,20 +46,12 @@ public class TurretTestWithPDTuning extends OpMode {
     @Override
     public void loop() {
         aprilTagWebcam.updateTagDetection();
-        turretController.update();
 
-        YawPitchRollAngles yawPitchRollAngles = imu.getRobotYawPitchRollAngles() ;
-        double raw = yawPitchRollAngles.getYaw(AngleUnit.DEGREES) + headingOffset;
-        double heading = wrapDeg(raw);
-
-        if (gamepad1.aWasPressed()) {
+        if(gamepad1.triangleWasPressed()) showAprilTagTelemetry = !showAprilTagTelemetry;
+        if (gamepad1.circleWasPressed()) {
             currentTargetVelocity = (currentTargetVelocity == highVelocity) ? lowVelocity : highVelocity;
         }
-        if(currentTargetVelocity == highVelocity) {
-            currentTargetVelocity = lowVelocity;
-        } else { currentTargetVelocity = highVelocity; }
-
-        if(gamepad1.bWasPressed()) {
+        if(gamepad1.xWasPressed()) {
             stepIndex = (stepIndex + 1) % stepSizes.length;
         }
         if(gamepad1.leftTriggerWasPressed()) {
@@ -93,27 +84,24 @@ public class TurretTestWithPDTuning extends OpMode {
         if (tag != null) {
             double bearing = tag.ftcPose.bearing; // degrees
             if (Math.abs(bearing) > 1.0) {        // deadband
-                turretController.setYaw(turretController.getCurrentYaw() - TRACK_GAIN * bearing);
+                turretController.setYaw(turretController.getCurrentYaw()+headingOffset - TRACK_GAIN * bearing);
             }
         }
 
 
 
         turretController.setTargetVel(currentTargetVelocity);
+        turretController.update();
 
-
-        telemetry.addLine("Current Target Velocity: " + currentTargetVelocity);
-        telemetry.addLine("Current Step Size: " + stepSizes[stepIndex]);
-        telemetry.addLine("Current Step Index: " + stepIndex);
-        telemetry.addData("Current Velocity: ", currVel);
-        telemetry.addData("Error: ", err);
-        telemetry.addData("PIDF Coefficients: " + P + ", ",  F);
-        aprilTagWebcam.displayTelemetry(telemetry);
-    }
-
-    private double wrapDeg(double a) {
-        while (a > 180) a -= 360;
-        while (a <= -180) a += 360;
-        return a;
+        if(showAprilTagTelemetry) {
+            aprilTagWebcam.displayTelemetry(telemetry);
+        } else {
+            telemetry.addLine("Current Target Velocity: " + currentTargetVelocity);
+            telemetry.addLine("Current Step Size: " + stepSizes[stepIndex]);
+            telemetry.addLine("Current Step Index: " + stepIndex);
+            telemetry.addData("Current Velocity: ", currVel);
+            telemetry.addData("Error: ", err);
+            telemetry.addData("PIDF Coefficients: " + P + ", ", F);
+        }
     }
 }
