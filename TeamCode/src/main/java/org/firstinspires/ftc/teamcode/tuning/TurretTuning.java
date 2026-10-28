@@ -1,18 +1,20 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoControllerEx;
 
-import org.firstinspires.ftc.teamcode.robotControllers.TurretController;
+import org.firstinspires.ftc.teamcode.robotControllers.TurretControllerWithHood;
 
 @TeleOp
+@Disabled ///Outdated using the old thing not for current robot
+@Deprecated
 public class TurretTuning extends OpMode {
-    TurretController turretController;
+    TurretControllerWithHood turretController;
 
     public DcMotorEx flywheelMotorA;
     public DcMotorEx flywheelMotorB;

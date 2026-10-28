@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.robotControllers;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class TurretController {
+@Deprecated
+public class TurretControllerWithHood {
     private final String SERVO_LEFT = "0";
     private final String SERVO_RIGHT = "1";
     private final Servo leftServo;
@@ -20,7 +20,7 @@ public class TurretController {
     private double flywheelPos = 0.0; ///This is in CM
     private Servo flywheelPosServo;
 
-    public TurretController (HardwareMap hardwareMap, Telemetry telemetry) {
+    public TurretControllerWithHood(HardwareMap hardwareMap, Telemetry telemetry) {
         leftServo = hardwareMap.get(Servo.class, SERVO_LEFT);
         rightServo = hardwareMap.get(Servo.class, SERVO_RIGHT);
 

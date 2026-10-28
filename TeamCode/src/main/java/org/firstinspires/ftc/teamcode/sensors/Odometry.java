@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
@@ -36,8 +37,8 @@ public class Odometry {
         imu.initialize(parameters);
 
 
-        horzMotor = hardwareMap.get(DcMotor.class, "uptake");
-        lateralMotor = hardwareMap.get(DcMotor.class, "intake");
+        horzMotor = hardwareMap.get(DcMotor.class, HardwareNames.UPTAKE_MOTOR_NAME);
+        lateralMotor = hardwareMap.get(DcMotor.class, HardwareNames.INTAKE_MOTOR_NAME);
 
         horzMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lateralMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
