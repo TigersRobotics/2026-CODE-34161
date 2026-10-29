@@ -75,7 +75,6 @@ public class TimedTelemetry {
 
 class TelemetryLine {
 
-    private static double lastTime = 0;
     boolean forever = false;
     double timeMillis;
     String caption;
@@ -119,9 +118,8 @@ class TelemetryLine {
     public boolean update(){
 
         if (timeMillis >=1){
-            if (!forever) timeMillis -= (Timer.getTime(TimeUnit.MILLISECONDS)-lastTime);
-        } else return false;
-        lastTime = Timer.getTime(TimeUnit.MILLISECONDS);
+            if (!forever) timeMillis -= Timer.DTime();
+        } else return false;;
 
         if(type == LineType.STRING){
             TimedTelemetry.telemetry.addLine(caption);
