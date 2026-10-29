@@ -118,7 +118,7 @@ class TelemetryLine {
     public boolean update(){
 
         if (timeMillis >=1){
-            if (!forever) timeMillis -= timer.time(TimeUnit.MILLISECONDS);
+            if (!forever) timeMillis -= Timer.getTime(TimeUnit.MILLISECONDS);
         } else return false;
         timer.reset();
 
