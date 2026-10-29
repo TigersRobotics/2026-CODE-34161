@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,10 @@ import java.util.concurrent.TimeUnit;
 public class TimedTelemetry {
     public static ArrayList<TelemetryLine> getTelemetryList(){
         return telemetryList;
+    }
+
+    public static void resetAll (){
+        telemetryList.clear();
     }
     static Telemetry telemetry;
     private static final ArrayList<TelemetryLine> telemetryList= new ArrayList<>();
@@ -71,7 +74,7 @@ public class TimedTelemetry {
 }
 
 class TelemetryLine {
-    private static ElapsedTime timer = new ElapsedTime();
+    private static final ElapsedTime timer = new ElapsedTime();
     boolean forever = false;
     double timeMillis;
     String caption;
@@ -117,6 +120,7 @@ class TelemetryLine {
         if (timeMillis >=1){
             if (!forever) timeMillis -= timer.time(TimeUnit.MILLISECONDS);
         } else return false;
+        timer.reset();
 
         if(type == LineType.STRING){
             TimedTelemetry.telemetry.addLine(caption);
@@ -125,7 +129,6 @@ class TelemetryLine {
         } else if (type==LineType.FORMATED_OBJECT_LIST){
             TimedTelemetry.telemetry.addData(caption, format, args);
         }
-        timer.reset();
         return true;
     }
 

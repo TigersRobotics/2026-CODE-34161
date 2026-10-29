@@ -11,8 +11,9 @@ public class TelemetryTesting extends OpMode {
     @Override
     public void init() {
         TimedTelemetry.init(telemetry);
-
+        TimedTelemetry.resetAll();
         TimedTelemetry.addLine("Deez NUts", 5000);
+        TimedTelemetry.addLine("DN2", 1000);
     }
 
     @Override
