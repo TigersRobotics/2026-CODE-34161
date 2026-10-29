@@ -6,11 +6,19 @@ import java.util.concurrent.TimeUnit;
 
 public class Timer {
     private final static ElapsedTime timer = new ElapsedTime();
+    private static double PTime = 0;
+    private static double DTime = 0;
     public static double getTime(TimeUnit unit){
         return timer.time(unit);
     }
 
     public static void init(){
         timer.reset();
+    }
+    public static void update(){
+        DTime = timer.time(TimeUnit.MILLISECONDS) - PTime;
+    }
+    public static double DTime(){
+        return DTime;
     }
 }
