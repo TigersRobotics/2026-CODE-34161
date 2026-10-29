@@ -16,7 +16,10 @@ public class Timer {
         timer.reset();
     }
     public static void update(){
+
         DTime = timer.time(TimeUnit.MILLISECONDS) - PTime;
+        PTime = timer.time(TimeUnit.MILLISECONDS);
+        TimedTelemetry.addData("DTime: ", timer.time(TimeUnit.MILLISECONDS));
     }
     public static double DTime(){
         return DTime;
