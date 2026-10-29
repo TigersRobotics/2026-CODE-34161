@@ -19,7 +19,9 @@ public class Timer {
 
         DTime = timer.time(TimeUnit.MILLISECONDS) - PTime;
         PTime = timer.time(TimeUnit.MILLISECONDS);
-        TimedTelemetry.addData("DTime: ", timer.time(TimeUnit.MILLISECONDS));
+        TimedTelemetry.addData("Time: ", timer.time(TimeUnit.MILLISECONDS));
+        TimedTelemetry.addData("DTime: ", DTime());
+
     }
     public static double DTime(){
         return DTime;

@@ -110,17 +110,13 @@ class TelemetryLine {
     }
 
     public TelemetryLine setForever(boolean forever){
-        this.timeMillis = 10000;
+        if (forever) this.timeMillis = 10000;
         this.forever = forever;
         return this;
     }
 
     public boolean update(){
-
-        if (timeMillis >=1){
-            if (!forever) timeMillis -= Timer.DTime();
-        } else return false;;
-
+        if (!forever&&Timer.DTime() >0) timeMillis -= Timer.DTime();
         if(type == LineType.STRING){
             TimedTelemetry.telemetry.addLine(caption);
         } else if (type == LineType.CAPTIONED_OBJECT) {
@@ -128,7 +124,7 @@ class TelemetryLine {
         } else if (type==LineType.FORMATED_OBJECT_LIST){
             TimedTelemetry.telemetry.addData(caption, format, args);
         }
-        return true;
+        return !(timeMillis <= 0);
     }
 
     @NonNull
