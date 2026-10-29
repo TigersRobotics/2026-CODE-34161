@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.sensors.AprilTagWebcam;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 
@@ -31,6 +32,7 @@ public class TurretTestWithPDTuning extends OpMode {
 
     @Override
     public void init() {
+        TimedTelemetry.init(telemetry);
         turretController = new PollenTurretController(hardwareMap);
          aprilTagWebcam = new AprilTagWebcam(hardwareMap);
 

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+import androidx.annotation.NonNull;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 
@@ -7,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TimedTelemetry {
+    public static ArrayList<TelemetryLine> getTelemetryList(){
+        return telemetryList;
+    }
     static Telemetry telemetry;
     private static final ArrayList<TelemetryLine> telemetryList= new ArrayList<>();
 
@@ -65,7 +70,7 @@ public class TimedTelemetry {
 class TelemetryLine {
 
     boolean forever = false;
-    int timeMillis;
+    double timeMillis;
     String caption;
     String format;
     Object value = null;
@@ -107,7 +112,7 @@ class TelemetryLine {
     public boolean update(){
 
         if (timeMillis >=1){
-            if (!forever) timeMillis -= (int) Math.round(1000/RobotSpecs.TICKS_PER_SECOND);
+            if (!forever) timeMillis -= 1000/RobotSpecs.TICKS_PER_SECOND;
         } else return false;
 
         if(type == LineType.STRING){
@@ -120,4 +125,9 @@ class TelemetryLine {
         return true;
     }
 
+    @NonNull
+    @Override
+    public String toString(){
+        return this.caption+" Time: " + this.timeMillis;
+    }
 }
