@@ -106,12 +106,14 @@ public class PathGenV2 {
     public static void update(ArrayList<Zone> obstacles){
 
 
-        if (follower.isBusy()) TimedTelemetry.addLine("Robot-chan is moving!");
-         else TimedTelemetry.addLine("Robot-chan is awaiting commands! :) ");
+        if (follower.isBusy()) TimedTelemetry.addLine("Robot is moving!");
+         else TimedTelemetry.addLine("Robot is awaiting commands! :) ");
 
         if (!on) {
             TimedTelemetry.addLine("Path generation is sleeping... zzz...");
         }
+        updateSomeStates();
+        if (currentState == State.IDLE) return;
         updateMovement(obstacles);
     }
     public static void update(ArrayList<Zone> obstacles, boolean pause){
@@ -119,7 +121,7 @@ public class PathGenV2 {
             update(obstacles);
         } else {
             follower.stop();
-            TimedTelemetry.addLine("Path Gen paused");
+            TimedTelemetry.addLine("Path Gen paused -_-");
         }
     }
 
@@ -172,16 +174,16 @@ public class PathGenV2 {
         /// returns true if the path is switched,
         /// otherwise return false
         if (on==PathGenV2.on){
-            if (on) telemetry.addLine("Path Gen is already wide awake! :3");
-            else telemetry.addLine("Path Gen is already sleeping. Hmph!");
+            if (on) TimedTelemetry.addLine("Path Gen is already wide awake! :3", 1000);
+            else TimedTelemetry.addLine("Path Gen is already sleeping.",1000);
             return false;
         } else {
             if (on){
                 PathGenV2.on = true;
-                telemetry.addLine("Awaking up!");
+                TimedTelemetry.addLine("Waking up!", 500);
             } else {
                 PathGenV2.on = false;
-                telemetry.addLine("Sleeeepping...");
+                TimedTelemetry.addLine("Sleeeepping...", 500);
             }
             return true;
         }
@@ -190,6 +192,10 @@ public class PathGenV2 {
         return follower.isBusy();
     }
 
+    public boolean atShootingArea(){
+        for (Zone z: MapSpecs.SHOOTING_POSITIONS) if (z.contains(PedroPathingConverter.toPoint(getCurrentPose()))) return true;
+        return false;
+    }
     public static void goShoot(){
         double targetHeading;
         Pose nearestSpot = getCurrentPose();
@@ -215,7 +221,7 @@ public class PathGenV2 {
     public static void goPark(){
         destination = MapSpecs.PARKING;
         if (currentState != State.IDLE && currentState != State.PARKING){
-            TimedTelemetry.addData("Robot-chan has stopped current state to Park (⸝⸝๑  ̫ ๑⸝⸝⸝). Current state: ", currentState, 1000);
+            TimedTelemetry.addData("Robot has stopped current state to Park (⸝⸝๑  ̫ ๑⸝⸝⸝). Current state: ", currentState, 1000);
         } else if(currentState == State.PARKING) TimedTelemetry.addLine("I'm already going to park! ᕙ( ᗒᗣᗕ )ᕗ",1000);
         currentState = State.PARKING;
     }
