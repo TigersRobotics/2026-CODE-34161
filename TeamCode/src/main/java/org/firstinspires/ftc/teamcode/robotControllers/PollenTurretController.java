@@ -15,68 +15,83 @@ import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 
 public class PollenTurretController {
-    private DcMotorEx flywheel;
-    private DcMotorEx rotation;
+    private static boolean isInitialized;
+    private static DcMotorEx flywheel;
+    private static DcMotorEx rotation;
+    private static double P, F, targetVel = 0, lowVelocity = 0, highVelocity = 1500;
+    private static double yaw = 0; //This is in degrees
+    private static double currentVel;
 
-    private double P, F, targetVel = 0, lowVelocity = 0, highVelocity = 1500;
-    private double yaw = 0; //This is in degrees
-    private double currentVel;
+    public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
+        if(actuallyEnabled) {
+            flywheel = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);
+            flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            flywheel.setDirection(DcMotor.Direction.FORWARD);
 
-    public PollenTurretController(HardwareMap hardwareMap) {
-        flywheel = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);
-        flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        flywheel.setDirection(DcMotor.Direction.FORWARD);
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+            rotation = hardwareMap.get(DcMotorEx.class, TURRET_YAW_MOTOR_NAME);
+            rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rotation.setMode(DcMotor.RunMode.RUN_TO_POSITION); ///Clockwise should be positive encoder position
+            rotation.setDirection(DcMotor.Direction.FORWARD);
+            rotation.setPower(1.0);
 
-        rotation = hardwareMap.get(DcMotorEx.class, TURRET_YAW_MOTOR_NAME);
-        rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotation.setMode(DcMotor.RunMode.RUN_TO_POSITION); ///Clockwise should be positive encoder position
-        rotation.setDirection(DcMotor.Direction.FORWARD);
-        rotation.setPower(1.0);
+            isInitialized = true;
 
+            TimedTelemetry.addLine("Pollen Turret Controller Initialized! :D", 1000);
 
-        TimedTelemetry.addLine("Pollen Turret Controller Initialized! :D", 1000);
+        } else stop();
     }
 
-    public void update() {
-        flywheel.setVelocity(targetVel);
+    public static void update() {
+        if(isInitialized) {
+            flywheel.setVelocity(targetVel);
 
-        if(currentVel == highVelocity) {
-            targetVel = lowVelocity;
-        } else { currentVel = highVelocity; }
+            if (currentVel == highVelocity) {
+                targetVel = lowVelocity;
+            } else {
+                currentVel = highVelocity;
+            }
 
-        rotation.setTargetPosition((int) Math.round(yaw * TICKS_PER_REV/360));
+            rotation.setTargetPosition((int) Math.round(yaw * TICKS_PER_REV / 360));
+        } else TimedTelemetry.addLine("Pollen Turret Updating but not Initialized! >:(");
     }
 
 
     ///Sets the angle of the turret in degrees
-    public void setYaw(double yaw) {
-        this.yaw = Math.max(MIN_YAW, Math.min(MAX_YAW, yaw));
+    public static void setYaw(double yaw) {
+        PollenTurretController.yaw = Math.max(MIN_YAW, Math.min(MAX_YAW, yaw));
     }
 
-    public void setTargetVel(double targetVel) {
-        this.targetVel = targetVel;
+    public static void setTargetVel(double targetVel) {
+        PollenTurretController.targetVel = targetVel;
     }
-    public void setPFCoefficients(double P, double F) {
-        this.P = P;
-        this.F = F;
+    public static void setPFCoefficients(double P, double F) {
+        PollenTurretController.P = P;
+        PollenTurretController.F = F;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
-    public double getLowVelocity () {
+    public static double getLowVelocity () {
         return lowVelocity;
     }
-    public double getTargetVel() {
+    public static double getTargetVel() {
         return targetVel;
     }
-    public double getVelocity() {
+    public static double getVelocity() {
         return flywheel.getVelocity();
     }
 
-    public double getCurrentYaw() {
+    public static double getCurrentYaw() {
         return rotation.getCurrentPosition();
+    }
+    public static void stop() {
+        flywheel = null;
+        rotation = null;
+        yaw = 0;
+        currentVel = 0;
+        isInitialized = false;
     }
 }

@@ -25,7 +25,6 @@ public class TurretTestWithPDTuning extends OpMode {
 
     double[] stepSizes = {10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
     int stepIndex = 1;
-    PollenTurretController turretController;
     AprilTagWebcam aprilTagWebcam;
     private double headingOffset = 0;
     private static final double TRACK_GAIN = 0.6;
@@ -33,13 +32,15 @@ public class TurretTestWithPDTuning extends OpMode {
     @Override
     public void init() {
         TimedTelemetry.init(telemetry);
-        turretController = new PollenTurretController(hardwareMap);
-         aprilTagWebcam = new AprilTagWebcam(hardwareMap);
+
+        aprilTagWebcam = new AprilTagWebcam(hardwareMap);
 
         imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoFacingDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
         RevHubOrientationOnRobot.UsbFacingDirection usbFacingDirection = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+
+        PollenTurretController.init(hardwareMap, true);
 
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(logoFacingDirection, usbFacingDirection));
         imu.initialize(parameters);
@@ -75,9 +76,9 @@ public class TurretTestWithPDTuning extends OpMode {
             headingOffset += stepSizes[stepIndex];
         }
 
-        turretController.setPFCoefficients(P, F);
+        PollenTurretController.setPFCoefficients(P, F);
 
-        double currVel = turretController.getVelocity();
+        double currVel = PollenTurretController.getVelocity();
         double err = currVel - currentTargetVelocity;
 
 
@@ -86,14 +87,14 @@ public class TurretTestWithPDTuning extends OpMode {
         if (tag != null) {
             double bearing = tag.ftcPose.bearing; // degrees
             if (Math.abs(bearing) > 1.0) {        // deadband
-                turretController.setYaw(turretController.getCurrentYaw()+headingOffset - TRACK_GAIN * bearing);
+                PollenTurretController.setYaw(PollenTurretController.getCurrentYaw()+headingOffset - TRACK_GAIN * bearing);
             }
         }
 
 
 
-        turretController.setTargetVel(currentTargetVelocity);
-        turretController.update();
+        PollenTurretController.setTargetVel(currentTargetVelocity);
+        PollenTurretController.update();
 
         if(showAprilTagTelemetry) {
             aprilTagWebcam.displayTelemetry(telemetry);

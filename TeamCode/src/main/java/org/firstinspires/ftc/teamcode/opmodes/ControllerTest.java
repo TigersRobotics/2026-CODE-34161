@@ -5,31 +5,40 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
+import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
+import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
+import org.firstinspires.ftc.teamcode.robotControllers.TurretControllerWithHood;
+import org.firstinspires.ftc.teamcode.robotControllers.UptakeServoController;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 @TeleOp
 public class ControllerTest extends OpMode {
-//    TurretControllerWithHood turretController;
-    MecanumDriveTrainController driveController;
 
     final boolean ENABLE_TURRET_CONTROLLER = false;
     final boolean ENABLE_DRIVE_CONTROLLER = true;
+    final boolean ENABLE_UPTAKE_SERVO_CONTROLLER = true;
+    final boolean ENABLE_INTAKE_CONTROLLER = true;
 
     @Override
     public void init() {
+        TimedTelemetry.init(telemetry);
 
-//        if(ENABLE_TURRET_CONTROLLER) turretController = new TurretControllerWithHood(hardwareMap, telemetry);
-        if(ENABLE_DRIVE_CONTROLLER) driveController = new MecanumDriveTrainController(hardwareMap, telemetry);
+        MecanumDriveTrainController.init(hardwareMap, telemetry, ENABLE_DRIVE_CONTROLLER);
+        PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
+        UptakeServoController.init(hardwareMap, telemetry, ENABLE_UPTAKE_SERVO_CONTROLLER);
+        SingleIntakeController.init(hardwareMap, telemetry, ENABLE_INTAKE_CONTROLLER);
+
     }
     @Override
     public void loop() {
 
-        if(ENABLE_TURRET_CONTROLLER) {
-//            turretController.setTurretPosition(gamepad1.left_stick_x*Math.PI, true);
-        }
-        driveController.updateMovement(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+        MecanumDriveTrainController.update(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+        PollenTurretController.update();
+        UptakeServoController.update();
+        SingleIntakeController.update(gamepad1.left_trigger);
 
+        TimedTelemetry.update();
         telemetry.update();
     }
-
 
 }
