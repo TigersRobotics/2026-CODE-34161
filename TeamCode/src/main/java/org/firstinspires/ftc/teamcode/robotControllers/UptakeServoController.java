@@ -19,7 +19,7 @@ public class UptakeServoController {
             UptakeServoController.telemetry = telemetry;
             telemetry.addLine("Uptake Controller Initialized");
             isInitialized = true;
-        }
+        } else stop();
     }
 
     public static boolean shoot(){
