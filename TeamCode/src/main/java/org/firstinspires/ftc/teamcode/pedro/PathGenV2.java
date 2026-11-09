@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedro;
 
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.skeletonarmy.marrow.weaver.HeadingPolicy;
@@ -18,13 +19,12 @@ import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.sensors.Odometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
+import org.firstinspires.ftc.teamcode.utils.Timer;
 
 import java.util.ArrayList;
 
 public class PathGenV2 {
-    /// because I don't like the original one
-
-    private static Telemetry telemetry;
+    /// because I didn't like the original one
     private static Odometry odometry;
     private static Follower follower;
     private static WeaverBuilder notPathYet;
@@ -51,6 +51,8 @@ public class PathGenV2 {
     private static Pose destination = null;
     private static ArrayList<Zone> obstacles = new ArrayList<>();
     private static ArrayList<Point> scoreElements = new ArrayList<>();
+
+    private static double timeUntilUpdate;
 
     public static boolean isAutoMode() {
         return autoMode;
@@ -89,22 +91,21 @@ public class PathGenV2 {
         return new Pose(odometry.getX(DistanceUnit.INCH), odometry.getY(DistanceUnit.INCH), odometry.getHeading(AngleUnit.DEGREES));
     }
 
-    public static void init(Odometry odometry, Telemetry telemetry, Follower follower, boolean debug){
+    public static void init(Odometry odometry, Telemetry telemetry, Follower follower) {
         PathGenV2.follower = follower;
         PathGenV2.odometry = odometry;
-        PathGenV2.telemetry = telemetry;
-        Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED /2.54)
-                .robotWidth(RobotSpecs.LENGTH_X/2.54)
-                .robotHeight(RobotSpecs.HEIGHT/2.54).clearance(RobotSpecs.CLEARANCE));
+        Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED / 2.54)
+                .robotWidth(RobotSpecs.LENGTH_X / 2.54)
+                .robotHeight(RobotSpecs.HEIGHT / 2.54).clearance(RobotSpecs.CLEARANCE));
         TimedTelemetry.addLine("PathGenV2 initialized!!! YAY!", 1000);
+        timeUntilUpdate = 0;
     }
-
-    public static void init(Odometry odometry, Telemetry telemetry, Follower follower){
-        init(odometry, telemetry, follower, false);
-    }
-
     public static void update(ArrayList<Zone> obstacles){
-
+        if (timeUntilUpdate >=1){
+            timeUntilUpdate-= Timer.DTime();
+            return;
+        }
+        timeUntilUpdate = RobotSpecs.MS_PER_PATH_UPDATE;
 
         if (follower.isBusy()) TimedTelemetry.addLine("Robot is moving!");
          else TimedTelemetry.addLine("Robot is awaiting commands! :) ");
@@ -229,5 +230,7 @@ public class PathGenV2 {
     public static State getCurrentState(){
         return currentState;
     }
+
+
 
 }

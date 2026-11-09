@@ -3,11 +3,12 @@ package org.firstinspires.ftc.teamcode.constants;
 public class RobotSpecs {
     // Everything is a temp value
 
-    public static final double TICKS_PER_SECOND = 20;
     public static final double[] CAMERA_TURRET_OFFSET= new double[]{
             0,0
     };
     // temp values
+
+    public static final double MS_PER_PATH_UPDATE = 500;
     public static final double MAX_TURRET_ANGLE_UP = 75;
     public static final double MAX_TURRET_ANGLE_DOWN = 15;
     public static final double OFFSETS_OF_ODOMETRY_PODS_CM_X = -10;

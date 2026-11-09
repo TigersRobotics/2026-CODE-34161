@@ -21,7 +21,7 @@ public class TelemetryTesting extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addData("Stuff: ", TimedTelemetry.getTelemetryList());
+        telemetry.addData("Stuff: ", TimedTelemetry.getTelemetryListAsStrings());
         TimedTelemetry.update();
         Timer.update();
         telemetry.update();

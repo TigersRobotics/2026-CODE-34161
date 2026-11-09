@@ -2,17 +2,17 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import androidx.annotation.NonNull;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class TimedTelemetry {
-    public static ArrayList<TelemetryLine> getTelemetryList(){
-        return telemetryList;
+    public static ArrayList<String> getTelemetryListAsStrings(){
+        /// for debugging only. Returns a list of displaying telemetry and how much time left
+        ArrayList<String> r = new ArrayList<>();
+        for (TelemetryLine t: telemetryList) r.add(t.toString());
+        return r;
     }
 
     public static void resetAll (){

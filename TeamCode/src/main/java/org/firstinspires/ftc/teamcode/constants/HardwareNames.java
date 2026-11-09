@@ -15,5 +15,5 @@ public class HardwareNames {
     public static final String TURRET_YAW_MOTOR_NAME = "yawMotor";
     public static final String UPTAKE_MOTOR_NAME = "uptake";
     public static final String INTAKE_MOTOR_NAME = "intake";
-
+    public static final String ODOMETRY_NAME = "Odometry";
 }
