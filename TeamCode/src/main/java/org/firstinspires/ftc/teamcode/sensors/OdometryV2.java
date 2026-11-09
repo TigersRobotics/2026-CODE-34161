@@ -7,18 +7,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 public class OdometryV2 {
 
     private final GoBildaPinpointDriver odo;
-
-    /**
-     * Initializes the goBilda Pinpoint Odometry Computer.
-     *
-     * @param hardwareMap HardwareMap reference from the OpMode
-     * @param deviceName  Device name configured in the Driver Station (e.g., "odo" or "pinpoint")
-     */
     public OdometryV2(HardwareMap hardwareMap, String deviceName) {
+        if (hardwareMap.get(GoBildaPinpointDriver.class, deviceName)==null) TimedTelemetry.addLine("Test", 1000);
+        else TimedTelemetry.addLine("Test Passed",1000);
+
         odo = hardwareMap.get(GoBildaPinpointDriver.class, deviceName);
 
         /*
