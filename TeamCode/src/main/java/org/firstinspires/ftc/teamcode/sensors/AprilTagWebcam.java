@@ -16,15 +16,15 @@ import java.util.ArrayList;
 
 public class AprilTagWebcam {
     //Processor for the april tag
-    private AprilTagProcessor processor;
+    private static AprilTagProcessor processor;
 
     //Vison/ camera I think
-    private VisionPortal vision;
+    private static VisionPortal vision;
 
     //List of Detected Tags
-    private ArrayList<AprilTagDetection> detectedTags = new ArrayList<>();
+    private static ArrayList<AprilTagDetection> detectedTags = new ArrayList<>();
 
-    public AprilTagWebcam(HardwareMap hardwareMap) {
+    public static void init(HardwareMap hardwareMap) {
         AprilTagProcessor.Builder processerBuilder = new AprilTagProcessor.Builder();
         processerBuilder.setDrawTagID(true);
         processerBuilder.setDrawTagOutline(true);
@@ -41,7 +41,7 @@ public class AprilTagWebcam {
 
         vision = visionBuilder.build();
     }
-    public void updateTagDetection() {
+    public static void update() {
         if(processor.getDetections() != null) {
             detectedTags = processor.getDetections();
         }
@@ -50,7 +50,7 @@ public class AprilTagWebcam {
     public ArrayList<AprilTagDetection> getDetectedTags() {
         return detectedTags;
     }
-    public void displayTelemetry(Telemetry telemetry) {
+    public static void displayTelemetry(Telemetry telemetry) {
         telemetry.addData("# AprilTags Detected", detectedTags.size());
 
         for (AprilTagDetection detection : detectedTags) {
@@ -82,14 +82,16 @@ public class AprilTagWebcam {
     }
 
     //Turn off vision to save resources
-    public void stop() {
+    public static void stop() {
         //Detect if there is a vision portal open
         if(vision != null) {
             vision.close();
+            processor = null;
+            vision = null;
         }
     }
 
-    public AprilTagDetection getTagByID(int id) {
+    public static AprilTagDetection getTagByID(int id) {
         for(AprilTagDetection detection : detectedTags) {
             AprilTagSingleDetection singleTag = (AprilTagSingleDetection) detection;
             if(singleTag.id == id) {

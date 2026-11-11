@@ -5,14 +5,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
-public class OdometryV2 {
+public class GoBildaOdometry {
 
     private final GoBildaPinpointDriver odo;
-    public OdometryV2(HardwareMap hardwareMap, String deviceName) {
+    public GoBildaOdometry(HardwareMap hardwareMap, String deviceName) {
         if (hardwareMap.get(GoBildaPinpointDriver.class, deviceName)==null) TimedTelemetry.addLine("Test", 1000);
         else TimedTelemetry.addLine("Test Passed",1000);
 

@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
-import org.firstinspires.ftc.teamcode.sensors.Odometry;
+import org.firstinspires.ftc.teamcode.sensors.StudicaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 public class PathGenV2 {
     /// because I didn't like the original one
-    private static Odometry odometry;
+    private static StudicaOdometry odometry;
     private static Follower follower;
     private static WeaverBuilder notPathYet;
     private static boolean on = true;
@@ -91,7 +91,7 @@ public class PathGenV2 {
         return new Pose(odometry.getX(DistanceUnit.INCH), odometry.getY(DistanceUnit.INCH), odometry.getHeading(AngleUnit.DEGREES));
     }
 
-    public static void init(Odometry odometry, Telemetry telemetry, Follower follower) {
+    public static void init(StudicaOdometry odometry, Telemetry telemetry, Follower follower) {
         PathGenV2.follower = follower;
         PathGenV2.odometry = odometry;
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED / 2.54)

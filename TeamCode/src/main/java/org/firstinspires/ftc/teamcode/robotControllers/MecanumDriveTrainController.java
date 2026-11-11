@@ -55,6 +55,11 @@ public class MecanumDriveTrainController{
     }
 
     public static void stop() {
+        frontRight.setPower(0);
+        frontLeft.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+
         isInitialized = false;
         frontLeft = null;
         frontRight = null;

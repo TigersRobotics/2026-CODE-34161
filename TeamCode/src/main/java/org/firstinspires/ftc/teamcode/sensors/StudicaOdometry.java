@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
-public class Odometry {
+public class StudicaOdometry {
     private final double TICKS_PER_REV = 2048.0;
 
     private DcMotor horzMotor; ///This uses CYPHER through bore encoder things from studica
@@ -24,7 +24,7 @@ public class Odometry {
     private DistanceUnit distanceUnit = DistanceUnit.CM;
 
     private double headingOffset = 0;
-    public Odometry(HardwareMap hardwareMap) {
+    public StudicaOdometry(HardwareMap hardwareMap) {
 
         imu = hardwareMap.get(IMU.class, "imu");
 
