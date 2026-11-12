@@ -7,20 +7,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
-import org.firstinspires.ftc.teamcode.sensors.OdometryV2;
+import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
 @TeleOp (name = "Odometry Test")
 public class OdometryTest extends OpMode {
-    OdometryV2 odometry;
+    GoBildaOdometry odometry;
     @Override
     public void init() {
 
         Timer.init();
         TimedTelemetry.init(telemetry);
-        odometry = new OdometryV2(hardwareMap, HardwareNames.ODOMETRY_NAME);
+        odometry = new GoBildaOdometry(hardwareMap, HardwareNames.ODOMETRY_NAME);
         MecanumDriveTrainController.init(hardwareMap,telemetry, true);
     }
 
