@@ -12,12 +12,11 @@ import com.skeletonarmy.marrow.weaver.WeaverBuilder;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.Zone;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
-import org.firstinspires.ftc.teamcode.sensors.StudicaOdometry;
+import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
@@ -25,7 +24,7 @@ import java.util.ArrayList;
 
 public class PathGenV2 {
     /// because I didn't like the original one
-    private static StudicaOdometry odometry;
+    private static GoBildaOdometry odometry;
     private static Follower follower;
     private static WeaverBuilder notPathYet;
     private static boolean on = true;
@@ -91,7 +90,7 @@ public class PathGenV2 {
         return new Pose(odometry.getX(DistanceUnit.INCH), odometry.getY(DistanceUnit.INCH), odometry.getHeading(AngleUnit.DEGREES));
     }
 
-    public static void init(StudicaOdometry odometry, Telemetry telemetry, Follower follower) {
+    public static void init(GoBildaOdometry odometry, Follower follower) {
         PathGenV2.follower = follower;
         PathGenV2.odometry = odometry;
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED / 2.54)
@@ -230,7 +229,4 @@ public class PathGenV2 {
     public static State getCurrentState(){
         return currentState;
     }
-
-
-
 }
