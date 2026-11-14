@@ -67,9 +67,6 @@ public class TimedTelemetry {
     public static void addData(String caption, String format, int timeMillis, Object... args){
         addData(caption, format, timeMillis, false, args);
     }
-    public static void addData (String caption, String format, Object... args){
-        addData(caption, format, 1, false, args);
-    }
 
 }
 
@@ -80,7 +77,7 @@ class TelemetryLine {
     String caption;
     String format;
     Object value = null;
-    ArrayList<Object> args;
+    Object[] args;
     enum LineType{
         STRING,
         CAPTIONED_OBJECT,
@@ -105,7 +102,7 @@ class TelemetryLine {
         this.timeMillis = timeMillis;
         this.caption = caption;
         this.format = format;
-        this.args = new ArrayList<>(List.of(args));
+        this.args = args;
         type = LineType.FORMATED_OBJECT_LIST;
     }
 

@@ -30,7 +30,7 @@ public class MapSpecs {
 
     public static final ArrayList<Zone> SHOOTING_POSITIONS = new ArrayList<>(
             List.of(LEFT_SHOOTING, RIGHT_SHOOTING));
-    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.5), 0);
+    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.5), 90);
     public static final Pose GARDEN = new Pose(tileToIN(5.5), tileToIN(0.5));
 
     public static final ArrayList<Zone> OBSTACLES = new ArrayList<>(List.of(
