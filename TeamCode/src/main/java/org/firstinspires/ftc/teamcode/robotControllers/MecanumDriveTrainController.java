@@ -29,10 +29,6 @@ public class MecanumDriveTrainController{
     private static double backLeftPower;
     private static double backRightPower;
 
-    private static double driveY;
-    private static double driveX;
-    private static double turn;
-
     public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
 
@@ -68,14 +64,6 @@ public class MecanumDriveTrainController{
         backLeft = null;
         backRight = null;
     }
-    /**
-     * Updates the turn value
-     * @param turn
-     * does not actually update the movement. updateMovement must be called to update
-     */
-    public static void updateTurn(double turn) {
-        if(isInitialized) MecanumDriveTrainController.turn = turn;
-    }
 
     /**
      * Updates the drive values
@@ -84,51 +72,14 @@ public class MecanumDriveTrainController{
      * does not actually update the movement. updateMovement must be called to update
      */
     public static void update(double driveY, double driveX) {
-        if (isInitialized) {
-            MecanumDriveTrainController.driveY = driveY;
-            MecanumDriveTrainController.driveX = driveX;
-        }
+        update(driveY,driveX, 0);
     }
     /**
      * Starts the movement of the robot.
      * Moves based off the values of driveY, driveX, and turn, set by updateDrive and updateTurn
      */
     public static void update() {
-        if(isInitialized) {
-            TimedTelemetry.addData("driveY: ", driveY);
-            TimedTelemetry.addData("driveX: ", driveX);
-            TimedTelemetry.addData("turn: ", turn);
-
-            double fl = driveY + driveX + turn;
-            double fr = driveY - driveX - turn;
-            double bl = driveY - driveX + turn;
-            double br = driveY + driveX - turn;
-
-            double max = Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(bl), Math.abs(br)));
-
-            if (max > 1.0) {
-                fl /= max;
-                fr /= max;
-                bl /= max;
-                br /= max;
-            }
-
-
-            frontLeftPower = fl;
-            frontRightPower = fr;
-            backRightPower = br;
-            backLeftPower = bl;
-
-            // Send calculated power to wheels
-            frontLeft.setPower(frontLeftPower);
-            frontRight.setPower(frontRightPower);
-            backLeft.setPower(backLeftPower);
-            backRight.setPower(backRightPower);
-
-
-            TimedTelemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
-            TimedTelemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
-        }
+        update(0, 0, 0);
     }
 
     /**
