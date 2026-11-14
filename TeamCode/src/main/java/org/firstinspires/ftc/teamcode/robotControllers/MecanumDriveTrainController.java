@@ -122,8 +122,6 @@ public class MecanumDriveTrainController{
             backRight.setPower(backRightPower);
 
 
-            TimedTelemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
-            TimedTelemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
         }
     }
 
