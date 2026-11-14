@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotControllers;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -15,6 +16,7 @@ public class SingleIntakeController {
     public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
             intakeMotor = hardwareMap.get(DcMotor.class, HardwareNames.INTAKE_MOTOR_NAME);
+            intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             isInitialized = true;
         } else {
             stop();
