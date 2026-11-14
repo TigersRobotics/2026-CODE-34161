@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
 
@@ -23,8 +24,6 @@ public class MecanumDriveTrainController{
     private static DcMotor frontRight;
     private static DcMotor backLeft;
     private static DcMotor backRight;
-
-    private static Telemetry telemetry;
     private static double frontLeftPower;
     private static double frontRightPower;
     private static double backLeftPower;
@@ -34,9 +33,8 @@ public class MecanumDriveTrainController{
     private static double driveX;
     private static double turn;
 
-    public static void init(HardwareMap hardwareMap, Telemetry telemetry, boolean actuallyInitialize) {
+    public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
-            MecanumDriveTrainController.telemetry = telemetry;
 
             frontLeft = hardwareMap.get(DcMotor.class, FRONT_LEFT_MOTOR_NAME);
             frontRight = hardwareMap.get(DcMotor.class, FRONT_RIGHT_MOTOR_NAME);
@@ -48,10 +46,14 @@ public class MecanumDriveTrainController{
             frontRight.setDirection(DcMotor.Direction.REVERSE);
             backRight.setDirection(DcMotor.Direction.REVERSE);
 
-            telemetry.addLine("MECANUM DRIVE TRAIN INITIALIZED");
+            TimedTelemetry.addLine("MECANUM DRIVE TRAIN INITIALIZED");
 
             isInitialized = true;
         } else stop();
+    }
+
+    public static void init(HardwareMap hardwareMap) {
+        init(hardwareMap, true);
     }
 
     public static void stop() {
@@ -65,7 +67,6 @@ public class MecanumDriveTrainController{
         frontRight = null;
         backLeft = null;
         backRight = null;
-        telemetry = null;
     }
     /**
      * Updates the turn value
@@ -94,9 +95,9 @@ public class MecanumDriveTrainController{
      */
     public static void update() {
         if(isInitialized) {
-            telemetry.addData("driveY: ", driveY);
-            telemetry.addData("driveX: ", driveX);
-            telemetry.addData("turn: ", turn);
+            TimedTelemetry.addData("driveY: ", driveY);
+            TimedTelemetry.addData("driveX: ", driveX);
+            TimedTelemetry.addData("turn: ", turn);
 
             double fl = driveY + driveX + turn;
             double fr = driveY - driveX - turn;
@@ -125,8 +126,8 @@ public class MecanumDriveTrainController{
             backRight.setPower(backRightPower);
 
 
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
-            telemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
+            TimedTelemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
+            TimedTelemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
         }
     }
 
@@ -138,9 +139,9 @@ public class MecanumDriveTrainController{
      */
     public static void update(double driveY, double driveX, double turn) {
         if(isInitialized) {
-            telemetry.addData("driveY: ", driveY);
-            telemetry.addData("driveX: ", driveX);
-            telemetry.addData("turn: ", turn);
+            TimedTelemetry.addData("driveY: ", driveY);
+            TimedTelemetry.addData("driveX: ", driveX);
+            TimedTelemetry.addData("turn: ", turn);
 
 
             double fl = driveY + driveX + turn;
@@ -170,8 +171,8 @@ public class MecanumDriveTrainController{
             backRight.setPower(backRightPower);
 
 
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
-            telemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
+            TimedTelemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
+            TimedTelemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
         }
     }
 

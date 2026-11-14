@@ -50,6 +50,7 @@ public class FlywheelPIDFTuning extends OpMode {
         if (gamepad1.triangleWasPressed()) {
             stepIndex = (stepIndex + 1) % stepSizes.length;
         }
+        if(gamepad1.squareWasPressed()) stepIndex = (stepIndex -1 + stepSizes.length) % stepSizes.length;
 
         // F tuning
         if (gamepad1.leftTriggerWasPressed()) F += stepSizes[stepIndex];

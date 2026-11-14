@@ -23,10 +23,10 @@ public class ControllerTest extends OpMode {
     public void init() {
         TimedTelemetry.init(telemetry);
 
-        MecanumDriveTrainController.init(hardwareMap, telemetry, ENABLE_DRIVE_CONTROLLER);
+        MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
-        UptakeServoController.init(hardwareMap, telemetry, ENABLE_UPTAKE_SERVO_CONTROLLER);
-        SingleIntakeController.init(hardwareMap, telemetry, ENABLE_INTAKE_CONTROLLER);
+        UptakeServoController.init(hardwareMap, ENABLE_UPTAKE_SERVO_CONTROLLER);
+        SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
 
     }
     @Override
