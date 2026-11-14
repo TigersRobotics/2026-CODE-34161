@@ -27,6 +27,9 @@ public class TelemetryTesting extends OpMode {
         telemetry.update();
 
     }
+    public int test(int ao) {
+        return ao^2;
+    }
 
     public void test(){{
         // this is a test to show another team about merge conflict

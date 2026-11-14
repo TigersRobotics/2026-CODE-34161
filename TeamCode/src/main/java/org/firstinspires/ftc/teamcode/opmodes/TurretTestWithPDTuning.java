@@ -25,7 +25,6 @@ public class TurretTestWithPDTuning extends OpMode {
 
     double[] stepSizes = {10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
     int stepIndex = 1;
-    AprilTagWebcam aprilTagWebcam;
     private double headingOffset = 0;
     private static final double TRACK_GAIN = 0.6;
 
@@ -33,7 +32,6 @@ public class TurretTestWithPDTuning extends OpMode {
     public void init() {
         TimedTelemetry.init(telemetry);
 
-        aprilTagWebcam = new AprilTagWebcam(hardwareMap);
 
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -48,7 +46,6 @@ public class TurretTestWithPDTuning extends OpMode {
 
     @Override
     public void loop() {
-        aprilTagWebcam.updateTagDetection();
 
         if(gamepad1.triangleWasPressed()) showAprilTagTelemetry = !showAprilTagTelemetry;
         if (gamepad1.circleWasPressed()) {
@@ -83,28 +80,28 @@ public class TurretTestWithPDTuning extends OpMode {
 
 
         //Code to rotate the turret(cam mounted on turret)
-        AprilTagDetection tag = aprilTagWebcam.getTagByID(24);
-        if (tag != null) {
-            double bearing = tag.ftcPose.bearing; // degrees
-            if (Math.abs(bearing) > 1.0) {        // deadband
-                PollenTurretController.setYaw(PollenTurretController.getCurrentYaw()+headingOffset - TRACK_GAIN * bearing);
-            }
-        }
+//        AprilTagDetection tag = aprilTagWebcam.getTagByID(24);
+//        if (tag != null) {
+//            double bearing = tag.ftcPose.bearing; // degrees
+//            if (Math.abs(bearing) > 1.0) {        // deadband
+//                PollenTurretController.setYaw(PollenTurretController.getCurrentYaw()+headingOffset - TRACK_GAIN * bearing);
+//            }
+//        }
 
 
 
         PollenTurretController.setTargetVel(currentTargetVelocity);
         PollenTurretController.update();
 
-        if(showAprilTagTelemetry) {
-            aprilTagWebcam.displayTelemetry(telemetry);
-        } else {
-            telemetry.addLine("Current Target Velocity: " + currentTargetVelocity);
-            telemetry.addLine("Current Step Size: " + stepSizes[stepIndex]);
-            telemetry.addLine("Current Step Index: " + stepIndex);
-            telemetry.addData("Current Velocity: ", currVel);
-            telemetry.addData("Error: ", err);
-            telemetry.addData("PIDF Coefficients: " + P + ", ", F);
-        }
+//        if(showAprilTagTelemetry) {
+//            aprilTagWebcam.displayTelemetry(telemetry);
+//        } else {
+//            telemetry.addLine("Current Target Velocity: " + currentTargetVelocity);
+//            telemetry.addLine("Current Step Size: " + stepSizes[stepIndex]);
+//            telemetry.addLine("Current Step Index: " + stepIndex);
+//            telemetry.addData("Current Velocity: ", currVel);
+//            telemetry.addData("Error: ", err);
+//            telemetry.addData("PIDF Coefficients: " + P + ", ", F);
+//        }
     }
 }
