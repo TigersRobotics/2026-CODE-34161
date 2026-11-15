@@ -31,6 +31,7 @@ public class SampleAutoPathing extends OpMode {
 
     //TODO add more paths and positions
 
+
     private PathChain driveStartPosShootPos;
 
     public void buildPaths(){
