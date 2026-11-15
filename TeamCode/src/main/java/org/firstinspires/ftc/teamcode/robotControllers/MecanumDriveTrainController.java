@@ -8,9 +8,8 @@ import static org.firstinspires.ftc.teamcode.constants.HardwareNames.FRONT_RIGHT
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
-import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
 
 /**
@@ -123,6 +122,15 @@ public class MecanumDriveTrainController{
 
 
         }
+    }
+
+    private static boolean driverOrientate = true;
+    private static boolean buttonHold = false;
+    private static double driverOffset = Competition.STARTING_HEADING_DRIVER_OFFSET;
+
+
+    public static void toggleDriverOrientation(boolean on){
+
     }
 
 }
