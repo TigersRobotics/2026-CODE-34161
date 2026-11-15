@@ -29,6 +29,8 @@ public class SampleAutoPathing extends OpMode {
     private final Pose startPose = new Pose(x,y,Math.toRadians(heading));
     private final Pose shootPose = new Pose(x,y,Math.toRadians(heading));
 
+    //TODO add more paths and positions
+
     private PathChain driveStartPosShootPos;
 
     public void buildPaths(){
