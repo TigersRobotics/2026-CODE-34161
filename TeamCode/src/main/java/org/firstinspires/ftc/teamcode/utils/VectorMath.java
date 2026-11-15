@@ -25,7 +25,7 @@ public class VectorMath {
     }
     
 
-    public static double[] shotAngle(double d, double h, double r, double camAngle, Telemetry telemetry) {
+    public static double[] shotAngle(double d, double h, double r, double camAngle) {
 /// returns turret vertical angle, and the horizonal angle. Input angleFromTag: facing right is pos
 /// all angles are in degrees, lengths are in meters, speeds are in m/s
         double [] nV = addV(new double[]{d, camAngle}, new double[]{MapSpecs.APRIL_TAG_HIVE_OFFSET_D, 180-r});
@@ -46,7 +46,7 @@ public class VectorMath {
                     nAngle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)){
 
                 // will log that it cannot find valid angle, shows init angle and backup angle
-                telemetry.addLine(("No valid angle found: " + angle + " " + nAngle));
+                TimedTelemetry.addLine(("No valid angle found: " + angle + " " + nAngle));
                 return new double[] {Double.NaN};
             }
             return new double[] {nAngle, nV[1]};
