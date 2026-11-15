@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
+import org.firstinspires.ftc.teamcode.robotControllers.UptakeController;
 import org.firstinspires.ftc.teamcode.robotControllers.UptakeServoController;
 import org.firstinspires.ftc.teamcode.sensors.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.teamcode.utils.VectorMath;
 public class TeleOpMain extends OpMode {
     final boolean ENABLE_TURRET_CONTROLLER = false;
     final boolean ENABLE_DRIVE_CONTROLLER = true;
-    final boolean ENABLE_UPTAKE_CONTROLLER = false;
+    final boolean ENABLE_UPTAKE_CONTROLLER = true;
     final boolean ENABLE_INTAKE_CONTROLLER = true;
     final boolean ENABLE_WEBCAM = false;
     boolean enableIntake = false;
@@ -25,7 +26,7 @@ public class TeleOpMain extends OpMode {
 
         MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
-        UptakeServoController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
+        UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
     }
 
@@ -36,7 +37,7 @@ public class TeleOpMain extends OpMode {
 
         MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0));
         PollenTurretController.update();
-        UptakeServoController.update();
+        UptakeController.update(gamepad1.right_trigger - gamepad1.left_trigger);
         SingleIntakeController.update(intakePower);
 
     }
@@ -45,7 +46,7 @@ public class TeleOpMain extends OpMode {
     public void stop() {
         MecanumDriveTrainController.stop();
         PollenTurretController.stop();
-        UptakeServoController.stop();
+        UptakeController.stop();
         SingleIntakeController.stop();
     }
 }

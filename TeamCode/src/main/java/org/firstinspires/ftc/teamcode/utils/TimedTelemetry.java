@@ -7,6 +7,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * This is used for having telemetry show for a certain amount of time. It is static so taht it is accessible anwhere
+ * @author Jason Xia
+ * @version 1.0.0
+ */
+
 public class TimedTelemetry {
     public static ArrayList<String> getTelemetryListAsStrings(){
         /// for debugging only. Returns a list of displaying telemetry and how much time left

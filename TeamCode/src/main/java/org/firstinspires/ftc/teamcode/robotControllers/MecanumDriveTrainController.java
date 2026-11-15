@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.constants.Competition;
+import org.firstinspires.ftc.teamcode.controller.CustomController;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 
@@ -123,7 +124,9 @@ public class MecanumDriveTrainController{
 
         }
     }
-
+    public static void update(CustomController controller) {
+        update(controller.getDriveY(), controller.getDriveX(), controller.getTurn());
+    }
     private static boolean driverOrientate = true;
     private static boolean buttonHold = false;
     private static double driverOffset = Competition.STARTING_HEADING_DRIVER_OFFSET;

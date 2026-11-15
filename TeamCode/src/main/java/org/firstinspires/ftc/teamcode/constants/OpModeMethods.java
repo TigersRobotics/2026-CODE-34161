@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.constants;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
+import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
+import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
+import org.firstinspires.ftc.teamcode.robotControllers.UptakeServoController;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
@@ -17,7 +21,9 @@ public class OpModeMethods {
     );
     public static ArrayList<Consumer<HardwareMap>> HARDWARE_MAP_INIT = new ArrayList<>(
             List.of(
-
+                    MecanumDriveTrainController::init,
+                    SingleIntakeController::init,
+                    PollenTurretController::init
             )
     );
 
