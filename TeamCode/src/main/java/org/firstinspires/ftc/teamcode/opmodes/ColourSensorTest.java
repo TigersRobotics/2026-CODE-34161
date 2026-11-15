@@ -20,7 +20,7 @@ public class ColourSensorTest extends OpMode {
 
     @Override
     public void loop() {
-        detectedColour = test.getDetectedColour(telemetry);
+        detectedColour = test.getDetectedColour();
 
         String name = "Empty";
 
