@@ -9,8 +9,7 @@ public class CustomController {
     private Binding.Axis driveY;
     private Binding.Axis turnRight;
     private Binding.Axis turnLeft;
-    private Binding.Axis boost;
-    private Binding.Button toggle4Wheel;
+
 
     public CustomController(Gamepad gamepad,
                             Binding.Axis driveX,
@@ -24,8 +23,6 @@ public class CustomController {
         this.driveY = driveY;
         this.turnRight = turnRight;
         this.turnLeft = turnLeft;
-        this.boost = boost;
-        this.toggle4Wheel = toggle4Wheel;
     }
 
     public CustomController(Gamepad gamepad,
@@ -38,8 +35,7 @@ public class CustomController {
         this.driveX = driveX;
         this.driveY = driveY;
         this.turnLeft = turn;
-        this.boost = boost;
-        this.toggle4Wheel = toggle4Wheel;
+
     }
 
     public double getDriveX() {
@@ -52,10 +48,4 @@ public class CustomController {
         return - turnRight.applyAsDouble(gamepad) + turnLeft.applyAsDouble(gamepad);
     }
 
-    public double getBoost() {
-        return boost.applyAsDouble(gamepad);
-    }
-    public boolean getToggle4Wheel() {
-        return toggle4Wheel.test(gamepad);
-    }
 }

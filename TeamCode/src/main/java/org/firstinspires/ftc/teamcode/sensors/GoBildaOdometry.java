@@ -16,32 +16,13 @@ public class GoBildaOdometry {
         else TimedTelemetry.addLine("Test Passed",1000);
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, deviceName);
-
-        /*
-         * Set physical pod offsets from the robot's center of rotation.
-         *  - X Offset: Distance along X-axis (forward/backward pod offset)
-         *  - Y Offset: Distance along Y-axis (perpendicular/strafe pod offset)
-         */
-        odo.setOffsets(RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_CM_X, RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_CM_Y, DistanceUnit.CM);
-
-        /*
-         * Define pod resolution type:
-         * Options include:
-         *   GoBildaPinpointDriver.GoBildaOdometryPods.GOBILDA_SWINGARM_POD
-         *   GoBildaPinpointDriver.GoBildaOdometryPods.GOBILDA_4_BAR_POD
-         */
+        odo.setOffsets(RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_IN_X, RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_IN_Y, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
-
-        /*
-         * Set encoder directions:
-         * Options: EncoderDirection.FORWARD or EncoderDirection.REVERSED
-         */
         odo.setEncoderDirections(
                 GoBildaPinpointDriver.EncoderDirection.FORWARD,
                 GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
 
-        // Reset positions and recalibrate internal gyro orientation
         odo.resetPosAndIMU();
     }
     public void update() {

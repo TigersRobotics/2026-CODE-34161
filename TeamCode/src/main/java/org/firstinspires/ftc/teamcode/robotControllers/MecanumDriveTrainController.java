@@ -8,8 +8,9 @@ import static org.firstinspires.ftc.teamcode.constants.HardwareNames.FRONT_RIGHT
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.utils.VectorMath;
+import org.firstinspires.ftc.teamcode.constants.Competition;
+import org.firstinspires.ftc.teamcode.controller.CustomController;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 
 /**
@@ -23,20 +24,13 @@ public class MecanumDriveTrainController{
     private static DcMotor frontRight;
     private static DcMotor backLeft;
     private static DcMotor backRight;
-
-    private static Telemetry telemetry;
     private static double frontLeftPower;
     private static double frontRightPower;
     private static double backLeftPower;
     private static double backRightPower;
 
-    private static double driveY;
-    private static double driveX;
-    private static double turn;
-
-    public static void init(HardwareMap hardwareMap, Telemetry telemetry, boolean actuallyInitialize) {
+    public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
-            MecanumDriveTrainController.telemetry = telemetry;
 
             frontLeft = hardwareMap.get(DcMotor.class, FRONT_LEFT_MOTOR_NAME);
             frontRight = hardwareMap.get(DcMotor.class, FRONT_RIGHT_MOTOR_NAME);
@@ -48,10 +42,14 @@ public class MecanumDriveTrainController{
             frontRight.setDirection(DcMotor.Direction.REVERSE);
             backRight.setDirection(DcMotor.Direction.REVERSE);
 
-            telemetry.addLine("MECANUM DRIVE TRAIN INITIALIZED");
+            TimedTelemetry.addLine("MECANUM DRIVE TRAIN INITIALIZED");
 
             isInitialized = true;
         } else stop();
+    }
+
+    public static void init(HardwareMap hardwareMap) {
+        init(hardwareMap, true);
     }
 
     public static void stop() {
@@ -65,15 +63,6 @@ public class MecanumDriveTrainController{
         frontRight = null;
         backLeft = null;
         backRight = null;
-        telemetry = null;
-    }
-    /**
-     * Updates the turn value
-     * @param turn
-     * does not actually update the movement. updateMovement must be called to update
-     */
-    public static void updateTurn(double turn) {
-        if(isInitialized) MecanumDriveTrainController.turn = turn;
     }
 
     /**
@@ -83,51 +72,14 @@ public class MecanumDriveTrainController{
      * does not actually update the movement. updateMovement must be called to update
      */
     public static void update(double driveY, double driveX) {
-        if (isInitialized) {
-            MecanumDriveTrainController.driveY = driveY;
-            MecanumDriveTrainController.driveX = driveX;
-        }
+        update(driveY,driveX, 0);
     }
     /**
      * Starts the movement of the robot.
      * Moves based off the values of driveY, driveX, and turn, set by updateDrive and updateTurn
      */
     public static void update() {
-        if(isInitialized) {
-            telemetry.addData("driveY: ", driveY);
-            telemetry.addData("driveX: ", driveX);
-            telemetry.addData("turn: ", turn);
-
-            double fl = driveY + driveX + turn;
-            double fr = driveY - driveX - turn;
-            double bl = driveY - driveX + turn;
-            double br = driveY + driveX - turn;
-
-            double max = Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(bl), Math.abs(br)));
-
-            if (max > 1.0) {
-                fl /= max;
-                fr /= max;
-                bl /= max;
-                br /= max;
-            }
-
-
-            frontLeftPower = fl;
-            frontRightPower = fr;
-            backRightPower = br;
-            backLeftPower = bl;
-
-            // Send calculated power to wheels
-            frontLeft.setPower(frontLeftPower);
-            frontRight.setPower(frontRightPower);
-            backLeft.setPower(backLeftPower);
-            backRight.setPower(backRightPower);
-
-
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
-            telemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
-        }
+        update(0, 0, 0);
     }
 
     /**
@@ -138,9 +90,9 @@ public class MecanumDriveTrainController{
      */
     public static void update(double driveY, double driveX, double turn) {
         if(isInitialized) {
-            telemetry.addData("driveY: ", driveY);
-            telemetry.addData("driveX: ", driveX);
-            telemetry.addData("turn: ", turn);
+            TimedTelemetry.addData("driveY: ", driveY);
+            TimedTelemetry.addData("driveX: ", driveX);
+            TimedTelemetry.addData("turn: ", turn);
 
 
             double fl = driveY + driveX + turn;
@@ -170,9 +122,18 @@ public class MecanumDriveTrainController{
             backRight.setPower(backRightPower);
 
 
-            telemetry.addData("Motors", "front left (%.2f), front right (%.2f)", frontLeftPower, frontRightPower);
-            telemetry.addData("Motors", "back left (%.2f), back right (%.2f)", backLeftPower, backRightPower);
         }
+    }
+    public static void update(CustomController controller) {
+        update(controller.getDriveY(), controller.getDriveX(), controller.getTurn());
+    }
+    private static boolean driverOrientate = true;
+    private static boolean buttonHold = false;
+    private static double driverOffset = Competition.STARTING_HEADING_DRIVER_OFFSET;
+
+
+    public static void toggleDriverOrientation(boolean on){
+
     }
 
 }

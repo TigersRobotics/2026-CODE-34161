@@ -15,4 +15,11 @@ public final class UtilMethods {
         return Math.signum(input)*Math.pow(Math.abs(input), exponent);
     }
 
+    /**
+     * Clips a number between two values
+     */
+    public static double clip(double num, double min, double max) {
+        return Math.min(Math.max(num, min), max);
+    }
+
 }

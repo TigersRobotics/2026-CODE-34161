@@ -7,6 +7,13 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * This is used for having telemetry show for a certain amount of time. It is static so taht it is accessible anwhere
+ * @author Jason Xia
+ * @version 1.0.0
+ */
+
 public class TimedTelemetry {
     public static ArrayList<String> getTelemetryListAsStrings(){
         /// for debugging only. Returns a list of displaying telemetry and how much time left
@@ -67,9 +74,6 @@ public class TimedTelemetry {
     public static void addData(String caption, String format, int timeMillis, Object... args){
         addData(caption, format, timeMillis, false, args);
     }
-    public static void addData (String caption, String format, Object... args){
-        addData(caption, format, 1, false, args);
-    }
 
 }
 
@@ -80,7 +84,7 @@ class TelemetryLine {
     String caption;
     String format;
     Object value = null;
-    ArrayList<Object> args;
+    Object[] args;
     enum LineType{
         STRING,
         CAPTIONED_OBJECT,
@@ -105,7 +109,7 @@ class TelemetryLine {
         this.timeMillis = timeMillis;
         this.caption = caption;
         this.format = format;
-        this.args = new ArrayList<>(List.of(args));
+        this.args = args;
         type = LineType.FORMATED_OBJECT_LIST;
     }
 

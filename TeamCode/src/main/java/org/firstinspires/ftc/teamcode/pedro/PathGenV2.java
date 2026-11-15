@@ -12,12 +12,11 @@ import com.skeletonarmy.marrow.weaver.WeaverBuilder;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.Zone;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
-import org.firstinspires.ftc.teamcode.sensors.StudicaOdometry;
+import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
@@ -25,7 +24,7 @@ import java.util.ArrayList;
 
 public class PathGenV2 {
     /// because I didn't like the original one
-    private static StudicaOdometry odometry;
+    private static GoBildaOdometry odometry;
     private static Follower follower;
     private static WeaverBuilder notPathYet;
     private static boolean on = true;
@@ -91,12 +90,12 @@ public class PathGenV2 {
         return new Pose(odometry.getX(DistanceUnit.INCH), odometry.getY(DistanceUnit.INCH), odometry.getHeading(AngleUnit.DEGREES));
     }
 
-    public static void init(StudicaOdometry odometry, Telemetry telemetry, Follower follower) {
+    public static void init(GoBildaOdometry odometry, Follower follower) {
         PathGenV2.follower = follower;
         PathGenV2.odometry = odometry;
-        Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED / 2.54)
-                .robotWidth(RobotSpecs.LENGTH_X / 2.54)
-                .robotHeight(RobotSpecs.HEIGHT / 2.54).clearance(RobotSpecs.CLEARANCE));
+        Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
+                .robotWidth(RobotSpecs.LENGTH_X_M / 2.54)
+                .robotHeight(RobotSpecs.HEIGHT / 2.54).clearance(RobotSpecs.CLEARANCE_IN));
         TimedTelemetry.addLine("PathGenV2 initialized!!! YAY!", 1000);
         timeUntilUpdate = 0;
     }
@@ -183,6 +182,9 @@ public class PathGenV2 {
                 PathGenV2.on = true;
                 TimedTelemetry.addLine("Waking up!", 500);
             } else {
+                currentState=State.IDLE;
+                destination = null;
+                scoreElements.clear();
                 PathGenV2.on = false;
                 TimedTelemetry.addLine("Sleeeepping...", 500);
             }
@@ -209,9 +211,9 @@ public class PathGenV2 {
         }
 
         if (INToTile(nearestSpot.x()) < 3){
-            targetHeading = -90;
+            targetHeading = 0;
         } else {
-            targetHeading = 90;
+            targetHeading = 180;
         }
 
         setDestination(new Pose(nearestSpot.x(),nearestSpot.y(), targetHeading ));
@@ -230,7 +232,4 @@ public class PathGenV2 {
     public static State getCurrentState(){
         return currentState;
     }
-
-
-
 }

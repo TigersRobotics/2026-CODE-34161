@@ -21,7 +21,7 @@ public class OdometryTest extends OpMode {
         Timer.init();
         TimedTelemetry.init(telemetry);
         odometry = new GoBildaOdometry(hardwareMap, HardwareNames.ODOMETRY_NAME);
-        MecanumDriveTrainController.init(hardwareMap,telemetry, true);
+        MecanumDriveTrainController.init(hardwareMap, true);
     }
 
     @Override

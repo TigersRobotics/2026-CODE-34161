@@ -22,9 +22,17 @@ public class TelemetryTesting extends OpMode {
     @Override
     public void loop() {
         telemetry.addData("Stuff: ", TimedTelemetry.getTelemetryListAsStrings());
+        TimedTelemetry.addData("Caption", "%.2f", 1, 10.1231 , 10.932);
         TimedTelemetry.update();
         Timer.update();
         telemetry.update();
 
     }
+    public int test(int ao) {
+        return ao^2;
+    }
+
+    public void test(){{
+        // this is a test to show another team about merge conflict
+    }}
 }

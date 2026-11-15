@@ -44,6 +44,11 @@ public class PollenTurretController {
         } else stop();
     }
 
+    public static void init(HardwareMap hardwareMap) {
+        init(hardwareMap, true);
+    }
+
+
     public static void update() {
         if(isInitialized) {
             flywheel.setVelocity(targetVel);

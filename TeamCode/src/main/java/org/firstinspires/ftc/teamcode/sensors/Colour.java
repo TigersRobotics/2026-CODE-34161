@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
+import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 public class Colour {
 
@@ -25,7 +26,7 @@ public class Colour {
         colourSensor.setGain(8);
     }
 
-    public DetectedColour getDetectedColour(Telemetry telemetry){
+    public DetectedColour getDetectedColour(){
         NormalizedRGBA colours = colourSensor.getNormalizedColors(); //Returns 4 values: red, green, blue, alpha(Brightness)
 
         float normRed, normGreen, normBlue;
@@ -33,9 +34,9 @@ public class Colour {
         normGreen = colours.green / colours.alpha;
         normBlue = colours.blue / colours.alpha;
 
-        telemetry.addData("red",normRed);
-        telemetry.addData("green",normGreen);
-        telemetry.addData("blue",normBlue);
+        TimedTelemetry.addData("red",normRed);
+        TimedTelemetry.addData("green",normGreen);
+        TimedTelemetry.addData("blue",normBlue);
 
         //add if statements for any other colour added
         /*

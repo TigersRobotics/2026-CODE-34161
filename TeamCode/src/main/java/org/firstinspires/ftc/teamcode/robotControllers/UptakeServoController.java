@@ -12,20 +12,21 @@ public class UptakeServoController {
     private static boolean isInitialized = false;
     private static Servo upTakeServo;
     private static boolean uptakeBusy = false;
-    private static Telemetry telemetry;
-    public static void init(HardwareMap hardwareMap, Telemetry telemetry, boolean actuallyInitialize){
+    public static void init(HardwareMap hardwareMap, boolean actuallyInitialize){
         if(actuallyInitialize) {
             upTakeServo = hardwareMap.get(Servo.class, HardwareNames.UPTAKE_SERVO_NAME);
-            UptakeServoController.telemetry = telemetry;
-            telemetry.addLine("Uptake Controller Initialized");
+            TimedTelemetry.addLine("Uptake Controller Initialized");
             isInitialized = true;
         } else stop();
+    }
+    public static void init(HardwareMap hardwareMap) {
+        init(hardwareMap, true);
     }
 
     public static boolean shoot(){
         if(isInitialized) {
             if (uptakeBusy) {
-                telemetry.addLine("Uptake Busy. If this shows while it is not busy, adjust constants");
+                TimedTelemetry.addLine("Uptake Busy. If this shows while it is not busy, adjust constants");
                 return false;
             }
 
@@ -41,14 +42,14 @@ public class UptakeServoController {
                 uptakeBusy = false;
             }
             if (upTakeServo.getPosition() == RobotSpecs.UPTAKE_SERVO_UP_ANGLE) {
-                telemetry.addLine("Uptake Moving down");
+                TimedTelemetry.addLine("Uptake Moving down");
                 upTakeServo.setPosition(RobotSpecs.UPTAKE_SERVO_DEFAULT_ANGLE);
             }
 
             if (uptakeBusy) {
-                telemetry.addLine("Uptake busy");
+                TimedTelemetry.addLine("Uptake busy");
             } else {
-                telemetry.addLine("Uptake free");
+                TimedTelemetry.addLine("Uptake free");
             }
         } else TimedTelemetry.addLine("UptakeController being updated but not initialized!");
     }

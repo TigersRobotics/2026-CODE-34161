@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 public class Spindexer {
     private static boolean isInitialized = false;
     public static Colour.DetectedColour[] balls = {Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY};
-    private static Telemetry telemetry;
 
     /**
      * Restraints: number from 0 to 3
@@ -34,19 +33,20 @@ public class Spindexer {
     private static  double moveTime = 0;
 
 
-    public static void init(HardwareMap hardwareMap, Telemetry telemetry, boolean actuallyInitialize) {
+    public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
             servo = hardwareMap.get(Servo.class, SPINDEXER_SERVO_NAME);
             colourSensor = new Colour();
             colourSensor.init(hardwareMap);
             servo.setDirection(Servo.Direction.FORWARD);
-            Spindexer.telemetry = telemetry;
             moveTimer = new ElapsedTime();
             isInitialized = true;
         } else stop();
     }
 
-
+    public static void init(HardwareMap hardwareMap) {
+        init(hardwareMap, true);
+    }
 
 
     /**
@@ -85,14 +85,14 @@ public class Spindexer {
         if(isInitialized) {
             //Only read the colour sens once the slot has moved past the sensor
             if (moveTimer.seconds() > moveTime) {
-                Colour.DetectedColour detectedColour = colourSensor.getDetectedColour(telemetry);
+                Colour.DetectedColour detectedColour = colourSensor.getDetectedColour();
                 if (balls[pos] == Colour.DetectedColour.EMPTY && detectedColour != Colour.DetectedColour.EMPTY)
                     emptySlots--;
                 if (balls[pos] != Colour.DetectedColour.EMPTY && detectedColour == Colour.DetectedColour.EMPTY)
                     emptySlots++;
                 balls[pos] = detectedColour;
             }
-        } else telemetry.addLine("Attempted to update spindexer but its not initialized! >:(");
+        } else TimedTelemetry.addLine("Attempted to update spindexer but its not initialized! >:(");
     }
 
     public static boolean isFull() { return emptySlots == 0; }
@@ -112,7 +112,6 @@ public class Spindexer {
     public static void stop() {
         isInitialized = false;
         balls = new Colour.DetectedColour[]{Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY};
-        telemetry = null;
         servo = null;
         moveTimer = null;
         colourSensor = null;
