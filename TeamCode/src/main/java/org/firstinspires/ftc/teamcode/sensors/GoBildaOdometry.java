@@ -5,14 +5,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
+import org.firstinspires.ftc.teamcode.pedro.PathGenV3;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 public class GoBildaOdometry {
 
     private final GoBildaPinpointDriver odo;
     public GoBildaOdometry(HardwareMap hardwareMap, String deviceName) {
-        if (hardwareMap.get(GoBildaPinpointDriver.class, deviceName)==null) TimedTelemetry.addLine("Test", 1000);
+        if (hardwareMap.get(GoBildaPinpointDriver.class, deviceName)==null) TimedTelemetry.addLine("Test Failed", 1000);
         else TimedTelemetry.addLine("Test Passed",1000);
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, deviceName);
@@ -24,6 +26,7 @@ public class GoBildaOdometry {
         );
 
         odo.resetPosAndIMU();
+        setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), AngleUnit.DEGREES, 0));
     }
     public void update() {
         odo.update();

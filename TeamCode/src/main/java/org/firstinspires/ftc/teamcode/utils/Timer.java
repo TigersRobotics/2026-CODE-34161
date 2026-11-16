@@ -10,15 +10,24 @@ public class Timer {
     private final static ElapsedTime timer = new ElapsedTime();
     private static double PTime = 0;
     private static double DTime = 0;
+    private static boolean firstLoop = false;
     public static double getTime(TimeUnit unit){
         return timer.time(unit);
     }
 
     public static void init(){
         timer.reset();
+        timedTriggers.clear();
+        PTime = 0;
+        DTime = 0;
+        firstLoop = true;
     }
-    public static void update(){
 
+    public static void update(){
+        if (firstLoop){
+            timer.reset();
+            firstLoop = false;
+        }
         DTime = timer.time(TimeUnit.MILLISECONDS) - PTime;
         PTime = timer.time(TimeUnit.MILLISECONDS);
         TimedTelemetry.addData("Time: ", timer.time(TimeUnit.MILLISECONDS));

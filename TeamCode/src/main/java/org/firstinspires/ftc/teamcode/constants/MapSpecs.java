@@ -28,8 +28,14 @@ public class MapSpecs {
             new Point(tileToIN(5.5), tileToIN(2.5)),
             new Point(tileToIN(5.5), tileToIN(0.5)));
 
-    public static final ArrayList<Zone> SHOOTING_POSITIONS = new ArrayList<>(
+    public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(1), tileToIN(2.5), -90 );
+    public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5), tileToIN(2.5), 90);
+
+    public static final ArrayList<Zone> SHOOTING_ZONES = new ArrayList<>(
             List.of(LEFT_SHOOTING, RIGHT_SHOOTING));
+    public static final ArrayList<Pose> SHOOT_POSITIONS = new ArrayList<>(
+            List.of()
+    );
     public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.5), 90);
     public static final Pose GARDEN = new Pose(tileToIN(5.5), tileToIN(0.5));
 

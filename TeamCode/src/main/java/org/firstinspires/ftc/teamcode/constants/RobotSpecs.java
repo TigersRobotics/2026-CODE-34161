@@ -19,17 +19,12 @@ public class RobotSpecs {
     public static final double BALL_SPEED = 10;
 
     public static final double LENGTH_X_M = 0.4572;
-    public static final double LENGTH_Y_M = 0.3302;
-
-    public static final double HEIGHT = 0.4572;
+    public static final double HEIGHT_M = 0.4572;
 
     // until further notice, intake width should be smaller than it actually is,
     // as for now, the only program using intake width recommends leaving some same space
     public static final double INTAKE_WIDTH_SHORTENED_CM = 33;
-    public static final double CLEARANCE_IN = 2;
-
-    public static final double DIAGONAL = Math.sqrt(Math.pow(LENGTH_X_M, 2) + Math.pow(LENGTH_Y_M, 2));
-
+    public static final double CLEARANCE_IN = 0.5;
     public static final double FLYWHEEL_RAIL_DEGREES_PER_MM = 360;
 
     public static final double SPINDEXER_RPM = 60;
