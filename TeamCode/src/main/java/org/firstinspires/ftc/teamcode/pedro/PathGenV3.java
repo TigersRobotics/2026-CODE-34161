@@ -8,15 +8,19 @@ import com.skeletonarmy.marrow.weaver.PathResult;
 import com.skeletonarmy.marrow.weaver.PedroPathingConverter;
 import com.skeletonarmy.marrow.weaver.Weaver;
 import com.skeletonarmy.marrow.weaver.WeaverBuilder;
+import com.skeletonarmy.marrow.zones.PolygonZone;
 import com.skeletonarmy.marrow.zones.Zone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
+
+import java.util.ArrayList;
 
 public class PathGenV3 {
     // because I don't like the first two. Also, we are likely not going to get a Limelight camera,
@@ -24,8 +28,11 @@ public class PathGenV3 {
 
     private static GoBildaOdometry odometry;
     private static Follower follower;
-    private static WeaverBuilder notPathYet;
     private static boolean on;
+    public static void setOn (boolean on){
+        PathGenV3.on = on;
+    }
+
     private static boolean autonMode;
     private static double timeUntilUpdate;
 
@@ -51,7 +58,9 @@ public class PathGenV3 {
 
     public static Pose destination;
 
-    public static void init(GoBildaOdometry odometry, Follower follower) {
+    public static void init(GoBildaOdometry odometry, Follower follower, boolean autonMode) {
+        PathGenV3.autonMode = autonMode;
+        currentState = State.IDLE;
         PathGenV3.follower = follower;
         PathGenV3.odometry = odometry;
 
@@ -92,14 +101,14 @@ public class PathGenV3 {
     }
 
     public static void checkSomeStates() {
-        switch (currentState){
+        switch (currentState) {
             case MOVING_TO_SHOOT:
-                if (follower.holding()){
+                if (follower.holding()) {
                     currentState = State.SHOOTING;
                 }
                 break;
             case PARKING:
-                if (follower.holding()){
+                if (follower.holding()) {
                     currentState = State.IDLE;
                 }
                 break;
@@ -111,15 +120,10 @@ public class PathGenV3 {
     }
 
     public static void updateMovement() {
-        notPathYet = Weaver.builder()
-                .start(PedroPathingConverter.toPoint(getCurrentPose()));
-        if (destination != null && currentState != State.MOVING_TO_SHOOT)
-            notPathYet.end(PedroPathingConverter.toPoint(destination));
-        else if (destination != null)
-            notPathYet.end(PedroPathingConverter.toPoint(destination), HeadingPolicy.LOCKED);
+        WeaverBuilder notPathYet = Weaver.builder();
 
         for (Zone obstacle : MapSpecs.OBSTACLES) notPathYet.addObstacle(obstacle);
-        if (autonMode) notPathYet.addObstacle(MapSpecs.OTHER_SIDE);
+        if (autonMode) notPathYet.addObstacle(MapSpecs.OTHER_SIDE).addObstacle(Competition.DISABLED_SIDE);
 
         PathResult almostPath = notPathYet.build();
         try {
@@ -130,7 +134,9 @@ public class PathGenV3 {
     }
 
     public static Pose getCurrentPose() {
-        return new Pose(odometry.getX(DistanceUnit.INCH), odometry.getY(DistanceUnit.INCH), odometry.getHeading(AngleUnit.DEGREES));
+        return new Pose(odometry.getX(DistanceUnit.INCH),
+                odometry.getY(DistanceUnit.INCH),
+                odometry.getHeading(AngleUnit.DEGREES));
     }
 
     public enum Hive {
@@ -141,19 +147,33 @@ public class PathGenV3 {
 
     public static void goShoot(Hive h) {
         TimedTelemetry.addData("goShoot received ^_^ Hive: ", h, 3000);
-        currentState = State.MOVING_TO_SHOOT;
         switch (h) {
             case LEFT_HIVE:
                 destination = MapSpecs.LEFT_SHOOT_POS;
+                if (autonMode&&Competition.DISABLED_SIDE.contains(PedroPathingConverter.toPoint(destination))) {
+                    destination = null;
+                }
                 break;
             case RIGHT_HIVE:
                 destination = MapSpecs.RIGHT_SHOOT_POS;
+                if (autonMode&&Competition.DISABLED_SIDE.contains(PedroPathingConverter.toPoint(destination))) {
+                    destination = null;
+                }
                 break;
             case NEAREST:
                 if (getCurrentPose().distance(MapSpecs.LEFT_SHOOT_POS) > getCurrentPose().distance(MapSpecs.RIGHT_SHOOT_POS)) {
                     destination = MapSpecs.RIGHT_SHOOT_POS;
                 } else destination = MapSpecs.LEFT_SHOOT_POS;
+                break;
         }
+        if (destination == null){
+            TimedTelemetry.addLine("Invalid shooting position given. ", 3000);
+            return;
+        }
+        currentState = State.MOVING_TO_SHOOT;
+
+
+
         TimedTelemetry.addData("New destination: (￣y▽,￣)╭ ", destination, 3000);
     }
 
@@ -163,7 +183,8 @@ public class PathGenV3 {
 
     //    public static void goCollect(){
 //        currentState = State.COLLECTING;
-//    }
+//    } Unused for now
+
     public static void goPark() {
         destination = MapSpecs.PARKING;
         if (currentState != State.IDLE && currentState != State.PARKING) {
