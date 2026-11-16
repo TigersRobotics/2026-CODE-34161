@@ -16,7 +16,7 @@ public class SingleIntakeController {
     public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
             intakeMotor = hardwareMap.get(DcMotor.class, HardwareNames.INTAKE_MOTOR_NAME);
-            intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             isInitialized = true;
         } else {
             stop();

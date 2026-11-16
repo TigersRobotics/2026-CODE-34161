@@ -16,7 +16,7 @@ public class UptakeController {
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         if(actuallyEnabled) {
             uptakeMotor = hardwareMap.get(DcMotor.class, HardwareNames.UPTAKE_MOTOR_NAME);
-            uptakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            uptakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             isInitialized = true;
         } else stop();
     }

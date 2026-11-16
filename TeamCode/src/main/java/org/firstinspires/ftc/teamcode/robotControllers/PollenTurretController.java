@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
+import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
 
 public class PollenTurretController {
@@ -24,14 +25,16 @@ public class PollenTurretController {
 
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         if(actuallyEnabled) {
-            flywheel = hardwareMap.get(DcMotorEx.class, FLYWHEEL_NAME);
-            flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            flywheel = (DcMotorEx) hardwareMap.get(DcMotor.class, FLYWHEEL_NAME);
+            flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             flywheel.setDirection(DcMotor.Direction.FORWARD);
 
             PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
             flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-            rotation = hardwareMap.get(DcMotorEx.class, TURRET_YAW_MOTOR_NAME);
+
+            rotation = (DcMotorEx) hardwareMap.get(DcMotor.class, TURRET_YAW_MOTOR_NAME);
+            rotation.setTargetPosition(0);
             rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rotation.setMode(DcMotor.RunMode.RUN_TO_POSITION); ///Clockwise should be positive encoder position
             rotation.setDirection(DcMotor.Direction.FORWARD);
@@ -52,21 +55,16 @@ public class PollenTurretController {
     public static void update() {
         if(isInitialized) {
             flywheel.setVelocity(targetVel);
-
-            if (currentVel == highVelocity) {
-                targetVel = lowVelocity;
-            } else {
-                currentVel = highVelocity;
-            }
-
+            TimedTelemetry.addData("Target Position: ", yaw);
             rotation.setTargetPosition((int) Math.round(yaw * TICKS_PER_REV / 360));
+            TimedTelemetry.addData("Current Flywheel Speed: ", flywheel.getVelocity());
         } else TimedTelemetry.addLine("Pollen Turret Updating but not Initialized! >:(");
     }
 
 
     ///Sets the angle of the turret in degrees
     public static void setYaw(double yaw) {
-        PollenTurretController.yaw = Math.max(MIN_YAW, Math.min(MAX_YAW, yaw));
+        PollenTurretController.yaw = UtilMethods.clip(yaw, MIN_YAW, MAX_YAW);
     }
 
     public static void setTargetVel(double targetVel) {
