@@ -35,4 +35,7 @@ public class RobotSpecs {
     public static final double MAX_YAW = 180;
     public static final double MIN_YAW = -180;
     public static final double HOOD_HEIGHT = 10; ///Inches
+    public static final double SHOT_EFFICIENCY = 0.5;
+    public static final double FLYWHEEL_RADIUS_M = 0.009;
+    public static final double FLYWHEEL_TICKS_PER_REV = 28;
 }

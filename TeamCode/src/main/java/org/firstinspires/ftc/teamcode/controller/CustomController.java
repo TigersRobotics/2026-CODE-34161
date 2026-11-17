@@ -17,6 +17,8 @@ public class CustomController {
     ///Technician Bindings
     private Binding.Axis overrideTurretLeft;
     private Binding.Axis overrideTurretRight;
+    private Binding.Axis overridePark;
+    private Binding.Button toggleAutoPark;
 
 
     /**

@@ -121,40 +121,59 @@ public class TeleOpMain extends OpMode {
         calculatedYaw += heading;
 
 
-        while(calculatedYaw > 1.5*Math.PI) calculatedYaw -= 2 * Math.PI;
-        while(calculatedYaw < -1.5*Math.PI) calculatedYaw += 2* Math.PI;
+        while(calculatedYaw > Math.PI) calculatedYaw -= 2 * Math.PI;
+        while(calculatedYaw < -Math.PI) calculatedYaw += 2* Math.PI;
 
         return calculatedYaw;
     }
 
 
     /**
-     * Use inches for this
+     * Use input inches
      */
     public double calculateHoodAngle(int hiveIndex, double posX, double posY, double flywheelTicksPerSecond) {
+        final double G = 9.81;
+
         double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
 
-        double dx = hiveX - posX;
-        double dy = hiveY - posY;
-        double x = Math.hypot(dx, dy);
+        // horizontal distance to hive, inches -> meters
+        double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
 
+        // target height relative to where the ball leaves the shooter (placeholders)
         double y = MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT;
 
-        double angle = angleCalc((byte) -1, x, y);
+        // flywheel ticks/sec -> ball exit speed in m/s (tune the efficiency!)
+        double wheelRevsPerSec = flywheelTicksPerSecond / RobotSpecs.FLYWHEEL_TICKS_PER_REV;
+        double surfaceSpeed = wheelRevsPerSec * 2 * Math.PI * RobotSpecs.FLYWHEEL_RADIUS_M;
+        double v = surfaceSpeed * RobotSpecs.SHOT_EFFICIENCY;
 
-        if(angle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
-            angle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(angle)) {
+        if (v <= 0 || x <= 0) return Double.NaN;
 
-            double nAngle = angleCalc((byte) 1, x, y);
-            if (nAngle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
-                    nAngle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)) {
-                TimedTelemetry.addLine("No valid angle found: " + angle + " " + nAngle);
-                return Double.NaN;
-            }
-            return nAngle;
+        // Solve y = x*u - k*(1+u^2) * ... for u = tan(angle):
+        // k*u^2 - x*u + (k + y) = 0, where k = g*x^2 / (2*v^2)
+        double k = G * x * x / (2 * v * v);
+        double disc = x * x - 4 * k * (k + y);
+
+        if (disc < 0) {
+            TimedTelemetry.addLine("Flywheel too slow to reach target");
+            return Double.NaN;
         }
-        return angle;
+
+        double sqrtDisc = Math.sqrt(disc);
+        double lowAngle  = Math.toDegrees(Math.atan((x - sqrtDisc) / (2 * k))); // flatter shot
+        double highAngle = Math.toDegrees(Math.atan((x + sqrtDisc) / (2 * k))); // lobbed shot
+
+        // prefer the flatter shot, fall back to the lob
+        if (lowAngle < RobotSpecs.MAX_TURRET_ANGLE_UP && lowAngle > RobotSpecs.MAX_TURRET_ANGLE_DOWN) {
+            return lowAngle;
+        }
+        if (highAngle < RobotSpecs.MAX_TURRET_ANGLE_UP && highAngle > RobotSpecs.MAX_TURRET_ANGLE_DOWN) {
+            return highAngle;
+        }
+
+        TimedTelemetry.addLine("No valid angle found: " + lowAngle + " " + highAngle);
+        return Double.NaN;
     }
 
     /**
