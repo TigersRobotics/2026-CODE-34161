@@ -28,9 +28,11 @@ public class Timer {
             timer.reset();
             firstLoop = false;
         }
-        DTime = timer.time(TimeUnit.MILLISECONDS) - PTime;
-        PTime = timer.time(TimeUnit.MILLISECONDS);
-        TimedTelemetry.addData("Time: ", timer.time(TimeUnit.MILLISECONDS));
+        // Read the clock once, and keep the fraction of a millisecond so DTime shows the real loop time
+        double now = timer.milliseconds();
+        DTime = now - PTime;
+        PTime = now;
+        TimedTelemetry.addData("Time: ", (long) now);
         TimedTelemetry.addData("DTime: ", DTime());
     }
     public static double DTime(){
