@@ -208,6 +208,16 @@ public class ShotCalculator {
         try {
             writer.write("EFFICIENCY=" + EFFICIENCY);
             writer.newLine();
+            writer.write("DRAG_PER_M=" + DRAG_PER_M);
+            writer.newLine();
+            writer.write("TIME_WEIGHT=" + TIME_WEIGHT);
+            writer.newLine();
+            writer.write("FLIGHT_WEIGHT=" + FLIGHT_WEIGHT);
+            writer.newLine();
+            writer.write("TOLERANCE_WEIGHT=" + TOLERANCE_WEIGHT);
+            writer.newLine();
+            writer.write("SPEED_BIAS=" + SPEED_BIAS);
+            writer.newLine();
             writer.write("HOOD_SERVO_AT_MIN=" + HOOD_SERVO_AT_MIN);
             writer.newLine();
             writer.write("HOOD_SERVO_AT_MAX=" + HOOD_SERVO_AT_MAX);
@@ -219,8 +229,21 @@ public class ShotCalculator {
     }
 
     private static void applyTuning(String key, double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            return;
+        }
         if ("EFFICIENCY".equals(key) && value > 0 && value < 1) {
             EFFICIENCY = value;
+        } else if ("DRAG_PER_M".equals(key) && value >= 0 && value <= 0.1) {
+            DRAG_PER_M = value;
+        } else if ("TIME_WEIGHT".equals(key) && value >= 0 && value <= 5) {
+            TIME_WEIGHT = value;
+        } else if ("FLIGHT_WEIGHT".equals(key) && value >= 0 && value <= 5) {
+            FLIGHT_WEIGHT = value;
+        } else if ("TOLERANCE_WEIGHT".equals(key) && value >= 0 && value <= 5) {
+            TOLERANCE_WEIGHT = value;
+        } else if ("SPEED_BIAS".equals(key) && value >= -2 && value <= 2) {
+            SPEED_BIAS = value;
         } else if ("HOOD_SERVO_AT_MIN".equals(key)) {
             HOOD_SERVO_AT_MIN = value;
         } else if ("HOOD_SERVO_AT_MAX".equals(key)) {
