@@ -33,8 +33,17 @@ public class TeleOpMain extends OpMode {
     final boolean ENABLE_UPTAKE_CONTROLLER = true;
     final boolean ENABLE_INTAKE_CONTROLLER = true;
     final boolean ENABLE_WEBCAM = false;
+    /// Degrees the turret moves for one tap of dpad left/right
+    static final double YAW_NUDGE_DEG = 1.0;
+    /// How long dpad left/right has to be held before the turret starts sweeping
+    static final double YAW_HOLD_DELAY_MS = 250;
+    /// Sweep speed while dpad left/right is held (0.03 = 30 degrees per second)
+    static final double YAW_HOLD_DEG_PER_MS = 0.03;
+
     boolean enableIntake = false;
     double yaw = 0;
+    double dpadRightHeldMs = 0;
+    double dpadLeftHeldMs = 0;
     boolean toggleFlywheel = false;
     double targetVel = 1200;
 
@@ -96,9 +105,20 @@ public class TeleOpMain extends OpMode {
         PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
         PollenTurretController.setHoodAngle(calculatedHoodAngle);
 
-        if(gamepad1.dpad_right) yaw += Timer.DTime()*0.1;
-        if(gamepad1.dpad_left) yaw -= Timer.DTime()*0.1;
-        double realYaw = calculatedYawDeg - yaw;
+        // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
+        // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
+        if(gamepad1.dpadRightWasPressed()) yaw += YAW_NUDGE_DEG;
+        if(gamepad1.dpadLeftWasPressed()) yaw -= YAW_NUDGE_DEG;
+
+        dpadRightHeldMs = gamepad1.dpad_right ? dpadRightHeldMs + Timer.DTime() : 0;
+        dpadLeftHeldMs = gamepad1.dpad_left ? dpadLeftHeldMs + Timer.DTime() : 0;
+        if(dpadRightHeldMs > YAW_HOLD_DELAY_MS) yaw += Timer.DTime() * YAW_HOLD_DEG_PER_MS;
+        if(dpadLeftHeldMs > YAW_HOLD_DELAY_MS) yaw -= Timer.DTime() * YAW_HOLD_DEG_PER_MS;
+
+        // Wrapping the offset stops it winding up past a full turn, and wrapping the final angle
+        // lets the turret carry on round instead of sticking at +/-180
+        yaw = wrapDegrees(yaw);
+        double realYaw = wrapDegrees(calculatedYawDeg - yaw);
 
         PollenTurretController.setYaw(realYaw);
 
@@ -140,6 +160,14 @@ public class TeleOpMain extends OpMode {
         return calculatedYaw;
     }
 
+
+    /// Brings any angle in degrees into the range -180 to 180
+    private static double wrapDegrees(double degrees) {
+        degrees %= 360;
+        if(degrees > 180) degrees -= 360;
+        if(degrees < -180) degrees += 360;
+        return degrees;
+    }
 
     /**
      * Use input inches
