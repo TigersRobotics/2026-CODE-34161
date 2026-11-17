@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
+import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
@@ -66,6 +67,7 @@ public class TeleOpMain extends OpMode {
         double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
         double calculatedYawDeg = Math.toDegrees(calculatedYaw);
 
+        double calculatedHoodAngle = calculateHoodAngle(hiveIndex, posx, posY, PollenTurretController.getVelocity());
 
         if(gamepad1.leftBumperWasPressed()) enableIntake = !enableIntake;
         double intakePower = enableIntake ? 1 : 0;
@@ -79,6 +81,7 @@ public class TeleOpMain extends OpMode {
         TimedTelemetry.addData("Target Velocity: ", targetVel);
 
         PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
+        PollenTurretController.setHoodAngle(calculatedHoodAngle);
 
         if(gamepad1.dpad_right) yaw += Timer.DTime()*0.1;
         if(gamepad1.dpad_left) yaw -= Timer.DTime()*0.1;
@@ -122,6 +125,62 @@ public class TeleOpMain extends OpMode {
         while(calculatedYaw < -1.5*Math.PI) calculatedYaw += 2* Math.PI;
 
         return calculatedYaw;
+    }
+
+
+    /**
+     * Use inches for this
+     */
+    public double calculateHoodAngle(int hiveIndex, double posX, double posY, double flywheelTicksPerSecond) {
+        double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
+        double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
+
+        double dx = hiveX - posX;
+        double dy = hiveY - posY;
+        double x = Math.hypot(dx, dy);
+
+        double y = MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT;
+
+        double angle = angleCalc((byte) -1, x, y);
+
+        if(angle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
+            angle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(angle)) {
+
+            double nAngle = angleCalc((byte) 1, x, y);
+            if (nAngle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
+                    nAngle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)) {
+                TimedTelemetry.addLine("No valid angle found: " + angle + " " + nAngle);
+                return Double.NaN;
+            }
+            return nAngle;
+        }
+        return angle;
+    }
+
+    /**
+     * Returns angle in degrees
+     * @param add
+     * @param x
+     * @param y
+     * @return
+     */
+    private static double angleCalc(byte add, double x, double y) {
+        double g = 9.800665;
+
+        double v = RobotSpecs.BALL_SPEED;
+        double v2 = Math.pow(v, 2);
+        double v4 = Math.pow(v, 4);
+
+        double x2 = Math.pow(x, 2);
+        double discriminant = v4 - g * (g * x2 + 2 * y * v2);
+        if (discriminant < 0) {
+            return Double.NaN; // Target is physically out of reach
+        }
+
+        double root = add * Math.sqrt(discriminant);
+        double arg = (v2 + root) / (g * x);
+
+        return Math.atan(arg)/Math.PI*180;
     }
 
     @Override

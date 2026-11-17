@@ -58,4 +58,6 @@ public class MapSpecs {
                     new Point(tileToIN(3.8), tileToIN(2.5))
             };
 
+
+    public static final double HIVE_HEIGHT = 53.5; ///Inches
 }

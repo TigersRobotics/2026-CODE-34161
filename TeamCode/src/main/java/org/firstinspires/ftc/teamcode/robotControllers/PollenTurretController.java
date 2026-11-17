@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
@@ -22,6 +23,8 @@ public class PollenTurretController {
     private static DcMotorEx rotation;
     private static double P, F, targetVel = 0, lowVelocity = 0, highVelocity = 1500;
     private static double yaw = 0; //This is in degrees
+
+    private static Servo hoodServo;
 
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         if(actuallyEnabled) {
@@ -95,5 +98,9 @@ public class PollenTurretController {
         rotation = null;
         yaw = 0;
         isInitialized = false;
+    }
+
+    public static void setHoodAngle(double degrees) {
+        hoodServo.setPosition(degrees/270);
     }
 }

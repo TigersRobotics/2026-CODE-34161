@@ -9,8 +9,8 @@ public class RobotSpecs {
     // temp values
 
     public static final double MS_PER_PATH_UPDATE = 500;
-    public static final double MAX_TURRET_ANGLE_UP = 75;
-    public static final double MAX_TURRET_ANGLE_DOWN = 15;
+    public static final double MAX_TURRET_ANGLE_UP = 25;
+    public static final double MAX_TURRET_ANGLE_DOWN = 5;
     public static final double OFFSETS_OF_ODOMETRY_PODS_IN_X = -3.3948507834607224;
     public static final double OFFSETS_OF_ODOMETRY_PODS_IN_Y = -5.696962611881767;
     public static final double UPTAKE_SERVO_UP_ANGLE=0.5;
@@ -34,4 +34,5 @@ public class RobotSpecs {
     public static final double TICKS_PER_REV = 700; //Ticks per revolution of motor
     public static final double MAX_YAW = 180;
     public static final double MIN_YAW = -180;
+    public static final double HOOD_HEIGHT = 10; ///Inches
 }
