@@ -15,9 +15,12 @@ import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
 import org.firstinspires.ftc.teamcode.robotControllers.UptakeController;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
+import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
+
+import java.io.File;
 
 @TeleOp
 public class TeleOpMain extends OpMode {
@@ -40,6 +43,7 @@ public class TeleOpMain extends OpMode {
         TimedTelemetry.init(telemetry);
 
         MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
+        ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
         UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
