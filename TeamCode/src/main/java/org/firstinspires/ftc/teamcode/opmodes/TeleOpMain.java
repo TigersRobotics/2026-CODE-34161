@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import static org.firstinspires.ftc.teamcode.constants.HardwareNames.ODOMETRY_NAME;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -23,6 +24,8 @@ import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
+import java.util.List;
+
 @TeleOp
 public class TeleOpMain extends OpMode {
     final boolean ENABLE_TURRET_CONTROLLER = true;
@@ -37,11 +40,17 @@ public class TeleOpMain extends OpMode {
 
     GoBildaOdometry odometry;
     int hiveIndex = 1;
+    List<LynxModule> hubs;
 
     @Override
     public void init() {
         Timer.init();
         TimedTelemetry.init(telemetry);
+
+        // Each hub now answers every encoder/velocity read in a loop from one bulk read,
+        // instead of one hub round trip per read. The cache is cleared at the top of loop().
+        hubs = hardwareMap.getAll(LynxModule.class);
+        for(LynxModule hub : hubs) hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
         MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
@@ -58,11 +67,15 @@ public class TeleOpMain extends OpMode {
 
     @Override
     public void loop() {
+        for(LynxModule hub : hubs) hub.clearBulkCache();
+
         odometry.update();
 
-        double posx = odometry.getX(DistanceUnit.INCH);
-        double posY = odometry.getY(DistanceUnit.INCH);
-        double heading = odometry.getHeading(AngleUnit.RADIANS);
+        // One pose object per loop instead of a new one for each of x, y and heading
+        Pose2D pose = odometry.getPose();
+        double posx = pose.getX(DistanceUnit.INCH);
+        double posY = pose.getY(DistanceUnit.INCH);
+        double heading = pose.getHeading(AngleUnit.RADIANS);
 
         double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
         double calculatedYawDeg = Math.toDegrees(calculatedYaw);
@@ -140,8 +153,8 @@ public class TeleOpMain extends OpMode {
         // horizontal distance to hive, inches -> meters
         double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
 
-        // target height relative to where the ball leaves the shooter (placeholders)
-        double y = MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT;
+        // target height relative to where the ball leaves the shooter (placeholders), inches -> meters
+        double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;
 
         // flywheel ticks/sec -> ball exit speed in m/s (tune the efficiency!)
         double wheelRevsPerSec = flywheelTicksPerSecond / RobotSpecs.FLYWHEEL_TICKS_PER_REV;

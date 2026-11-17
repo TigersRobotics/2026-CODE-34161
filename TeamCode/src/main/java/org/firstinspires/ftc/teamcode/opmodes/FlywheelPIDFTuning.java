@@ -22,6 +22,11 @@ public class FlywheelPIDFTuning extends OpMode {
     private double P = 0;
     private double F = 0;
 
+    // What the hub was last told. NaN means the target velocity has not been sent yet.
+    private double sentP = P;
+    private double sentF = F;
+    private double sentTargetVelocity = Double.NaN;
+
     private final double[] stepSizes = {10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
     private int stepIndex = 1;
 
@@ -60,10 +65,18 @@ public class FlywheelPIDFTuning extends OpMode {
         if (gamepad1.leftBumperWasPressed()) P += stepSizes[stepIndex];
         if (gamepad1.rightBumperWasPressed()) P -= stepSizes[stepIndex];
 
-        // Apply coefficients and target velocity
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
-                new PIDFCoefficients(P, 0, 0, F));
-        flywheel.setVelocity(currentTargetVelocity);
+        // Apply coefficients and target velocity, but only when a button changed one of them.
+        // Sending them every loop slowed the loop down, which makes the velocity readout laggier.
+        if (P != sentP || F != sentF) {
+            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
+                    new PIDFCoefficients(P, 0, 0, F));
+            sentP = P;
+            sentF = F;
+        }
+        if (currentTargetVelocity != sentTargetVelocity) {
+            flywheel.setVelocity(currentTargetVelocity);
+            sentTargetVelocity = currentTargetVelocity;
+        }
 
         double currVel = flywheel.getVelocity();
         double err = currentTargetVelocity - currVel;
