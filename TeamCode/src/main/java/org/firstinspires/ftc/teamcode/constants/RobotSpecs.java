@@ -31,7 +31,7 @@ public class RobotSpecs {
     public static final double SPINDEXER_MAX_ROTATION = 360; //In degrees
 
     public static final double ODO_WHEELS_DIA_CM = 5.0;
-    public static final double TICKS_PER_REV = 700; //Ticks per revolution of motor
+    public static final double TICKS_PER_REV = 732.3; //Ticks per revolution of motor
     public static final double MAX_YAW = 180;
     public static final double MIN_YAW = -180;
     public static final double HOOD_HEIGHT = 10; ///Inches

@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
@@ -21,7 +22,7 @@ public class PollenTurretController {
     private static boolean isInitialized;
     private static DcMotorEx flywheel;
     private static DcMotorEx rotation;
-    private static double P, F, targetVel = 0, lowVelocity = 0, highVelocity = 1500;
+    private static double P, F, targetVel = 0;
     private static double yaw = 0; //This is in degrees
 
     private static Servo hoodServo;
@@ -44,6 +45,8 @@ public class PollenTurretController {
             rotation.setPower(1.0);
 
             isInitialized = true;
+
+            hoodServo = hardwareMap.get(Servo.class, HardwareNames.TURRET_UP_ANGLE_SERVO_NAME);
 
             TimedTelemetry.addLine("Pollen Turret Controller Initialized! :D", 1000);
 
@@ -74,15 +77,14 @@ public class PollenTurretController {
         PollenTurretController.targetVel = targetVel;
     }
     public static void setPFCoefficients(double P, double F) {
-        PollenTurretController.P = P;
-        PollenTurretController.F = F;
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        if(isInitialized) {
+            PollenTurretController.P = P;
+            PollenTurretController.F = F;
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        }
     }
 
-    public static double getLowVelocity () {
-        return lowVelocity;
-    }
     public static double getTargetVel() {
         return targetVel;
     }
@@ -91,11 +93,15 @@ public class PollenTurretController {
     }
 
     public static double getCurrentYaw() {
-        return rotation.getCurrentPosition();
+        return rotation.getCurrentPosition() * 360 / TICKS_PER_REV;
     }
     public static void stop() {
+        flywheel.setPower(0);
+        rotation.setPower(0);
+        hoodServo.setPosition(0);
         flywheel = null;
         rotation = null;
+        hoodServo = null;
         yaw = 0;
         isInitialized = false;
     }
