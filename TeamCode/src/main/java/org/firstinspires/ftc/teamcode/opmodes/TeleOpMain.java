@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import static org.firstinspires.ftc.teamcode.constants.HardwareNames.ODOMETRY_NAME;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
@@ -28,6 +34,9 @@ public class TeleOpMain extends OpMode {
     boolean toggleFlywheel = false;
     double targetVel = 1200;
 
+    GoBildaOdometry odometry;
+    int hiveIndex = 1;
+
     @Override
     public void init() {
         Timer.init();
@@ -38,17 +47,33 @@ public class TeleOpMain extends OpMode {
         UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
 
+        odometry = new GoBildaOdometry(hardwareMap, ODOMETRY_NAME);
+
         PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
+
+        TimedTelemetry.update();
+        telemetry.update();
     }
 
     @Override
     public void loop() {
+        odometry.update();
+
+        double posx = odometry.getX(DistanceUnit.INCH);
+        double posY = odometry.getY(DistanceUnit.INCH);
+        double heading = odometry.getHeading(AngleUnit.RADIANS);
+
+        double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
+        double calculatedYawDeg = Math.toDegrees(calculatedYaw);
+
+
         if(gamepad1.leftBumperWasPressed()) enableIntake = !enableIntake;
         double intakePower = enableIntake ? 1 : 0;
         Timer.update();
         if(gamepad1.circleWasPressed()) toggleFlywheel = !toggleFlywheel;
         if(gamepad1.dpadUpWasPressed()) targetVel += 10;
         if(gamepad1.dpadDownWasPressed()) targetVel -= 10;
+        if(gamepad1.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
 
 
         TimedTelemetry.addData("Target Velocity: ", targetVel);
@@ -57,9 +82,12 @@ public class TeleOpMain extends OpMode {
 
         if(gamepad1.dpad_right) yaw += Timer.DTime()*0.1;
         if(gamepad1.dpad_left) yaw -= Timer.DTime()*0.1;
-        PollenTurretController.setYaw(yaw);
+        double realYaw = calculatedYawDeg - yaw;
 
-        TimedTelemetry.addData("Target Yaw: ", yaw);
+        PollenTurretController.setYaw(realYaw);
+
+        TimedTelemetry.addData("GoBilda Heading ", heading);
+        TimedTelemetry.addData("Target Yaw: ", realYaw);
 
         MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0));
         PollenTurretController.update();
@@ -68,6 +96,32 @@ public class TeleOpMain extends OpMode {
         TimedTelemetry.update();
 
         telemetry.update();
+    }
+
+
+    /**
+     * Returns the angle in radians that the turret would need to be to look at the hive
+     * @param hiveIndex
+     * @param posX
+     * @param posY
+     * @param heading
+     * @return
+     */
+    public double calculateTurretAngle(int hiveIndex, double posX, double posY, double heading) {
+        double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
+        double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
+
+        double dx = hiveX - posX;
+        double dy = hiveY - posY;
+
+        double calculatedYaw = Math.atan2(dy, dx);
+        calculatedYaw += heading;
+
+
+        while(calculatedYaw > 1.5*Math.PI) calculatedYaw -= 2 * Math.PI;
+        while(calculatedYaw < -1.5*Math.PI) calculatedYaw += 2* Math.PI;
+
+        return calculatedYaw;
     }
 
     @Override

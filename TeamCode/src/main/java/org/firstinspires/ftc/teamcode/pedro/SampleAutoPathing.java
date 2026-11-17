@@ -9,6 +9,7 @@ import com.pedropathing.utils.Timer;
 
 //https://www.youtube.com/watch?v=gdkefs_VL-w&t=300s
 //Youtube Vid I referenced cause I have no idea what is happening
+/*
 @TeleOp
 public class SampleAutoPathing extends OpMode {
 
@@ -97,3 +98,4 @@ public class SampleAutoPathing extends OpMode {
 
     }
 }
+*/

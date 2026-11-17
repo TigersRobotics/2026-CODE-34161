@@ -10,6 +10,9 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 import com.skeletonarmy.marrow.zones.Zone;
 
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,4 +51,11 @@ public class MapSpecs {
             new Point(tileToIN(3), tileToIN(0)), new Point(tileToIN(6), tileToIN(0)),
             new Point(tileToIN(6), tileToIN(3)), new Point(tileToIN(6), tileToIN(6))
     );
+
+    public static final Point[] HIVE_COORDINATES =
+            {
+                    new Point(tileToIN(2.4), tileToIN(2.5)),
+                    new Point(tileToIN(3.8), tileToIN(2.5))
+            };
+
 }

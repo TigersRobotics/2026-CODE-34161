@@ -8,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.constants.RobotSpecs.TICKS_PER_REV;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -21,13 +22,12 @@ public class PollenTurretController {
     private static DcMotorEx rotation;
     private static double P, F, targetVel = 0, lowVelocity = 0, highVelocity = 1500;
     private static double yaw = 0; //This is in degrees
-    private static double currentVel;
 
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         if(actuallyEnabled) {
             flywheel = (DcMotorEx) hardwareMap.get(DcMotor.class, FLYWHEEL_NAME);
             flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            flywheel.setDirection(DcMotor.Direction.FORWARD);
+            flywheel.setDirection(DcMotor.Direction.REVERSE);
 
             PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
             flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
@@ -94,7 +94,6 @@ public class PollenTurretController {
         flywheel = null;
         rotation = null;
         yaw = 0;
-        currentVel = 0;
         isInitialized = false;
     }
 }
