@@ -34,4 +34,8 @@ public class OpModeMethods {
             )
     );
     // no list of parameterized methods for update, as parameters varies by number and type
+
+    public static void onTeleop(){
+
+    }
 }

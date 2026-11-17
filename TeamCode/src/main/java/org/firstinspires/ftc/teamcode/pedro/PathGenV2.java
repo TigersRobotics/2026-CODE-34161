@@ -31,7 +31,6 @@ public class PathGenV2 {
     public static double tileToIN(double tiles){
         return tiles*24;
     }
-
     public static double INToTile(double inches){
         return inches/24;
     }
@@ -95,10 +94,13 @@ public class PathGenV2 {
         PathGenV2.odometry = odometry;
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
                 .robotWidth(RobotSpecs.LENGTH_X_M / 2.54)
-                .robotHeight(RobotSpecs.HEIGHT / 2.54).clearance(RobotSpecs.CLEARANCE_IN));
+                .robotHeight(RobotSpecs.HEIGHT_M / 2.54).
+                clearance(RobotSpecs.CLEARANCE_IN));
         TimedTelemetry.addLine("PathGenV2 initialized!!! YAY!", 1000);
         timeUntilUpdate = 0;
+
     }
+
     public static void update(ArrayList<Zone> obstacles){
         if (timeUntilUpdate >=1){
             timeUntilUpdate-= Timer.DTime();
@@ -196,14 +198,14 @@ public class PathGenV2 {
     }
 
     public boolean atShootingArea(){
-        for (Zone z: MapSpecs.SHOOTING_POSITIONS) if (z.contains(PedroPathingConverter.toPoint(getCurrentPose()))) return true;
+        for (Zone z: MapSpecs.SHOOTING_ZONES) if (z.contains(PedroPathingConverter.toPoint(getCurrentPose()))) return true;
         return false;
     }
     public static void goShoot(){
         double targetHeading;
         Pose nearestSpot = getCurrentPose();
         double closest = 1000;
-        for (Zone shootingSpot: MapSpecs.SHOOTING_POSITIONS){
+        for (Zone shootingSpot: MapSpecs.SHOOTING_ZONES){
             if (shootingSpot.distanceTo(PedroPathingConverter.toPoint(getCurrentPose())) < closest){
                 closest = shootingSpot.distanceTo(PedroPathingConverter.toPoint(getCurrentPose()));
                 nearestSpot = new Pose(shootingSpot.getPosition().getX(), shootingSpot.getPosition().getY());

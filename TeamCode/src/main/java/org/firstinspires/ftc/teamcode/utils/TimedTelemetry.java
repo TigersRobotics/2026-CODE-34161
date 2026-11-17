@@ -30,6 +30,8 @@ public class TimedTelemetry {
 
     public static void init(Telemetry telemetry){
         TimedTelemetry.telemetry = telemetry;
+        telemetryList.clear();
+
     }
 
     public static void update(){
