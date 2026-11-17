@@ -1,11 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedro;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.math.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.pedropathing.utils.Timer;
-
 
 //https://www.youtube.com/watch?v=gdkefs_VL-w&t=300s
 //Youtube Vid I referenced cause I have no idea what is happening

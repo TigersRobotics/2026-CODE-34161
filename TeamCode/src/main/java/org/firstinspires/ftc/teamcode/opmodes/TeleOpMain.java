@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
@@ -16,13 +15,13 @@ import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainControll
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
 import org.firstinspires.ftc.teamcode.robotControllers.UptakeController;
-import org.firstinspires.ftc.teamcode.robotControllers.UptakeServoController;
-import org.firstinspires.ftc.teamcode.sensors.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
+import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
-import org.firstinspires.ftc.teamcode.utils.VectorMath;
+
+import java.io.File;
 
 import java.util.List;
 
@@ -62,6 +61,7 @@ public class TeleOpMain extends OpMode {
         for(LynxModule hub : hubs) hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
         MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
+        ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
         UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
@@ -103,7 +103,7 @@ public class TeleOpMain extends OpMode {
         TimedTelemetry.addData("Target Velocity: ", targetVel);
 
         PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
-        PollenTurretController.setHoodAngle(calculatedHoodAngle);
+        if(!Double.isNaN(calculatedYawDeg)) PollenTurretController.setHoodAngle(calculatedHoodAngle);
 
         // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
         // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
@@ -179,7 +179,7 @@ public class TeleOpMain extends OpMode {
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
 
         // horizontal distance to hive, inches -> meters
-        double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
+        double x = Mahttps://github.com/TigersRobotics/2026-CODE-34161/pull/1/conflict?name=TeamCode%252Fsrc%252Fmain%252Fjava%252Forg%252Ffirstinspires%252Fftc%252Fteamcode%252FrobotControllers%252FPollenTurretController.java&ancestor_oid=714e53535dceeac20f75212fe6501165ccf07b6a&base_oid=e4983539c38794000c5a1293293fe7fac31e4b2d&head_oid=51d9770f47b89d46ecfd1d9f137d5870c0a4105fth.hypot(hiveX - posX, hiveY - posY) * 0.0254;
 
         // target height relative to where the ball leaves the shooter (placeholders), inches -> meters
         double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;

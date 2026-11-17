@@ -51,6 +51,10 @@ public class PollenTurretController {
     private static long velSentAtNs;
     private static long yawSentAtNs;
 
+    private static boolean updateYaw = false;
+    private static boolean updateVel = false;
+    private static double flywheelVel = 0;
+
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         if(actuallyEnabled) {
             flywheel = (DcMotorEx) hardwareMap.get(DcMotor.class, FLYWHEEL_NAME);
@@ -74,7 +78,8 @@ public class PollenTurretController {
             isInitialized = true;
 
             TimedTelemetry.addLine("Pollen Turret Controller Initialized! :D", 1000);
-
+            updateYaw = false;
+            updateVel = false;
         } else stop();
     }
 
@@ -114,10 +119,12 @@ public class PollenTurretController {
     ///Sets the angle of the turret in degrees
     public static void setYaw(double yaw) {
         if(Double.isNaN(yaw)) return; // a bad odometry reading must not swing the turret back to 0
+        updateYaw = true;
         PollenTurretController.yaw = UtilMethods.clip(yaw, MIN_YAW, MAX_YAW);
     }
 
     public static void setTargetVel(double targetVel) {
+        updateVel = true;
         PollenTurretController.targetVel = targetVel;
     }
 

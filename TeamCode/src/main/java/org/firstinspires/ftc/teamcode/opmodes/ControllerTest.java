@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
-import org.firstinspires.ftc.teamcode.robotControllers.TurretControllerWithHood;
 import org.firstinspires.ftc.teamcode.robotControllers.UptakeServoController;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
