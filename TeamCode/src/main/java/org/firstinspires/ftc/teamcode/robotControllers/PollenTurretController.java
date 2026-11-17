@@ -8,7 +8,6 @@ import static org.firstinspires.ftc.teamcode.constants.RobotSpecs.TICKS_PER_REV;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -26,6 +25,10 @@ public class PollenTurretController {
     private static double yaw = 0; //This is in degrees
 
     private static Servo hoodServo;
+
+    private static boolean updateYaw = false;
+    private static boolean updateVel = false;
+    private static double flywheelVel = 0;
 
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         if(actuallyEnabled) {
@@ -49,7 +52,8 @@ public class PollenTurretController {
             hoodServo = hardwareMap.get(Servo.class, HardwareNames.TURRET_UP_ANGLE_SERVO_NAME);
 
             TimedTelemetry.addLine("Pollen Turret Controller Initialized! :D", 1000);
-
+            updateYaw = false;
+            updateVel = false;
         } else stop();
     }
 
@@ -60,20 +64,30 @@ public class PollenTurretController {
 
     public static void update() {
         if(isInitialized) {
-            flywheel.setVelocity(targetVel);
+            if(updateVel) {
+                flywheel.setVelocity(targetVel);
+                updateVel = false;
+            }
             TimedTelemetry.addData("Target Position: ", yaw);
-            rotation.setTargetPosition((int) Math.round(yaw * TICKS_PER_REV / 360));
-            TimedTelemetry.addData("Current Flywheel Speed: ", flywheel.getVelocity());
+
+            if(updateYaw) {
+                rotation.setTargetPosition((int) Math.round(yaw * TICKS_PER_REV / 360));
+                updateYaw = false;
+            }
+            flywheelVel = flywheel.getVelocity();
+            TimedTelemetry.addData("Current Flywheel Speed: ", flywheelVel);
         } else TimedTelemetry.addLine("Pollen Turret Updating but not Initialized! >:(");
     }
 
 
     ///Sets the angle of the turret in degrees
     public static void setYaw(double yaw) {
+        updateYaw = true;
         PollenTurretController.yaw = UtilMethods.clip(yaw, MIN_YAW, MAX_YAW);
     }
 
     public static void setTargetVel(double targetVel) {
+        updateVel = true;
         PollenTurretController.targetVel = targetVel;
     }
     public static void setPFCoefficients(double P, double F) {
@@ -89,7 +103,7 @@ public class PollenTurretController {
         return targetVel;
     }
     public static double getVelocity() {
-        return flywheel.getVelocity();
+        return flywheelVel;
     }
 
     public static double getCurrentYaw() {
@@ -107,6 +121,6 @@ public class PollenTurretController {
     }
 
     public static void setHoodAngle(double degrees) {
-        hoodServo.setPosition(degrees/270);
+        hoodServo.setPosition(UtilMethods.clip(degrees, 0, 270)/ 270);
     }
 }

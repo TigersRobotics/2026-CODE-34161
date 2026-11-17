@@ -7,9 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
-import org.firstinspires.ftc.teamcode.sensors.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 
 @Disabled

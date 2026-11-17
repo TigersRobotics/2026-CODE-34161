@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
@@ -15,13 +14,10 @@ import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainControll
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
 import org.firstinspires.ftc.teamcode.robotControllers.UptakeController;
-import org.firstinspires.ftc.teamcode.robotControllers.UptakeServoController;
-import org.firstinspires.ftc.teamcode.sensors.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
-import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
 @TeleOp
 public class TeleOpMain extends OpMode {
@@ -81,7 +77,7 @@ public class TeleOpMain extends OpMode {
         TimedTelemetry.addData("Target Velocity: ", targetVel);
 
         PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
-        PollenTurretController.setHoodAngle(calculatedHoodAngle);
+        if(!Double.isNaN(calculatedYawDeg)) PollenTurretController.setHoodAngle(calculatedHoodAngle);
 
         if(gamepad1.dpad_right) yaw += Timer.DTime()*0.1;
         if(gamepad1.dpad_left) yaw -= Timer.DTime()*0.1;
@@ -141,7 +137,7 @@ public class TeleOpMain extends OpMode {
         double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
 
         // target height relative to where the ball leaves the shooter (placeholders)
-        double y = MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT;
+        double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;
 
         // flywheel ticks/sec -> ball exit speed in m/s (tune the efficiency!)
         double wheelRevsPerSec = flywheelTicksPerSecond / RobotSpecs.FLYWHEEL_TICKS_PER_REV;

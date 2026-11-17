@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.utils;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 

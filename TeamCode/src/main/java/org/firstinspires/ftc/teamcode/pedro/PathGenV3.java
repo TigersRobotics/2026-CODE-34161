@@ -2,13 +2,11 @@ package org.firstinspires.ftc.teamcode.pedro;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
-import com.skeletonarmy.marrow.weaver.HeadingPolicy;
 import com.skeletonarmy.marrow.weaver.PathConfig;
 import com.skeletonarmy.marrow.weaver.PathResult;
 import com.skeletonarmy.marrow.weaver.PedroPathingConverter;
 import com.skeletonarmy.marrow.weaver.Weaver;
 import com.skeletonarmy.marrow.weaver.WeaverBuilder;
-import com.skeletonarmy.marrow.zones.PolygonZone;
 import com.skeletonarmy.marrow.zones.Zone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -19,8 +17,6 @@ import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
-
-import java.util.ArrayList;
 
 public class PathGenV3 {
     // because I don't like the first two. Also, we are likely not going to get a Limelight camera,
