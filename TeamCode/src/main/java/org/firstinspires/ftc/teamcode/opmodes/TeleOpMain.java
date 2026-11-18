@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
@@ -179,7 +180,7 @@ public class TeleOpMain extends OpMode {
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
 
         // horizontal distance to hive, inches -> meters
-        double x = Mahttps://github.com/TigersRobotics/2026-CODE-34161/pull/1/conflict?name=TeamCode%252Fsrc%252Fmain%252Fjava%252Forg%252Ffirstinspires%252Fftc%252Fteamcode%252FrobotControllers%252FPollenTurretController.java&ancestor_oid=714e53535dceeac20f75212fe6501165ccf07b6a&base_oid=e4983539c38794000c5a1293293fe7fac31e4b2d&head_oid=51d9770f47b89d46ecfd1d9f137d5870c0a4105fth.hypot(hiveX - posX, hiveY - posY) * 0.0254;
+        double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
 
         // target height relative to where the ball leaves the shooter (placeholders), inches -> meters
         double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;

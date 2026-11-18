@@ -56,6 +56,7 @@ public class PathGenV3 {
 
     public static void init(GoBildaOdometry odometry, Follower follower, boolean autonMode) {
         PathGenV3.autonMode = autonMode;
+        on = autonMode;
         currentState = State.IDLE;
         PathGenV3.follower = follower;
         PathGenV3.odometry = odometry;
@@ -69,6 +70,8 @@ public class PathGenV3 {
     }
 
     public static void update() {
+        TimedTelemetry.addData("Current Pose", getCurrentPose());
+        TimedTelemetry.addData("Destination", destination);
         if (timeUntilUpdate >= 1) {
             timeUntilUpdate -= Timer.DTime();
             return;
@@ -117,10 +120,10 @@ public class PathGenV3 {
 
     public static void updateMovement() {
         WeaverBuilder notPathYet = Weaver.builder();
-
+        notPathYet.start(PedroPathingConverter.toPoint(getCurrentPose()));
         for (Zone obstacle : MapSpecs.OBSTACLES) notPathYet.addObstacle(obstacle);
         if (autonMode) notPathYet.addObstacle(MapSpecs.OTHER_SIDE).addObstacle(Competition.DISABLED_SIDE);
-
+        notPathYet.end(PedroPathingConverter.toPoint(destination));
         PathResult almostPath = notPathYet.build();
         try {
             follower.follow(PedroPathingConverter.toPath(almostPath.getPath()));
