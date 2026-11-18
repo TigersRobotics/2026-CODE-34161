@@ -31,5 +31,6 @@ public class HoodAngleTuner extends OpMode {
             delta /= 2;
         }
         telemetry.addLine("Angle: " + angle);
+        telemetry.update();
     }
 }

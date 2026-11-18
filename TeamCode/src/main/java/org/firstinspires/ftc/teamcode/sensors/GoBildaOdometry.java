@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.PathGenV3;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
@@ -18,11 +19,11 @@ public class GoBildaOdometry {
         else TimedTelemetry.addLine("Test Passed",1000);
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, deviceName);
-        odo.setOffsets(RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_IN_X, RobotSpecs.OFFSETS_OF_ODOMETRY_PODS_IN_Y, DistanceUnit.INCH);
+        odo.setOffsets(Constants.localizerConfig.xPodOffset.get(), Constants.localizerConfig.yPodOffset.get(), Constants.localizerConfig.globalDistanceUnit.get());
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
         odo.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.FORWARD,
-                GoBildaPinpointDriver.EncoderDirection.FORWARD
+                Constants.localizerConfig.xPodDirection.get(),
+                Constants.localizerConfig.yPodDirection.get()
         );
 
         odo.resetPosAndIMU();
