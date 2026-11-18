@@ -24,10 +24,12 @@ public class MecanumDriveTrainController{
     private static DcMotor frontRight;
     private static DcMotor backLeft;
     private static DcMotor backRight;
-    private static double frontLeftPower;
-    private static double frontRightPower;
-    private static double backLeftPower;
-    private static double backRightPower;
+    private static final double POWER_WRITE_TOLERANCE = 0.01;
+    // The power last sent to each wheel. NaN means nothing has been sent yet.
+    private static double frontLeftPower = Double.NaN;
+    private static double frontRightPower = Double.NaN;
+    private static double backLeftPower = Double.NaN;
+    private static double backRightPower = Double.NaN;
 
     public static void init(HardwareMap hardwareMap, boolean actuallyInitialize) {
         if(actuallyInitialize) {
@@ -42,6 +44,12 @@ public class MecanumDriveTrainController{
             frontRight.setDirection(DcMotor.Direction.REVERSE);
             backRight.setDirection(DcMotor.Direction.REVERSE);
 
+            // The statics survive between OpMode runs, so forget what was sent last time
+            frontLeftPower = Double.NaN;
+            frontRightPower = Double.NaN;
+            backLeftPower = Double.NaN;
+            backRightPower = Double.NaN;
+
             TimedTelemetry.addLine("MECANUM DRIVE TRAIN INITIALIZED");
 
             isInitialized = true;
@@ -53,10 +61,10 @@ public class MecanumDriveTrainController{
     }
 
     public static void stop() {
-        frontRight.setPower(0);
-        frontLeft.setPower(0);
-        backRight.setPower(0);
-        backLeft.setPower(0);
+        if(frontRight != null) frontRight.setPower(0);
+        if(frontLeft != null) frontLeft.setPower(0);
+        if(backRight != null) backRight.setPower(0);
+        if(backLeft != null) backLeft.setPower(0);
 
         isInitialized = false;
         frontLeft = null;
@@ -110,19 +118,33 @@ public class MecanumDriveTrainController{
             }
 
 
-            frontLeftPower = fl;
-            frontRightPower = fr;
-            backRightPower = br;
-            backLeftPower = bl;
-
-            // Send calculated power to wheels
-            frontLeft.setPower(frontLeftPower);
-            frontRight.setPower(frontRightPower);
-            backLeft.setPower(backLeftPower);
-            backRight.setPower(backRightPower);
-
-
+            // Send calculated power to wheels, skipping any wheel whose power has barely moved.
+            // Each skipped wheel is one less hub command in the loop.
+            if(isWorthSending(fl, frontLeftPower)) {
+                frontLeft.setPower(fl);
+                frontLeftPower = fl;
+            }
+            if(isWorthSending(fr, frontRightPower)) {
+                frontRight.setPower(fr);
+                frontRightPower = fr;
+            }
+            if(isWorthSending(bl, backLeftPower)) {
+                backLeft.setPower(bl);
+                backLeftPower = bl;
+            }
+            if(isWorthSending(br, backRightPower)) {
+                backRight.setPower(br);
+                backRightPower = br;
+            }
         }
+    }
+
+    /// Stick noise changes the power by tiny amounts every loop. Anything under 1% is not sent,
+    /// except a stop, which always goes through.
+    private static boolean isWorthSending(double power, double sentPower) {
+        if(Double.isNaN(sentPower)) return true;
+        if(power == 0) return sentPower != 0;
+        return Math.abs(power - sentPower) >= POWER_WRITE_TOLERANCE;
     }
     public static void update(CustomController controller) {
         update(controller.getDriveY(), controller.getDriveX(), controller.getTurn());

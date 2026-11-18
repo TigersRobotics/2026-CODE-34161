@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import static org.firstinspires.ftc.teamcode.constants.HardwareNames.ODOMETRY_NAME;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -22,6 +23,8 @@ import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
 import java.io.File;
 
+import java.util.List;
+
 @TeleOp
 public class TeleOpMain extends OpMode {
     final boolean ENABLE_TURRET_CONTROLLER = true;
@@ -29,18 +32,33 @@ public class TeleOpMain extends OpMode {
     final boolean ENABLE_UPTAKE_CONTROLLER = true;
     final boolean ENABLE_INTAKE_CONTROLLER = true;
     final boolean ENABLE_WEBCAM = false;
+    /// Degrees the turret moves for one tap of dpad left/right
+    static final double YAW_NUDGE_DEG = 1.0;
+    /// How long dpad left/right has to be held before the turret starts sweeping
+    static final double YAW_HOLD_DELAY_MS = 250;
+    /// Sweep speed while dpad left/right is held (0.03 = 30 degrees per second)
+    static final double YAW_HOLD_DEG_PER_MS = 0.03;
+
     boolean enableIntake = false;
     double yaw = 0;
+    double dpadRightHeldMs = 0;
+    double dpadLeftHeldMs = 0;
     boolean toggleFlywheel = false;
     double targetVel = 1200;
 
     GoBildaOdometry odometry;
     int hiveIndex = 1;
+    List<LynxModule> hubs;
 
     @Override
     public void init() {
         Timer.init();
         TimedTelemetry.init(telemetry);
+
+        // Each hub now answers every encoder/velocity read in a loop from one bulk read,
+        // instead of one hub round trip per read. The cache is cleared at the top of loop().
+        hubs = hardwareMap.getAll(LynxModule.class);
+        for(LynxModule hub : hubs) hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
         MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
         ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
@@ -58,11 +76,15 @@ public class TeleOpMain extends OpMode {
 
     @Override
     public void loop() {
+        for(LynxModule hub : hubs) hub.clearBulkCache();
+
         odometry.update();
 
-        double posx = odometry.getX(DistanceUnit.INCH);
-        double posY = odometry.getY(DistanceUnit.INCH);
-        double heading = odometry.getHeading(AngleUnit.RADIANS);
+        // One pose object per loop instead of a new one for each of x, y and heading
+        Pose2D pose = odometry.getPose();
+        double posx = pose.getX(DistanceUnit.INCH);
+        double posY = pose.getY(DistanceUnit.INCH);
+        double heading = pose.getHeading(AngleUnit.RADIANS);
 
         double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
         double calculatedYawDeg = Math.toDegrees(calculatedYaw);
@@ -83,9 +105,20 @@ public class TeleOpMain extends OpMode {
         PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
         if(!Double.isNaN(calculatedYawDeg)) PollenTurretController.setHoodAngle(calculatedHoodAngle);
 
-        if(gamepad1.dpad_right) yaw += Timer.DTime()*0.1;
-        if(gamepad1.dpad_left) yaw -= Timer.DTime()*0.1;
-        double realYaw = calculatedYawDeg - yaw;
+        // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
+        // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
+        if(gamepad1.dpadRightWasPressed()) yaw += YAW_NUDGE_DEG;
+        if(gamepad1.dpadLeftWasPressed()) yaw -= YAW_NUDGE_DEG;
+
+        dpadRightHeldMs = gamepad1.dpad_right ? dpadRightHeldMs + Timer.DTime() : 0;
+        dpadLeftHeldMs = gamepad1.dpad_left ? dpadLeftHeldMs + Timer.DTime() : 0;
+        if(dpadRightHeldMs > YAW_HOLD_DELAY_MS) yaw += Timer.DTime() * YAW_HOLD_DEG_PER_MS;
+        if(dpadLeftHeldMs > YAW_HOLD_DELAY_MS) yaw -= Timer.DTime() * YAW_HOLD_DEG_PER_MS;
+
+        // Wrapping the offset stops it winding up past a full turn, and wrapping the final angle
+        // lets the turret carry on round instead of sticking at +/-180
+        yaw = wrapDegrees(yaw);
+        double realYaw = wrapDegrees(calculatedYawDeg - yaw);
 
         PollenTurretController.setYaw(realYaw);
 
@@ -128,6 +161,14 @@ public class TeleOpMain extends OpMode {
     }
 
 
+    /// Brings any angle in degrees into the range -180 to 180
+    private static double wrapDegrees(double degrees) {
+        degrees %= 360;
+        if(degrees > 180) degrees -= 360;
+        if(degrees < -180) degrees += 360;
+        return degrees;
+    }
+
     /**
      * Use input inches
      */
@@ -138,9 +179,9 @@ public class TeleOpMain extends OpMode {
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
 
         // horizontal distance to hive, inches -> meters
-        double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
+        double x = Mahttps://github.com/TigersRobotics/2026-CODE-34161/pull/1/conflict?name=TeamCode%252Fsrc%252Fmain%252Fjava%252Forg%252Ffirstinspires%252Fftc%252Fteamcode%252FrobotControllers%252FPollenTurretController.java&ancestor_oid=714e53535dceeac20f75212fe6501165ccf07b6a&base_oid=e4983539c38794000c5a1293293fe7fac31e4b2d&head_oid=51d9770f47b89d46ecfd1d9f137d5870c0a4105fth.hypot(hiveX - posX, hiveY - posY) * 0.0254;
 
-        // target height relative to where the ball leaves the shooter (placeholders)
+        // target height relative to where the ball leaves the shooter (placeholders), inches -> meters
         double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;
 
         // flywheel ticks/sec -> ball exit speed in m/s (tune the efficiency!)

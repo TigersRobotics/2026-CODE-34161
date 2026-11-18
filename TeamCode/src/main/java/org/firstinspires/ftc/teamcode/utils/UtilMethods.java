@@ -12,6 +12,8 @@ public final class UtilMethods {
      * @param exponent  The scaling rate
      */
     public static double expo(double input, double exponent) {
+        // Squaring is the common case (every drive stick, every loop) and does not need Math.pow
+        if(exponent == 2) return input * Math.abs(input);
         return Math.signum(input)*Math.pow(Math.abs(input), exponent);
     }
 
