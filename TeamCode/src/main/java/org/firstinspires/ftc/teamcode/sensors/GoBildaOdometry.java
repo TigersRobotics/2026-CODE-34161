@@ -27,6 +27,7 @@ public class GoBildaOdometry {
         );
 
         odo.resetPosAndIMU();
+        TimedTelemetry.addLine("setPose reached");
         setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), AngleUnit.DEGREES, 0));
     }
     public void update() {

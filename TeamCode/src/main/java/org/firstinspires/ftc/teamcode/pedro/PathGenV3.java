@@ -41,6 +41,8 @@ public class PathGenV3 {
     }
 
     private static State currentState = State.IDLE;
+    private static final State previousState = State.IDLE;
+
 
     public enum State {
         MOVING_TO_SHOOT,
@@ -70,6 +72,10 @@ public class PathGenV3 {
     }
 
     public static void update() {
+        follower.update(Timer.DTime());
+        TimedTelemetry.addData("Current State", currentState);
+        TimedTelemetry.addData("Previous State", previousState);
+        TimedTelemetry.addData("Follower Stats", follower.following());
         TimedTelemetry.addData("Current Pose", getCurrentPose());
         TimedTelemetry.addData("Destination", destination);
         if (timeUntilUpdate >= 1) {
@@ -78,15 +84,23 @@ public class PathGenV3 {
         }
         timeUntilUpdate = RobotSpecs.MS_PER_PATH_UPDATE;
 
-        if (follower.isBusy()) TimedTelemetry.addLine("Robot is moving!");
-        else TimedTelemetry.addLine("Robot is awaiting commands! :) ");
+        if (follower.isBusy())
+            TimedTelemetry.addLine("Robot is moving!", (int) (RobotSpecs.MS_PER_PATH_UPDATE - 20));
+        else
+            TimedTelemetry.addLine("Robot is awaiting commands! :) ", (int) (RobotSpecs.MS_PER_PATH_UPDATE - 20));
 
         if (!on) {
             TimedTelemetry.addLine("Path generation is sleeping... zzz...");
         }
         checkSomeStates();
+        TimedTelemetry.addData("Current State", currentState);
+        TimedTelemetry.addData("Previous State", previousState);
+        TimedTelemetry.addData("Follower Stats", follower.following());
         if (currentState == State.IDLE) return;
-        updateMovement();
+        if (currentState != previousState) {
+            currentState = previousState;
+            updateMovement();
+        }
 
     }
 
@@ -100,22 +114,22 @@ public class PathGenV3 {
     }
 
     public static void checkSomeStates() {
-        switch (currentState) {
-            case MOVING_TO_SHOOT:
-                if (follower.holding()) {
-                    currentState = State.SHOOTING;
-                }
-                break;
-            case PARKING:
-                if (follower.holding()) {
-                    currentState = State.IDLE;
-                }
-                break;
-            case FLOWER_COLLECTING1:
-                if (follower.holding())
-                    currentState = State.FLOWER_COLLECTING2;
-                break;
-        }
+//        switch (currentState) {
+//            case MOVING_TO_SHOOT:
+//                if (follower.holding()) {
+//                    currentState = State.SHOOTING;
+//                }
+//                break;
+//            case PARKING:
+//                if (follower.holding()) {
+//                    currentState = State.IDLE;
+//                }
+//                break;
+//            case FLOWER_COLLECTING1:
+//                if (follower.holding())
+//                    currentState = State.FLOWER_COLLECTING2;
+//                break;
+//        }
     }
 
     public static void updateMovement() {
@@ -126,6 +140,7 @@ public class PathGenV3 {
         notPathYet.end(PedroPathingConverter.toPoint(destination));
         PathResult almostPath = notPathYet.build();
         try {
+            TimedTelemetry.addLine("Follower followed", 1000);
             follower.follow(PedroPathingConverter.toPath(almostPath.getPath()));
         } catch (NullPointerException | IllegalArgumentException e) {
             TimedTelemetry.addLine("Path Gen failed... (╥﹏╥) (˶˃⤙˂˶)!", 1000);

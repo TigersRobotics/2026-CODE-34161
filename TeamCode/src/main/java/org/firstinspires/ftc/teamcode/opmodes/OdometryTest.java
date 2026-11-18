@@ -5,7 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
+import org.firstinspires.ftc.teamcode.pedro.PathGenV3;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
@@ -36,6 +39,13 @@ public class OdometryTest extends OpMode {
         TimedTelemetry.addData("Y: ", odometry.getY(DistanceUnit.INCH));
         TimedTelemetry.addData("Heading: ", odometry.getHeading(AngleUnit.DEGREES));
         TimedTelemetry.update();
+        if (gamepad1.circleWasPressed()) {
+            TimedTelemetry.addData("Start Y", PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), 1000);
+            odometry.setPose(new Pose2D(DistanceUnit.INCH,
+                    PathGenV3.tileToIN(Competition.STARTING_X_TILES),
+                    PathGenV3.tileToIN(Competition.STARTING_Y_Tiles),
+                    AngleUnit.DEGREES, 0));
+        }
         telemetry.update();
 
     }
