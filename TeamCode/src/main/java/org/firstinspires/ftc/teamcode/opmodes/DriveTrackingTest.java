@@ -11,12 +11,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
+import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.TurretController;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.ShotUtil;
+import org.firstinspires.ftc.teamcode.utils.VectorMath;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
@@ -27,7 +29,8 @@ import java.util.List;
 
 @TeleOp(name = "Drive Tracking Test")
 public class DriveTrackingTest extends OpMode {
-    static final double START_HEADING_DEG = 90; // deg
+    static final double CLOSE_X_IN = -12; // in, left corner. Teleop's start is the right corner.
+    static final double CLOSE_HEADING_DEG = 0; // deg, same zero teleop uses
     static final double MIN_STEP = 0.1; // deg
     static final double RPM_BUMP = 100;
     static final String LOG_NAME = "drive-tracking-shots.csv";
@@ -114,6 +117,11 @@ public class DriveTrackingTest extends OpMode {
         if (gamepad1.circleWasPressed()) adjust(r, true, true, true);
         if (gamepad1.triangleWasPressed()) adjust(r, false, true, true);
         if (gamepad1.crossWasPressed()) lock(r, x, y, beta);
+        if (gamepad1.optionsWasPressed()) {
+            makes++;
+            attempts++;
+            lastResult = "in";
+        }
         if (gamepad1.leftBumperWasPressed()) undo();
         if (gamepad1.rightBumperWasPressed()) resetSearch();
         if (gamepad1.backWasPressed()) {
@@ -127,9 +135,15 @@ public class DriveTrackingTest extends OpMode {
         TurretController.setRpm(flywheelOn ? flywheelRpm : 0);
         TurretController.setHood(hoodSent);
         hoodCommand = hoodSent;
-        TurretController.setYawFieldCentric(
-                r.yawFieldDeg,
-                heading,
+        double inchX = pose.getX(DistanceUnit.INCH);
+        double inchY = pose.getY(DistanceUnit.INCH);
+        double yawDeg = Math.toDegrees(VectorMath.calculateTurretAngle(
+                closerHive(inchX, inchY),
+                inchX,
+                inchY,
+                pose.getHeading(AngleUnit.RADIANS)));
+        TurretController.setYaw(
+                yawDeg,
                 (movingComp && r.valid) ? r.vPerp : 0,
                 r.ballSpeed,
                 r.thetaDeg,
@@ -177,7 +191,7 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("fit", "a0 %.2f  a1 %.2f  a2 %.3f", 1, a0, a1, a2);
         double pct = attempts == 0 ? 0 : 100.0 * makes / attempts;
         TimedTelemetry.addData("hits", makes + " / " + attempts + "  " + Math.round(pct) + "%");
-        TimedTelemetry.addLine("dpadU rpm+ | dpadD rpm- | □ fly | dpadL move | dpadR zero | RT over | LT under | O top | △ bottom | X lock | LB undo | RB reset");
+        TimedTelemetry.addLine("dpadU rpm+ | dpadD rpm- | □ fly | dpadL move | dpadR zero | RT over | LT under | O top | △ bottom | X lock | opt in | LB undo | RB reset");
         TimedTelemetry.update();
         telemetry.update();
     }
@@ -189,14 +203,25 @@ public class DriveTrackingTest extends OpMode {
     }
 
     private void zeroPose() {
-        odometry.setPose(new Pose2D(DistanceUnit.METER, 0, 0, AngleUnit.DEGREES, START_HEADING_DEG));
+        odometry.setPose(new Pose2D(DistanceUnit.INCH, CLOSE_X_IN, 0, AngleUnit.DEGREES, CLOSE_HEADING_DEG));
+    }
+
+    private int closerHive(double inchX, double inchY) {
+        double best = Double.POSITIVE_INFINITY;
+        int hive = 0;
+        for (int i = 0; i < MapSpecs.HIVE_COORDINATES.length; i++) {
+            double dx = MapSpecs.HIVE_COORDINATES[i].getX() - inchX;
+            double dy = MapSpecs.HIVE_COORDINATES[i].getY() - inchY;
+            double distance = dx * dx + dy * dy;
+            if (distance < best) {
+                best = distance;
+                hive = i;
+            }
+        }
+        return hive;
     }
 
     private void adjust(ShotUtil.ShotResult r, boolean shorter, boolean half, boolean make) {
-        if (r.behind) {
-            lastResult = "behind: not tuned";
-            return;
-        }
         int direction = shorter ? 1 : -1;
         if (lastDirection != 0 && lastDirection != direction) step = Math.max(MIN_STEP, step / 2.0);
         double move = half ? step / 2.0 : step; // deg

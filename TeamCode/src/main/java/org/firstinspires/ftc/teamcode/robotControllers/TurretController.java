@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
-import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.ShotUtil;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
@@ -66,8 +65,7 @@ public class TurretController {
 
     public static void setHood(double degrees) {
         if (Double.isNaN(degrees)) return;
-        degrees = Math.max(TurretConstants.HOOD_MIN_DEG, Math.min(TurretConstants.HOOD_MAX_DEG, degrees));
-        hoodPosition = Math.round(degrees / TurretConstants.HOOD_STEP_DEG) * TurretConstants.HOOD_STEP_DEG;
+        hoodPosition = degrees;
     }
 
     public static double getRpm() {
@@ -155,11 +153,11 @@ public class TurretController {
             velocitySentAtNs = now;
         }
 
-        double servo = ShotCalculator.hoodServoPosition(hoodPosition);
-        if (servo != sentHood) {
-            hoodServo.setPosition(servo);
-            sentHood = servo;
-        }
+        double servo = hoodPosition / 270.0;
+        if (servo < 0) servo = 0;
+        if (servo > 1) servo = 1;
+        hoodServo.setPosition(servo);
+        sentHood = servo;
     }
 
     public static void stop() {
