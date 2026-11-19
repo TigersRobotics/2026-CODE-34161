@@ -60,6 +60,10 @@ public class GoBildaOdometry {
     public double getHeading(AngleUnit unit) {
         return odo.getPosition().getHeading(unit);
     }
+
+    public void setHeading(double heading, AngleUnit unit) {
+        odo.setHeading(heading, unit);
+    }
     public void reset() {
         odo.resetPosAndIMU();
     }

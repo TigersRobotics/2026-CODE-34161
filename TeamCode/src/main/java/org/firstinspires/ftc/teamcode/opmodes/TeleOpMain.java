@@ -45,7 +45,7 @@ public class TeleOpMain extends OpMode {
     static final double YAW_HOLD_DEG_PER_MS = 0.03;
 
     boolean enableIntake = false;
-    double yaw = 90;
+    double yaw = 0;
     double dpadRightHeldMs = 0;
     double dpadLeftHeldMs = 0;
     boolean toggleFlywheel = false;
@@ -58,7 +58,7 @@ public class TeleOpMain extends OpMode {
 
     double posx;
     double posY;
-    double heading;
+    double heading = 90;
     double intakePower;
 
     @Override
@@ -78,6 +78,7 @@ public class TeleOpMain extends OpMode {
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
 
         odometry = new GoBildaOdometry(hardwareMap, ODOMETRY_NAME);
+        odometry.setHeading(heading, AngleUnit.DEGREES);
 
         PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
 
