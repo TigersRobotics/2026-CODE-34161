@@ -45,7 +45,7 @@ public class TeleOpMain extends OpMode {
     static final double YAW_HOLD_DEG_PER_MS = 0.03;
 
     boolean enableIntake = false;
-    double yaw = 0;
+    double yaw = 90;
     double dpadRightHeldMs = 0;
     double dpadLeftHeldMs = 0;
     boolean toggleFlywheel = false;
