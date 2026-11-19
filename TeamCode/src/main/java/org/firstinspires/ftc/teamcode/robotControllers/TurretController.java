@@ -89,7 +89,7 @@ public class TurretController {
         if(actuallyEnabled) {
             flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
             flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            flywheel.setDirection(DcMotor.Direction.REVERSE);
+            flywheel.setDirection(DcMotor.Direction.FORWARD);
 
             rotation = hardwareMap.get(DcMotorEx.class, "yawMotor");
             rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
