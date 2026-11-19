@@ -35,13 +35,9 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     private static final int F = 3;
     private static final String[] AXIS_NAMES = {"kP", "kI", "kD", "kF"};
 
-    /**
-     * The manual tuner's F of 13.698 balances a motor whose top is about 2400 ticks/s.
-     * 1500 ticks/s is only two thirds of that, so shots leave underpowered.
-     * 2100 still leaves a little headroom for the wheel to recover after a ball.
-     */
-    private static final double INITIAL_TARGET_TICKS = 2100.0;
-    private static final double MIN_TARGET_TICKS = 1600.0;
+    /** Same target the manual flywheel tuner uses. 2100 ticks/s was too fast to shoot. */
+    private static final double INITIAL_TARGET_TICKS = 1500.0;
+    private static final double MIN_TARGET_TICKS = 1200.0;
     /** Closed-loop spin-up budget. Past this, the target is treated as a hardware limit. */
     private static final long SPINUP_TIMEOUT_MS = 15_000L;
     private static final long AT_SPEED_HOLD_MS = 200L;
@@ -215,7 +211,7 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     /**
-     * Starts at 2100 ticks/s so a shot is not at the old half-speed target.
+     * Starts at 1500 ticks/s, the speed the manual tuner holds.
      * The closed loop lowers that target only if the seed gains cannot hold it.
      */
     private boolean chooseTargetFromHardware() {
@@ -223,7 +219,7 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
         directionLabel = "forward";
         targetTicksPerSec = INITIAL_TARGET_TICKS;
         hardwareMaxTicks = INITIAL_TARGET_TICKS;
-        targetNote = "Target 2100 ticks/s. FIRE appears only while that speed is held.";
+        targetNote = "Target 1500 ticks/s. A shot is an RPM drop from that speed.";
         return true;
     }
 
@@ -372,7 +368,9 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     private double waitForShotRecovery() {
-        double reference = lastVelocity;
+        // Frozen at the speed the wheel was holding. It must not follow the dip down,
+        // or a real shot never looks big enough to count.
+        double reference = lastRaw;
         int lowSamples = 0;
         boolean recovering = false;
         long shotAtNs = 0L;
@@ -380,15 +378,15 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
 
         while (opModeIsActive()) {
             commandVelocity(targetTicksPerSec);
-            double velocity = readVelocity();
+            readVelocity();
+            double velocity = lastRaw;
             long now = System.nanoTime();
             boolean near = Math.abs(velocity - targetTicksPerSec) <= readyBand();
             hardwareMaxTicks = Math.max(hardwareMaxTicks, velocity);
 
             if (!recovering) {
-                boolean deep = reference - velocity >= dropThreshold()
-                        && velocity <= targetTicksPerSec - dropThreshold();
-                if (near) reference = velocity;
+                if (near && velocity >= reference - 25.0) reference = velocity;
+                boolean deep = reference - velocity >= dropThreshold();
                 if (deep) {
                     lowSamples++;
                     phase = "Shot drop";
@@ -401,7 +399,6 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
                     }
                 } else {
                     lowSamples = 0;
-                    // A small dip is not a failed trial and must not restart the search.
                     phase = near ? "Waiting for shot" : "Spinning up";
                 }
             } else if (near) {
@@ -603,6 +600,8 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
 
         if ("Waiting for shot".equals(phase)) {
             telemetry.addLine("FIRE");
+        } else if ("Shot drop".equals(phase) || "Recovering".equals(phase)) {
+            telemetry.addLine("SHOT");
         } else {
             telemetry.addLine("Do not fire yet");
         }
@@ -638,6 +637,8 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
         if (!targetNote.isEmpty()) telemetry.addLine(targetNote);
         if ("Waiting for shot".equals(phase)) {
             telemetry.addLine("FIRE — feed one ball through the wheel");
+        } else if ("Shot drop".equals(phase) || "Recovering".equals(phase)) {
+            telemetry.addLine("SHOT — recording how long the wheel takes to recover");
         }
         if (searchComplete && !giveUp && !Double.isNaN(bestRecoveryMs)) {
             telemetry.addLine(String.format(Locale.US,
@@ -685,7 +686,9 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     private double dropThreshold() {
-        return readyBand() + Math.max(80.0, targetTicksPerSec * 0.08);
+        // A ball is a small sharp dip. The old threshold was larger than that dip,
+        // so the shot was labeled "not at speed" and never recorded.
+        return Math.max(60.0, targetTicksPerSec * 0.04);
     }
 
     private double ticksToRpm(double ticksPerSec) {
