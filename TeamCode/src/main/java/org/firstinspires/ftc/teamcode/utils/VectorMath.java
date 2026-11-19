@@ -96,4 +96,83 @@ public class VectorMath {
 
     }
 
+
+
+    /**
+     * Returns the angle in radians that the turret would need to be to look at the hive
+     * @param hiveIndex the hive that the robot is looking at(0 is left, 1 is right)
+     * @param posX  Robot x pos
+     * @param posY  robot y pos
+     * @param heading robot heading
+     * @return returns a yaw for the turret to be at in radians
+     */
+    public static double calculateTurretAngle(int hiveIndex, double posX, double posY, double heading) {
+        double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
+        double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
+
+        double dx = hiveX - posX;
+        double dy = hiveY - posY;
+
+        double calculatedYaw = Math.atan2(dy, dx);
+        calculatedYaw += heading;
+
+
+        while(calculatedYaw > Math.PI) calculatedYaw -= 2 * Math.PI;
+        while(calculatedYaw < -Math.PI) calculatedYaw += 2* Math.PI;
+
+        return calculatedYaw;
+    }
+
+
+    /**
+     * Use input inches
+     */
+    public static double calculateHoodAngle(int hiveIndex, double posX, double posY, double flywheelTicksPerSecond) {
+        final double G = 9.81;
+
+        double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
+        double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
+
+        // horizontal distance to hive, inches -> meters
+        double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
+
+        // target height relative to where the ball leaves the shooter (placeholders), inches -> meters
+        double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;
+
+        // flywheel ticks/sec -> ball exit speed in m/s (tune the efficiency!)
+        double wheelRevsPerSec = flywheelTicksPerSecond / RobotSpecs.FLYWHEEL_TICKS_PER_REV;
+        double surfaceSpeed = wheelRevsPerSec * 2 * Math.PI * RobotSpecs.FLYWHEEL_RADIUS_M;
+        double v = surfaceSpeed * RobotSpecs.SHOT_EFFICIENCY;
+
+        if (v <= 0 || x <= 0) return Double.NaN;
+
+        // Solve y = x*u - k*(1+u^2) * ... for u = tan(angle):
+        // k*u^2 - x*u + (k + y) = 0, where k = g*x^2 / (2*v^2)
+        double k = G * x * x / (2 * v * v);
+        double disc = x * x - 4 * k * (k + y);
+
+        if (disc < 0) {
+            TimedTelemetry.addLine("Flywheel too slow to reach target");
+            return Double.NaN;
+        }
+
+        double sqrtDisc = Math.sqrt(disc);
+        double lowAngle  = Math.toDegrees(Math.atan((x - sqrtDisc) / (2 * k))); // flatter shot
+        double highAngle = Math.toDegrees(Math.atan((x + sqrtDisc) / (2 * k))); // lobbed shot
+
+
+        //Prefer not lob shot
+        if (lowAngle < RobotSpecs.MAX_TURRET_ANGLE_UP && lowAngle > RobotSpecs.MAX_TURRET_ANGLE_DOWN) {
+            return lowAngle;
+        }
+        //lob shot
+        if (highAngle < RobotSpecs.MAX_TURRET_ANGLE_UP && highAngle > RobotSpecs.MAX_TURRET_ANGLE_DOWN) {
+            return highAngle;
+        }
+
+
+        TimedTelemetry.addLine("No valid angle found: " + lowAngle + " " + highAngle);
+        return Double.NaN;
+    }
+
 }

@@ -18,7 +18,14 @@ public class Presets {
     public static CustomController technicianPreset(Gamepad gamepad2) {
         return  new CustomController(gamepad2,
                     gamepad -> gamepad.left_trigger * Timer.DTime(),
-                gamepad -> gamepad.right_trigger * Timer.DTime()
+                gamepad -> gamepad.right_trigger * Timer.DTime(),
+                Gamepad::circleWasPressed,      ///Auto park
+                Gamepad::dpadLeftWasPressed,
+                Gamepad::dpadRightWasPressed,
+                Gamepad::triangleWasPressed,
+                Gamepad::dpadUpWasPressed,
+                Gamepad::dpadDownWasPressed,
+                Gamepad::squareWasPressed
                 );
     }
 

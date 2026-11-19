@@ -23,6 +23,7 @@ public class AprilTagWebcam {
 
     //List of Detected Tags
     private static ArrayList<AprilTagDetection> detectedTags = new ArrayList<>();
+    private static HiveSide lastSeenSide = HiveSide.RIGHT;
 
     public static void init(HardwareMap hardwareMap) {
         AprilTagProcessor.Builder processerBuilder = new AprilTagProcessor.Builder();
@@ -91,6 +92,37 @@ public class AprilTagWebcam {
         }
     }
 
+
+    public enum HiveSide  {
+        LEFT,
+        RIGHT
+    }
+
+    /**
+     * Returns the side hive is on; if there r no detected tags returns the last side seen
+     * @param tags list of tags on the hive
+     * @param headingRad heading of robot in deg
+     * @return enum of hive side
+     */
+    public static HiveSide getHiveSide(int[] tags, double headingRad) {
+        AprilTagDetection best = null;
+        for (int id : tags) {
+            AprilTagDetection tag = getTagByID(id);
+            if (tag == null || tag.ftcPose == null) continue;
+            if (best == null || Math.abs(tag.ftcPose.bearing) < Math.abs(best.ftcPose.bearing)) {
+                best = tag;
+            }
+        }
+        if (best == null) return lastSeenSide;
+
+        double bearingRad = Math.toRadians(best.ftcPose.bearing);
+        double fieldBearing = AngleUnit.normalizeRadians(headingRad + bearingRad);
+
+        // Decide using fieldBearing's sign / range, per your field's convention
+        HiveSide side = fieldBearing > 0 ? HiveSide.LEFT : HiveSide.RIGHT;
+        lastSeenSide = side;
+        return side;
+    }
     public static AprilTagDetection getTagByID(int id) {
         for(AprilTagDetection detection : detectedTags) {
             AprilTagSingleDetection singleTag = (AprilTagSingleDetection) detection;

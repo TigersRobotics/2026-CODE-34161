@@ -19,6 +19,12 @@ public class CustomController {
     private Binding.Axis overrideTurretRight;
     private Binding.Axis overridePark;
     private Binding.Button toggleAutoPark;
+    private Binding.Button degUpHood;
+    private Binding.Button degDownHood;
+    private Binding.Button toggleFlywheel;
+    private Binding.Button turnUpFlywheelSpeed;
+    private Binding.Button turnDownFlywheelSpeed;
+    private Binding.Button changeHiveIndex;
 
 
     /**
@@ -49,10 +55,41 @@ public class CustomController {
 
     public CustomController(Gamepad gamepad,
                             Binding.Axis overrideTurretLeft,
-                            Binding.Axis overrideTurretRight) {
+                            Binding.Axis overrideTurretRight,
+                            Binding.Button toggleAutoPark,
+                            Binding.Button degUpHood,
+                            Binding.Button degDownHood,
+                            Binding.Button toggleFlywheel,
+                            Binding.Button turnUpFlywheelSpeed,
+                            Binding.Button turnDownFlywheelSpeed,
+                            Binding.Button changeHiveIndex) {
         this.gamepad = gamepad;
         this.overrideTurretRight = overrideTurretRight;
         this.overrideTurretLeft = overrideTurretLeft;
+        this.toggleAutoPark = toggleAutoPark;
+        this.degUpHood = degUpHood;
+        this.degDownHood = degDownHood;
+        this.toggleFlywheel = toggleFlywheel;
+        this.turnUpFlywheelSpeed = turnUpFlywheelSpeed;
+        this.turnDownFlywheelSpeed = turnDownFlywheelSpeed;
+        this.changeHiveIndex = changeHiveIndex;
+
+    }
+
+    public boolean turnUpFlywheelSpeed() {
+        return turnUpFlywheelSpeed.test(gamepad);
+    }
+    public boolean turnDownFlywheelSpeed() {
+        return turnDownFlywheelSpeed.test(gamepad);
+    }
+    public boolean getDegUpHood() {
+        return degUpHood.test(gamepad);
+    }
+    public boolean getDegDownHood() {
+        return degDownHood.test(gamepad);
+    }
+    public boolean toggleFlywheel() {
+        return toggleFlywheel.test(gamepad);
     }
     public double getDriveX() {
         return driveX.applyAsDouble(gamepad);

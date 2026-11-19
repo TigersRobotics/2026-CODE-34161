@@ -4,7 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 
 @TeleOp(name = "Flywheel PIDF Tuning")
 public class FlywheelPIDFTuning extends OpMode {
@@ -13,13 +17,12 @@ public class FlywheelPIDFTuning extends OpMode {
     private static final String MOTOR_NAME = "flywheel";
 
     public double highVelocity = 1500;
-    public double lowVelocity = 900;
     private double currentTargetVelocity = highVelocity;
 
     private DcMotorEx flywheel;
 
-    private double P = 0;
-    private double F = 0;
+    private double P = 11.0;
+    private double F = 13.698;
 
     // What the hub was last told. NaN means the target velocity has not been sent yet.
     private double sentP = P;
@@ -29,26 +32,30 @@ public class FlywheelPIDFTuning extends OpMode {
     private final double[] stepSizes = {10.0, 1.0, 0.1, 0.01, 0.001, 0.0001};
     private int stepIndex = 1;
 
+    private Servo hoodServo;
+
     @Override
     public void init() {
         flywheel = hardwareMap.get(DcMotorEx.class, MOTOR_NAME);
         flywheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        // flywheel.setDirection(DcMotorSimple.Direction.REVERSE); // uncomment if needed
+//         flywheel.setDirection(DcMotorSimple.Direction.REVERSE); // uncomment if needed
 
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
                 new PIDFCoefficients(P, 0, 0, F));
+
+        hoodServo = hardwareMap.get(Servo.class, HardwareNames.TURRET_UP_ANGLE_SERVO_NAME);
 
         telemetry.addLine("Init complete");
     }
 
     @Override
     public void loop() {
-        // Toggle target velocity
-        if (gamepad1.circleWasPressed()) {
-            currentTargetVelocity = (currentTargetVelocity == highVelocity) ? lowVelocity : highVelocity;
-        }
+        hoodServo.setPosition(1);
+        //Change target Velocity
+        if(gamepad1.circleWasPressed()) currentTargetVelocity += 10;
+        if(gamepad1.crossWasPressed()) currentTargetVelocity -= 10;
 
         // Cycle step size
         if (gamepad1.triangleWasPressed()) {
