@@ -38,12 +38,16 @@ public class PollenTurretController {
     private static Servo hoodServo;
 
     private static double P = TuningConstants.FLYWHEEL_P_VALUE;
+    private static double I = TuningConstants.FLYWHEEL_I_VALUE;
+    private static double D = TuningConstants.FLYWHEEL_D_VALUE;
     private static double F = TuningConstants.FLYWHEEL_F_VALUE;
     private static double targetVel = 0;
     private static double yaw = 0; //This is in degrees
 
     // The last values actually sent to the hardware. NaN / MIN_VALUE mean "nothing sent yet".
     private static double sentP = Double.NaN;
+    private static double sentI = Double.NaN;
+    private static double sentD = Double.NaN;
     private static double sentF = Double.NaN;
     private static double sentVel = Double.NaN;
     private static int sentYawTicks = Integer.MIN_VALUE;
@@ -172,15 +176,19 @@ public class PollenTurretController {
     }
 
     private static void applyPFCoefficients() {
-        if(P == sentP && F == sentF) return;
+        if(P == sentP && I == sentI && D == sentD && F == sentF) return;
 
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, 0, 0, F));
+        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
         sentP = P;
+        sentI = I;
+        sentD = D;
         sentF = F;
     }
 
     private static void forgetSentValues() {
         sentP = Double.NaN;
+        sentI = Double.NaN;
+        sentD = Double.NaN;
         sentF = Double.NaN;
         sentVel = Double.NaN;
         sentYawTicks = Integer.MIN_VALUE;

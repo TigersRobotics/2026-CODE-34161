@@ -15,9 +15,9 @@ public class ShotUtilTest {
             ShotUtil.ShotResult result = ShotUtil.compute(0, 0.9144, 0, 0, 2350, false);
             assertTrue(result.valid);
             assertTrue(result.steepArc);
-            assertEquals(5.31, result.ballSpeed, 0.02); // m/s
-            assertEquals(75.6, result.thetaDeg, 0.1); // deg
-            assertEquals(14.4, result.hoodDeg, 0.1); // deg
+            assertEquals(5.25, result.ballSpeed, 0.02); // m/s
+            assertEquals(74.7, result.thetaDeg, 0.1); // deg
+            assertEquals(15.3, result.hoodDeg, 0.1); // deg
         } finally {
             TurretConstants.SHOOTER_Z = previousShooterZ;
         }

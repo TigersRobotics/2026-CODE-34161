@@ -16,10 +16,10 @@ public class TurretConstants {
     // Tuned Constants
 
     // PIDF
-    public static double FLYWHEEL_P = 0;
+    public static double FLYWHEEL_P = 10;
     public static double FLYWHEEL_I = 0;
     public static double FLYWHEEL_D = 0;
-    public static double FLYWHEEL_F = 0;
+    public static double FLYWHEEL_F = 32767.0 / (FLYWHEEL_RPM_MAX * FLYWHEEL_TICKS_PER_REV / 60.0);
 
     // Shooting
     public static double G = 9.80665; // m/s^2
@@ -31,7 +31,7 @@ public class TurretConstants {
     public static double HIVE_Y = 0; // m
 
     public static double W_V = 0.5;
-    public static double W_D = 1.0;
+    public static double W_D = 1.25;
     public static double W_H1 = -1.0;
     public static double W_H0 = 90.0;
     public static double W_BETA = 0.0;
@@ -39,8 +39,8 @@ public class TurretConstants {
     public static double W_T = 1.0;
     public static double T_LAT = 0.05; // s
 
-    public static double RPM_A = 0;
-    public static double RPM_B = 0; // rpm per m
+    public static double RPM_A = 2250;
+    public static double RPM_B = 313; // rpm per m
 
     public static double YAW_TOL = 0.15; // m
     public static double HOOD_SETTLE_DEG = 0.5;
@@ -53,4 +53,7 @@ public class TurretConstants {
 
     public static double BEHIND_HYST = 0.05; // m
     public static double BEHIND_MIN_PHI = 60; // deg
+
+    public static double TRIM_STEP_START = 2.0; // deg
+    public static double TRIM_SHORTER_SIGN = -1;
 }
