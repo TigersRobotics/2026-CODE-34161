@@ -60,8 +60,6 @@ public class TeleOpMain extends OpMode {
     double posY;
     double heading;
     double intakePower;
-    CustomController technicianController = Presets.technicianPreset(gamepad2);
-    CustomController driverController = Presets.driverPreset(gamepad1);
 
     @Override
     public void init() {
@@ -125,15 +123,15 @@ public class TeleOpMain extends OpMode {
     }
 
     private void handleDriverInputs() {
-        if(driverController.getToggleIntake()) enableIntake = !enableIntake;
+        if(gamepad1.leftTriggerWasPressed()) enableIntake = !enableIntake;
         intakePower = enableIntake ? 1 : 0;
     }
 
     private void handleTechnicianInputs() {
-        if(technicianController.turnUpFlywheelSpeed()) targetVel += 10;
-        if(technicianController.turnDownFlywheelSpeed()) targetVel -= 10;
+        if(gamepad2.dpadUpWasPressed()) targetVel += 10;
+        if(gamepad2.dpadDownWasPressed()) targetVel -= 10;
         if(gamepad1.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
-        if(technicianController.toggleFlywheel()) toggleFlywheel = !toggleFlywheel;
+        if(gamepad2.circleWasPressed()) toggleFlywheel = !toggleFlywheel;
 
 
 

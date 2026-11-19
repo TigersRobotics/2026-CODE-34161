@@ -113,12 +113,12 @@ public class VectorMath {
         double dx = hiveX - posX;
         double dy = hiveY - posY;
 
-        double calculatedYaw = Math.atan2(dy, dx);
-        calculatedYaw += heading;
+        double calculatedYaw = heading -Math.atan2(dy, dx);
 
 
         while(calculatedYaw > Math.PI) calculatedYaw -= 2 * Math.PI;
         while(calculatedYaw < -Math.PI) calculatedYaw += 2* Math.PI;
+
 
         return calculatedYaw;
     }
