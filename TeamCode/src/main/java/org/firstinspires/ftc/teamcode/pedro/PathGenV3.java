@@ -126,28 +126,28 @@ public class PathGenV3 {
     }
 
     public static void checkSomeStates() {
-        switch (currentState) {
-            case MOVING_TO_SHOOT:
-                if (!follower.isBusy()) {
-                    currentState = State.SHOOTING;
-                }
-                break;
-            case PARKING:
-                if (!follower.isBusy()) {
-                    currentState = State.IDLE;
-                }
-                break;
-            case FLOWER_COLLECTING1:
-                if (!follower.isBusy()) {
-                    currentState = State.FLOWER_COLLECTING2;
-                    if ((getCurrentPose().heading() - Math.toRadians(110) < 0)) {
-                        destination = new Pose(getCurrentPose().x(), getCurrentPose().y() + 36, Math.toRadians(90));
-                    } else {
-                        destination = new Pose(getCurrentPose().x() + 36, getCurrentPose().y(), Math.toRadians(180));
-                    }
-                }
-                break;
-        }
+//        switch (currentState) {
+//            case MOVING_TO_SHOOT:
+//                if (!follower.isBusy()) {
+//                    currentState = State.SHOOTING;
+//                }
+//                break;
+//            case PARKING:
+//                if (!follower.isBusy()) {
+//                    currentState = State.IDLE;
+//                }
+//                break;
+//            case FLOWER_COLLECTING1:
+//                if (!follower.isBusy()) {
+//                    currentState = State.FLOWER_COLLECTING2;
+//                    if ((getCurrentPose().heading() - Math.toRadians(110) < 0)) {
+//                        destination = new Pose(getCurrentPose().x(), getCurrentPose().y() + 36, Math.toRadians(90));
+//                    } else {
+//                        destination = new Pose(getCurrentPose().x() + 36, getCurrentPose().y(), Math.toRadians(180));
+//                    }
+//                }
+//                break;
+//        }
     }
 
     public static void updateMovement() {

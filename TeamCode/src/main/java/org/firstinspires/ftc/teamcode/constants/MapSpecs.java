@@ -33,7 +33,7 @@ public class MapSpecs {
     public static final ArrayList<Zone> SHOOTING_ZONES = new ArrayList<>(
             List.of(LEFT_SHOOTING, RIGHT_SHOOTING));
 
-    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.5 - Competition.STARTING_Y_TILES), Math.toRadians(90));
+    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.75 - Competition.STARTING_Y_TILES), Math.toRadians(90));
     public static final Pose GARDEN = new Pose(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES));
     public static final ArrayList<Zone> FLOWERS = new ArrayList<>(List.of(
             new CircleZone(new Point(2.5, 48), 2.5),
