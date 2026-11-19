@@ -11,6 +11,7 @@ import com.skeletonarmy.marrow.zones.Zone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
@@ -61,6 +62,7 @@ public class PathGenV3 {
         on = autonMode;
         currentState = State.IDLE;
         PathGenV3.follower = follower;
+        follower.setPose(new Pose(tileToIN(Competition.STARTING_X_TILES), tileToIN(Competition.STARTING_Y_Tiles), 0));
         PathGenV3.odometry = odometry;
 
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)

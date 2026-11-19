@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 public class GoBildaOdometry {
 
     private final GoBildaPinpointDriver odo;
+    private static boolean setInitYet = false;
     public GoBildaOdometry(HardwareMap hardwareMap, String deviceName) {
         if (hardwareMap.get(GoBildaPinpointDriver.class, deviceName)==null) TimedTelemetry.addLine("Test Failed", 1000);
         else TimedTelemetry.addLine("Test Passed",1000);
@@ -28,9 +29,14 @@ public class GoBildaOdometry {
 
         odo.resetPosAndIMU();
         TimedTelemetry.addLine("setPose reached");
-        setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), AngleUnit.DEGREES, 0));
     }
     public void update() {
+        if (odo.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.NOT_READY) return;
+        if (!setInitYet) {
+            setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), AngleUnit.DEGREES, 0));
+            setInitYet = true;
+        }
+
         odo.update();
     }
 
@@ -57,4 +63,5 @@ public class GoBildaOdometry {
     public GoBildaPinpointDriver.DeviceStatus getStatus() {
         return odo.getDeviceStatus();
     }
+
 }
