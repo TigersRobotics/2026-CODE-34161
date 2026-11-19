@@ -31,13 +31,12 @@ public class GoBildaOdometry {
         TimedTelemetry.addLine("setPose reached");
     }
     public void update() {
+        odo.update();
         if (odo.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.NOT_READY) return;
         if (!setInitYet) {
             setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), 0, AngleUnit.DEGREES, 0));
             setInitYet = true;
         }
-
-        odo.update();
     }
 
     public Pose2D getPose() {

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
+import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.ShotUtil;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
@@ -88,7 +89,7 @@ public class TurretController {
         if(actuallyEnabled) {
             flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
             flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            flywheel.setDirection(DcMotor.Direction.FORWARD);
+            flywheel.setDirection(DcMotor.Direction.REVERSE);
 
             rotation = hardwareMap.get(DcMotorEx.class, "yawMotor");
             rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -154,9 +155,7 @@ public class TurretController {
             velocitySentAtNs = now;
         }
 
-        double servo = (hoodPosition - TurretConstants.HOOD_MIN_DEG)
-                / (TurretConstants.HOOD_MAX_DEG - TurretConstants.HOOD_MIN_DEG);
-        servo = Math.max(0, Math.min(1, servo));
+        double servo = ShotCalculator.hoodServoPosition(hoodPosition);
         if (servo != sentHood) {
             hoodServo.setPosition(servo);
             sentHood = servo;

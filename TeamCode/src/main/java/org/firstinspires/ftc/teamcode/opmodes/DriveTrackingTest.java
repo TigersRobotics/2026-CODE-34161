@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.TurretController;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
+import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.ShotUtil;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
@@ -32,7 +33,7 @@ public class DriveTrackingTest extends OpMode {
 
     GoBildaOdometry odometry;
     List<LynxModule> hubs;
-    boolean flywheelOn;
+    boolean flywheelOn = true;
     boolean movingComp;
     boolean needZero = true;
     boolean rightDown;
@@ -59,6 +60,7 @@ public class DriveTrackingTest extends OpMode {
         hubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : hubs) hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
+        ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
         TurretController.init(hardwareMap);
         MecanumDriveTrainController.init(hardwareMap);
         ShotUtil.reset();
@@ -145,6 +147,7 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("x", "%.2f m", 1, x);
         TimedTelemetry.addData("y", "%.2f m", 1, y);
         TimedTelemetry.addData("heading", "%.1f deg", 1, heading);
+        TimedTelemetry.addData("odo", odometry.getStatus());
         TimedTelemetry.addData("vx", "%.2f m/s", 1, vx);
         TimedTelemetry.addData("vy", "%.2f m/s", 1, vy);
         TimedTelemetry.addData("range", "%.2f m", 1, r.range);
