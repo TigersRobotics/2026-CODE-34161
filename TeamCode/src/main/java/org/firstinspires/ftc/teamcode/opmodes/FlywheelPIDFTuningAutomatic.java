@@ -63,7 +63,8 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     private double hardwareMaxTicks;
     private int speedReductions;
     private String targetNote = "";
-    private String directionLabel = "reverse";
+    private String directionLabel = "forward";
+    private boolean directionFlipped;
 
     private final double[] axisLo = new double[4];
     private final double[] axisHi = new double[4];
@@ -119,7 +120,9 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     @Override
     public void runOpMode() {
         flywheel = hardwareMap.get(DcMotorEx.class, HardwareNames.FLYWHEEL_NAME);
-        flywheel.setDirection(DcMotor.Direction.REVERSE);
+        // ShooterTuning and the manual PIDF tuner leave the default direction.
+        // Reversing here spins the wheel backwards while the encoder still counts up.
+        flywheel.setDirection(DcMotor.Direction.FORWARD);
         flywheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -215,19 +218,20 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     private boolean chooseTargetFromHardware() {
         phase = "Measuring hardware max";
         tuningLabel = "hardware max";
-        double reversePeak = coastUp(DcMotor.Direction.REVERSE);
-        double peak = reversePeak;
-        directionLabel = "reverse";
-        flywheel.setDirection(DcMotor.Direction.REVERSE);
+        flywheel.setDirection(DcMotor.Direction.FORWARD);
+        directionLabel = "forward";
+        double peak = coastUp(DcMotor.Direction.FORWARD);
 
-        if (reversePeak < 200.0) {
-            double forwardPeak = coastUp(DcMotor.Direction.FORWARD);
-            if (forwardPeak > reversePeak) {
-                peak = forwardPeak;
-                directionLabel = "forward";
-            } else {
-                flywheel.setDirection(DcMotor.Direction.REVERSE);
+        // A negative encoder means this direction is backwards. Flip once.
+        if (peak < 200.0) {
+            double flippedPeak = coastUp(DcMotor.Direction.REVERSE);
+            if (flippedPeak > peak) {
+                peak = flippedPeak;
                 directionLabel = "reverse";
+                directionFlipped = true;
+            } else {
+                flywheel.setDirection(DcMotor.Direction.FORWARD);
+                directionLabel = "forward";
             }
         }
 
@@ -419,6 +423,13 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
             commandVelocity(targetTicksPerSec);
             double velocity = readVelocity();
             spinUpElapsedMs = msSince(spinStart);
+            if (!directionFlipped && velocity < -150.0 && spinUpElapsedMs > 400.0) {
+                flipDirection();
+                spinStart = System.nanoTime();
+                inBandSince = -1L;
+                resetFilter();
+                continue;
+            }
             if (Math.abs(velocity - targetTicksPerSec) <= speedBand()) {
                 if (inBandSince < 0L) inBandSince = System.nanoTime();
                 phase = "Spinning up";
@@ -676,6 +687,16 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
         velocityPos = 0;
     }
 
+    private void flipDirection() {
+        DcMotor.Direction next = flywheel.getDirection() == DcMotor.Direction.REVERSE
+                ? DcMotor.Direction.FORWARD
+                : DcMotor.Direction.REVERSE;
+        flywheel.setDirection(next);
+        directionLabel = next == DcMotor.Direction.REVERSE ? "reverse" : "forward";
+        directionFlipped = true;
+        forgetSentCommands();
+    }
+
     private void forgetSentCommands() {
         sentP = Double.NaN;
         sentI = Double.NaN;
@@ -687,6 +708,11 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     private void publish() {
         double progress = searchComplete ? 100.0 : computeProgress();
 
+        if ("Waiting for shot".equals(phase)) {
+            telemetry.addLine("FIRE");
+        } else {
+            telemetry.addLine("Do not fire yet");
+        }
         telemetry.addData("Progress", "%.1f%%", progress);
         telemetry.addData("Phase", phase);
         telemetry.addData("Pass", "%d / %d", Math.max(passNumber, 0), MAX_PASSES);
@@ -717,7 +743,9 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
         telemetry.addData("Trials scored", trialsMeasured);
         telemetry.addData("Confirm shots", confirmations);
         if (!targetNote.isEmpty()) telemetry.addLine(targetNote);
-        telemetry.addLine("Feed a ball through the wheel. No controller input.");
+        if ("Waiting for shot".equals(phase)) {
+            telemetry.addLine("FIRE — feed one ball through the wheel");
+        }
         if (searchComplete && !giveUp && !Double.isNaN(bestRecoveryMs)) {
             telemetry.addLine(String.format(Locale.US,
                     "Optimal  kP %.4f  kI %.4f  kD %.4f  kF %.4f",
