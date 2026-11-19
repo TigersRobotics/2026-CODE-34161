@@ -44,7 +44,7 @@ public class TurretController {
 
     public static void setYawFieldCentric(double fieldDegrees, double robotHeadingDegrees,
             double perpendicularVelocity, double ballSpeed, double trajectoryDegrees, double weight) {
-        setYaw(fieldDegrees - robotHeadingDegrees, perpendicularVelocity, ballSpeed, trajectoryDegrees, weight);
+        setYaw(fieldDegrees + robotHeadingDegrees, perpendicularVelocity, ballSpeed, trajectoryDegrees, weight);
     }
 
     private static double leadDegrees(double perpendicularVelocity, double ballSpeed,
