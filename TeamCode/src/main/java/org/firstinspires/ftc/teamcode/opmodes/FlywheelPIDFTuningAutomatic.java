@@ -35,17 +35,21 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     private static final int F = 3;
     private static final String[] AXIS_NAMES = {"kP", "kI", "kD", "kF"};
 
-    /** Same high target the manual flywheel tuner commands, in ticks per second. */
-    private static final double INITIAL_TARGET_TICKS = 1500.0;
-    private static final double MIN_TARGET_TICKS = 400.0;
+    /**
+     * The manual tuner's F of 13.698 balances a motor whose top is about 2400 ticks/s.
+     * 1500 ticks/s is only two thirds of that, so shots leave underpowered.
+     * 2100 still leaves a little headroom for the wheel to recover after a ball.
+     */
+    private static final double INITIAL_TARGET_TICKS = 2100.0;
+    private static final double MIN_TARGET_TICKS = 1600.0;
     /** Closed-loop spin-up budget. Past this, the target is treated as a hardware limit. */
     private static final long SPINUP_TIMEOUT_MS = 15_000L;
-    private static final long OPEN_LOOP_CAP_MS = 8_000L;
-    private static final long BLEED_MS = 1_500L;
-    private static final long AT_SPEED_HOLD_MS = 250L;
+    private static final long AT_SPEED_HOLD_MS = 200L;
+    /** Feedforward and P from the manual flywheel tuner. F holds speed; P recovers it. */
+    private static final double SEED_P = 11.0;
+    private static final double SEED_F = 13.698;
     private static final long RECOVER_HOLD_MS = 150L;
     private static final long RECOVERY_CAP_MS = 5_000L;
-    private static final long SUDDEN_DROP_WINDOW_NS = 400_000_000L;
     private static final long SAMPLE_MS = 20L;
     private static final long VELOCITY_RESEND_NS = 500_000_000L;
 
@@ -211,86 +215,16 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     /**
-     * Spins the wheel open-loop and keeps a target the hardware can actually hold.
-     * The closed-loop search still lowers the target again if a reachable setpoint
-     * cannot be held within {@link #SPINUP_TIMEOUT_MS}.
+     * Starts at 2100 ticks/s so a shot is not at the old half-speed target.
+     * The closed loop lowers that target only if the seed gains cannot hold it.
      */
     private boolean chooseTargetFromHardware() {
-        phase = "Measuring hardware max";
-        tuningLabel = "hardware max";
         flywheel.setDirection(DcMotor.Direction.FORWARD);
         directionLabel = "forward";
-        double peak = coastUp(DcMotor.Direction.FORWARD);
-
-        // A negative encoder means this direction is backwards. Flip once.
-        if (peak < 200.0) {
-            double flippedPeak = coastUp(DcMotor.Direction.REVERSE);
-            if (flippedPeak > peak) {
-                peak = flippedPeak;
-                directionLabel = "reverse";
-                directionFlipped = true;
-            } else {
-                flywheel.setDirection(DcMotor.Direction.FORWARD);
-                directionLabel = "forward";
-            }
-        }
-
-        hardwareMaxTicks = peak;
-        if (peak < 200.0) return false;
-
-        double reachable = peak * 0.90;
-        if (reachable < INITIAL_TARGET_TICKS) {
-            targetTicksPerSec = reachable;
-            speedReductions++;
-            targetNote = String.format(Locale.US,
-                    "Target lowered from %.0f to %.0f ticks/s. Open-loop max was %.0f.",
-                    INITIAL_TARGET_TICKS, targetTicksPerSec, peak);
-        } else {
-            targetTicksPerSec = INITIAL_TARGET_TICKS;
-            targetNote = String.format(Locale.US,
-                    "Open-loop max %.0f ticks/s. Target stays %.0f.",
-                    peak, targetTicksPerSec);
-        }
-        return targetTicksPerSec >= 150.0;
-    }
-
-    private double coastUp(DcMotor.Direction direction) {
-        flywheel.setDirection(direction);
-        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        forgetSentCommands();
-        resetFilter();
-        double peak = 0.0;
-        try {
-            flywheel.setPower(1.0);
-            long startNs = System.nanoTime();
-            long stableSinceNs = -1L;
-            double previous = 0.0;
-            while (opModeIsActive() && msSince(startNs) < OPEN_LOOP_CAP_MS) {
-                readVelocity();
-                // Median rejects a one-sample encoder spike so it cannot set the hardware max.
-                if (velocityCount >= 3 && msSince(startNs) > 200.0 && lastVelocity > peak) {
-                    peak = lastVelocity;
-                    hardwareMaxTicks = Math.max(hardwareMaxTicks, peak);
-                }
-                phase = "Measuring hardware max";
-                publish();
-
-                double tolerance = Math.max(40.0, peak * 0.02);
-                if (lastVelocity > 200.0 && Math.abs(lastVelocity - previous) <= tolerance) {
-                    if (stableSinceNs < 0L) stableSinceNs = System.nanoTime();
-                    if (msSince(stableSinceNs) >= 500.0) break;
-                } else {
-                    stableSinceNs = -1L;
-                }
-                previous = lastVelocity;
-                pause();
-            }
-        } finally {
-            flywheel.setPower(0.0);
-            flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            forgetSentCommands();
-        }
-        return peak;
+        targetTicksPerSec = INITIAL_TARGET_TICKS;
+        hardwareMaxTicks = INITIAL_TARGET_TICKS;
+        targetNote = "Target 2100 ticks/s. FIRE appears only while that speed is held.";
+        return true;
     }
 
     private void searchAxis(int axis) {
@@ -398,24 +332,11 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     /**
-     * Commands zero briefly so the wheel has to accelerate under the gains being scored,
-     * then waits until it holds the target.
+     * Commands the target and leaves the wheel there. It does not stop the wheel between trials.
      */
     private boolean spinUp(double[] gains) {
         applyGains(gains);
         show(gains);
-
-        long bleedStart = System.nanoTime();
-        while (opModeIsActive() && msSince(bleedStart) < BLEED_MS) {
-            commandVelocity(0.0);
-            double velocity = readVelocity();
-            phase = "Settling before trial";
-            spinUpElapsedMs = 0.0;
-            publish();
-            if (velocity <= targetTicksPerSec * 0.50) break;
-            pause();
-        }
-        if (!opModeIsActive()) return false;
 
         long spinStart = System.nanoTime();
         long inBandSince = -1L;
@@ -423,6 +344,7 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
             commandVelocity(targetTicksPerSec);
             double velocity = readVelocity();
             spinUpElapsedMs = msSince(spinStart);
+            hardwareMaxTicks = Math.max(hardwareMaxTicks, velocity);
             if (!directionFlipped && velocity < -150.0 && spinUpElapsedMs > 400.0) {
                 flipDirection();
                 spinStart = System.nanoTime();
@@ -430,7 +352,7 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
                 resetFilter();
                 continue;
             }
-            if (Math.abs(velocity - targetTicksPerSec) <= speedBand()) {
+            if (Math.abs(velocity - targetTicksPerSec) <= readyBand()) {
                 if (inBandSince < 0L) inBandSince = System.nanoTime();
                 phase = "Spinning up";
                 if (msSince(inBandSince) >= AT_SPEED_HOLD_MS) {
@@ -450,8 +372,6 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     private double waitForShotRecovery() {
-        long lostSince = -1L;
-        long lastInBandNs = System.nanoTime();
         double reference = lastVelocity;
         int lowSamples = 0;
         boolean recovering = false;
@@ -462,37 +382,29 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
             commandVelocity(targetTicksPerSec);
             double velocity = readVelocity();
             long now = System.nanoTime();
-            boolean inBand = Math.abs(velocity - targetTicksPerSec) <= speedBand();
+            boolean near = Math.abs(velocity - targetTicksPerSec) <= readyBand();
+            hardwareMaxTicks = Math.max(hardwareMaxTicks, velocity);
 
             if (!recovering) {
-                if (inBand) {
-                    reference = velocity;
-                    lastInBandNs = now;
-                    lostSince = -1L;
-                    lowSamples = 0;
-                    phase = "Waiting for shot";
-                } else {
-                    boolean sudden = now - lastInBandNs <= SUDDEN_DROP_WINDOW_NS;
-                    boolean deep = reference - velocity >= dropThreshold()
-                            && velocity <= targetTicksPerSec - dropThreshold();
-                    if (sudden && deep) {
-                        lowSamples++;
-                        phase = "Shot drop";
-                        if (lowSamples >= 2) {
-                            recovering = true;
-                            shotAtNs = now;
-                            dropShown = reference - velocity;
-                            recoverSince = -1L;
-                            phase = "Recovering";
-                        }
-                    } else {
-                        lowSamples = 0;
-                        phase = "Reacquiring speed";
-                        if (lostSince < 0L) lostSince = now;
-                        if (msSince(lostSince) >= SPINUP_TIMEOUT_MS) return UNREACHABLE;
+                boolean deep = reference - velocity >= dropThreshold()
+                        && velocity <= targetTicksPerSec - dropThreshold();
+                if (near) reference = velocity;
+                if (deep) {
+                    lowSamples++;
+                    phase = "Shot drop";
+                    if (lowSamples >= 2) {
+                        recovering = true;
+                        shotAtNs = now;
+                        dropShown = reference - velocity;
+                        recoverSince = -1L;
+                        phase = "Recovering";
                     }
+                } else {
+                    lowSamples = 0;
+                    // A small dip is not a failed trial and must not restart the search.
+                    phase = near ? "Waiting for shot" : "Spinning up";
                 }
-            } else if (inBand) {
+            } else if (near) {
                 phase = "Recovering";
                 if (recoverSince < 0L) recoverSince = now;
                 if (msSince(recoverSince) >= RECOVER_HOLD_MS) {
@@ -516,28 +428,10 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     }
 
     private void noteUnreachable(double[] trial, double score) {
-        if (score < UNREACHABLE / 2.0) {
-            consecutiveUnreachable = 0;
-            return;
-        }
-        if (sameGains(trial, seedGains)) {
-            if (!lowerTarget("Seed gains did not reach speed within 15s.")) giveUp = true;
-            else restartSearch = true;
-            return;
-        }
-
-        consecutiveUnreachable++;
-        if (consecutiveUnreachable < 3) return;
-        consecutiveUnreachable = 0;
-
-        tuningLabel = "recheck speed";
-        phase = "Rechecking hardware max";
-        publish();
-        if (!spinUp(seedGains)) {
-            if (!opModeIsActive()) return;
-            if (!lowerTarget("Best-known gains did not reach speed within 15s.")) giveUp = true;
-            else restartSearch = true;
-        }
+        // A gain that misses speed is just a bad score. Restarting here snapped progress
+        // back to 0 and spun the wheel down again.
+        if (score < UNREACHABLE / 2.0) consecutiveUnreachable = 0;
+        if (trial == null) return;
     }
 
     private void holdResult() {
@@ -618,18 +512,17 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
         axisHi[D] = 5.0;
         axisTol[D] = 0.02;
 
-        double seedF = 32767.0 / Math.max(hardwareMaxTicks, targetTicksPerSec);
-        axisLo[F] = 0.0;
-        axisHi[F] = Math.max(20.0, seedF * 2.0);
-        axisTol[F] = Math.max(0.05, axisHi[F] / 128.0);
+        // Below this the wheel cannot hold the shot speed, so every ball leaves soft.
+        axisLo[F] = 8.0;
+        axisHi[F] = 24.0;
+        axisTol[F] = 0.05;
     }
 
     private void seed(double[] gains) {
-        gains[P] = clamp(5.0, axisLo[P], axisHi[P]);
+        gains[P] = clamp(SEED_P, axisLo[P], axisHi[P]);
         gains[I] = 0.0;
         gains[D] = 0.0;
-        double seedF = 32767.0 / Math.max(hardwareMaxTicks, 1.0);
-        gains[F] = clamp(seedF, axisLo[F], axisHi[F]);
+        gains[F] = clamp(SEED_F, axisLo[F], axisHi[F]);
     }
 
     private void remember(double[] gains, double score) {
@@ -787,12 +680,12 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
         shownF = gains[F];
     }
 
-    private double speedBand() {
-        return Math.max(25.0, targetTicksPerSec * 0.03);
+    private double readyBand() {
+        return Math.max(120.0, targetTicksPerSec * 0.12);
     }
 
     private double dropThreshold() {
-        return Math.max(targetTicksPerSec * 0.05, speedBand() * 2.0);
+        return readyBand() + Math.max(80.0, targetTicksPerSec * 0.08);
     }
 
     private double ticksToRpm(double ticksPerSec) {
@@ -803,13 +696,6 @@ public class FlywheelPIDFTuningAutomatic extends LinearOpMode {
     private String key(double[] gains) {
         return String.format(Locale.US, "%.4f|%.4f|%.4f|%.4f|%.1f",
                 gains[P], gains[I], gains[D], gains[F], targetTicksPerSec);
-    }
-
-    private boolean sameGains(double[] a, double[] b) {
-        for (int i = 0; i < 4; i++) {
-            if (Math.abs(a[i] - b[i]) > 0.0001) return false;
-        }
-        return true;
     }
 
     private boolean leaveSearch() {
