@@ -7,6 +7,7 @@ import com.skeletonarmy.marrow.weaver.PathResult;
 import com.skeletonarmy.marrow.weaver.PedroPathingConverter;
 import com.skeletonarmy.marrow.weaver.Weaver;
 import com.skeletonarmy.marrow.weaver.WeaverBuilder;
+import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.Zone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -25,7 +26,8 @@ public class PathGenV3 {
     private static GoBildaOdometry odometry;
     private static Follower follower;
     private static boolean on;
-    public static void setOn (boolean on){
+
+    public static void setOn(boolean on) {
         PathGenV3.on = on;
         if (!on) {
             TimedTelemetry.addLine("Follower turned off");
@@ -74,7 +76,7 @@ public class PathGenV3 {
         PathGenV3.odometry = odometry;
 
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
-                .robotWidth(RobotSpecs.LENGTH_X_M * 100 / 2.54)
+                .robotWidth(RobotSpecs.LENGTH_X_IN)
                 .robotHeight(RobotSpecs.HEIGHT_M * 100 / 2.54).
                 clearance(RobotSpecs.CLEARANCE_IN));
         TimedTelemetry.addLine("PathGenV3 initialized!!! YAY!", 1000);
@@ -136,18 +138,28 @@ public class PathGenV3 {
 //                }
 //                break;
 //            case FLOWER_COLLECTING1:
-//                if (!follower.isBusy())
+//                if (!follower.isBusy()) {
 //                    currentState = State.FLOWER_COLLECTING2;
+//                    if ((getCurrentPose().heading() - Math.toRadians(110) < 0)) {
+//                        destination = new Pose(getCurrentPose().x(), getCurrentPose().y() + 36, Math.toRadians(90));
+//                    } else {
+//                        destination = new Pose(getCurrentPose().x() + 36, getCurrentPose().y(), Math.toRadians(180));
+//                    }
+//                }
 //                break;
 //        }
     }
 
     public static void updateMovement() {
         WeaverBuilder notPathYet = Weaver.builder();
-        notPathYet.start(PedroPathingConverter.toPoint(getCurrentPose()));
-        for (Zone obstacle : MapSpecs.OBSTACLES) notPathYet.addObstacle(obstacle);
-        if (autonMode) notPathYet.addObstacle(MapSpecs.OTHER_SIDE).addObstacle(Competition.DISABLED_SIDE);
-        notPathYet.end(PedroPathingConverter.toPoint(destination));
+        notPathYet = notPathYet.start(PedroPathingConverter.toPoint(getCurrentPose()));
+        for (Zone obstacle : MapSpecs.OBSTACLES)
+            notPathYet = notPathYet.addObstacle(obstacle);
+        if (autonMode)
+            notPathYet = notPathYet.addObstacle(MapSpecs.OTHER_SIDE).addObstacle(Competition.DISABLED_SIDE);
+        if (currentState != State.FLOWER_COLLECTING1 || currentState != State.FLOWER_COLLECTING2)
+            for (Zone flower : MapSpecs.FLOWERS) notPathYet = notPathYet.addObstacle(flower);
+        notPathYet = notPathYet.end(PedroPathingConverter.toPoint(destination));
         PathResult almostPath = notPathYet.build();
         try {
             TimedTelemetry.addLine("Follower followed", 2000);
@@ -174,13 +186,13 @@ public class PathGenV3 {
         switch (h) {
             case LEFT_HIVE:
                 destination = MapSpecs.LEFT_SHOOT_POS;
-                if (autonMode&&Competition.DISABLED_SIDE.contains(PedroPathingConverter.toPoint(destination))) {
+                if (autonMode && Competition.DISABLED_SIDE.contains(PedroPathingConverter.toPoint(destination))) {
                     destination = null;
                 }
                 break;
             case RIGHT_HIVE:
                 destination = MapSpecs.RIGHT_SHOOT_POS;
-                if (autonMode&&Competition.DISABLED_SIDE.contains(PedroPathingConverter.toPoint(destination))) {
+                if (autonMode && Competition.DISABLED_SIDE.contains(PedroPathingConverter.toPoint(destination))) {
                     destination = null;
                 }
                 break;
@@ -190,19 +202,30 @@ public class PathGenV3 {
                 } else destination = MapSpecs.LEFT_SHOOT_POS;
                 break;
         }
-        if (destination == null){
+        if (destination == null) {
             TimedTelemetry.addLine("Invalid shooting position given. ", 3000);
             return;
         }
         currentState = State.MOVING_TO_SHOOT;
 
 
-
         TimedTelemetry.addData("New destination: (￣y▽,￣)╭ ", destination, 3000);
     }
 
     public static void goScoop() {
-
+        if (currentState == State.FLOWER_COLLECTING2) {
+            TimedTelemetry.addLine("Already Flower Collecting", 2000);
+            return;
+        }
+        TimedTelemetry.addLine("Going to collect flower");
+        currentState = State.FLOWER_COLLECTING1;
+        double d = 1000000;
+        for (Point p : MapSpecs.FLOWER_COLLECTION_START) {
+            if (p.distanceTo(PedroPathingConverter.toPoint(getCurrentPose())) < d) {
+                d = p.distanceTo(PedroPathingConverter.toPoint(getCurrentPose()));
+                destination = new Pose(p.getX(), p.getY(), p.getHeadingRad());
+            }
+        }
     }
 
     //    public static void goCollect(){

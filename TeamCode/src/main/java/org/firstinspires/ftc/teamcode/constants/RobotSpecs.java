@@ -18,7 +18,7 @@ public class RobotSpecs {
     // Ball speed is currently a temp value;
     public static final double BALL_SPEED = 10;
 
-    public static final double LENGTH_X_M = 0.4572;
+    public static final double LENGTH_X_IN = 17.4;
     public static final double HEIGHT_M = 0.4572;
 
     // until further notice, intake width should be smaller than it actually is,

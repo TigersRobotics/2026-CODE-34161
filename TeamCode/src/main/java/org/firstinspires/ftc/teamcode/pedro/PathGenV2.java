@@ -94,7 +94,7 @@ public class PathGenV2 {
         PathGenV2.follower = follower;
         PathGenV2.odometry = odometry;
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
-                .robotWidth(RobotSpecs.LENGTH_X_M / 2.54)
+                .robotWidth(RobotSpecs.LENGTH_X_IN / 2.54)
                 .robotHeight(RobotSpecs.HEIGHT_M / 2.54).
                 clearance(RobotSpecs.CLEARANCE_IN));
         TimedTelemetry.addLine("PathGenV2 initialized!!! YAY!", 1000);
