@@ -71,7 +71,7 @@ public class ShotCalibration extends OpMode {
     private static final double PRESS_HEADING = 90;
     private static final double PRESS_BOX_IN = 40;
     private static final double PRESS_RUNAWAY_IN = 8;
-    private static final double ROBOT_HALF_IN = RobotSpecs.LENGTH_X_M / 0.0254 / 2.0;
+    private static final double ROBOT_HALF_IN = RobotSpecs.LENGTH_X_IN / 0.0254 / 2.0;
     private static final double ARRIVE_IN = 3;
     private static final double ARRIVE_DEG = 8;
     private static final double DRIVE_POWER = 0.4;

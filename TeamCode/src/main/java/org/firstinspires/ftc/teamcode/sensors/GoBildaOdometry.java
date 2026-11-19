@@ -21,7 +21,7 @@ public class GoBildaOdometry {
 
         odo = hardwareMap.get(GoBildaPinpointDriver.class, deviceName);
         odo.setOffsets(Constants.localizerConfig.xPodOffset.get(), Constants.localizerConfig.yPodOffset.get(), Constants.localizerConfig.globalDistanceUnit.get());
-        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         odo.setEncoderDirections(
                 Constants.localizerConfig.xPodDirection.get(),
                 Constants.localizerConfig.yPodDirection.get()

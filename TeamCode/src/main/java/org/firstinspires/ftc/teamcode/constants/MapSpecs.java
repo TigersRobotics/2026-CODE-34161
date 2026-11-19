@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.constants;
 
 
-import static org.firstinspires.ftc.teamcode.pedro.PathGenV2.tileToIN;
+import static org.firstinspires.ftc.teamcode.pedro.PathGenV3.tileToIN;
 
 import com.pedropathing.math.Pose;
+import com.skeletonarmy.marrow.zones.CircleZone;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 import com.skeletonarmy.marrow.zones.Zone;
@@ -26,15 +27,26 @@ public class MapSpecs {
             new Point(tileToIN(5.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
             new Point(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES)));
 
-    public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(1), tileToIN(2.5 - Competition.STARTING_Y_TILES), -90);
-    public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5), tileToIN(2.5 - Competition.STARTING_Y_TILES), 90);
+    public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(1), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(-90));
+    public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(90));
 
     public static final ArrayList<Zone> SHOOTING_ZONES = new ArrayList<>(
             List.of(LEFT_SHOOTING, RIGHT_SHOOTING));
 
-    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.5 - Competition.STARTING_Y_TILES), 90);
+    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.5 - Competition.STARTING_Y_TILES), Math.toRadians(90));
     public static final Pose GARDEN = new Pose(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES));
+    public static final ArrayList<Zone> FLOWERS = new ArrayList<>(List.of(
+            new CircleZone(new Point(2.5, 48), 2.5),
+            new CircleZone(new Point(96, 2.5), 2.5),
+            new CircleZone(new Point(141.5, 96), 2.5),
+            new CircleZone(new Point(48, 141.5), 2.5)
 
+    ));
+
+    public static final ArrayList<Point> FLOWER_COLLECTION_START = new ArrayList<>(List.of(
+            new Point(11, 24 - tileToIN(Competition.STARTING_Y_TILES), Math.toRadians(90)),
+            new Point(72, 11 - tileToIN(Competition.STARTING_Y_TILES), Math.toRadians(180))
+    ));
     public static final ArrayList<Zone> OBSTACLES = new ArrayList<>(List.of(
             // these are just setting what bounds of the arena is
             new PolygonZone(new Point(tileToIN(0), tileToIN(0 - Competition.STARTING_Y_TILES)),
@@ -69,8 +81,10 @@ public class MapSpecs {
     );
 
     public static final Zone OTHER_SIDE = new PolygonZone(
-            new Point(tileToIN(3), tileToIN(0 - Competition.STARTING_Y_TILES)), new Point(tileToIN(6), tileToIN(0 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(6), tileToIN(3 - Competition.STARTING_Y_TILES)), new Point(tileToIN(6), tileToIN(6 - Competition.STARTING_Y_TILES))
+            new Point(tileToIN(3), tileToIN(0 - Competition.STARTING_Y_TILES)),
+            new Point(tileToIN(6), tileToIN(0 - Competition.STARTING_Y_TILES)),
+            new Point(tileToIN(6), tileToIN(3 - Competition.STARTING_Y_TILES)),
+            new Point(tileToIN(6), tileToIN(6 - Competition.STARTING_Y_TILES))
     );
 
     public static final Point[] HIVE_COORDINATES =

@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
+import java.nio.file.Path;
+
 @TeleOp (name = "PedroPathing Test")
 public class PedroTest extends OpMode {
 
@@ -39,7 +41,7 @@ public class PedroTest extends OpMode {
         double x = -gamepad1.left_stick_x;
         double y = gamepad1.left_stick_y;
         double turn = -gamepad1.right_stick_x;
-        MecanumDriveTrainController.update(y, x, turn);
+        MecanumDriveTrainController.update(-y, -x, turn);
         TimedTelemetry.addData("X: ", odometry.getX(DistanceUnit.INCH));
         TimedTelemetry.addData("Y: ", odometry.getY(DistanceUnit.INCH));
         TimedTelemetry.addData("Heading: ", odometry.getHeading(AngleUnit.DEGREES));
@@ -48,9 +50,13 @@ public class PedroTest extends OpMode {
         } else if (gamepad1.dpadLeftWasPressed()) {
             PathGenV3.goShoot(PathGenV3.Hive.LEFT_HIVE);
         } else if (gamepad1.dpadRightWasPressed()) {
+            PathGenV3.goShoot(PathGenV3.Hive.RIGHT_HIVE);
+        } else if (gamepad1.rightBumperWasPressed()) {
+            PathGenV3.switchOn();
+        } else if (gamepad1.dpadUpWasPressed()) {
             PathGenV3.goShoot(PathGenV3.Hive.NEAREST);
         } else if (gamepad1.dpadDownWasPressed()) {
-            PathGenV3.switchOn();
+            PathGenV3.goScoop();
         }
 
 
