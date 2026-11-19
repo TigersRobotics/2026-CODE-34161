@@ -28,7 +28,7 @@ public class PollenTurretController {
     /// Encoder ticks per degree of turret yaw, worked out once instead of every loop
     private static final double TICKS_PER_DEGREE = TICKS_PER_REV / 360.0;
     /// Degrees of hood travel that map onto the full range of the hood servo
-    private static final double HOOD_SERVO_RANGE_DEG = 270.0;
+    private static final double HOOD_SERVO_RANGE_DEG = 20;
     /// An unchanged target is still re-sent this often, so a hub that reset mid-match gets it back
     private static final long RESEND_INTERVAL_NS = 500_000_000L;
 

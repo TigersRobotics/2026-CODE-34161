@@ -22,7 +22,7 @@ public class VectorMath {
             return rotateVector(x, y, Math.toRadians(angle));
         }
     }
-    
+
 
     public static double[] shotAngle(double d, double h, double r, double camAngle) {
 /// returns turret vertical angle, and the horizonal angle. Input angleFromTag: facing right is pos
@@ -105,7 +105,10 @@ public class VectorMath {
      * @param posY  robot y pos
      * @param heading robot heading
      * @return returns a yaw for the turret to be at in radians
+     *
      */
+
+
     public static double calculateTurretAngle(int hiveIndex, double posX, double posY, double heading) {
         double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
@@ -133,16 +136,27 @@ public class VectorMath {
 
 
     /**
-     * Use input inches
+     * Old signature, kept so other opmodes still compile. Uses MapSpecs.HIVE_COORDINATES,
+     * so the position has to be in that frame. Use input inches.
      */
     public static double calculateHoodAngle(int hiveIndex, double posX, double posY, double flywheelTicksPerSecond) {
-        final double G = 9.81;
-
         double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
 
+        return calculateHoodAngle(Math.hypot(hiveX - posX, hiveY - posY), flywheelTicksPerSecond);
+    }
+
+    /**
+     * Returns the hood angle in degrees needed to hit the hive.
+     * @param distanceInches horizontal distance from the robot to the target, in inches
+     * @param flywheelTicksPerSecond current flywheel velocity
+     * @return hood angle in degrees, or NaN if there is no valid shot
+     */
+    public static double calculateHoodAngle(double distanceInches, double flywheelTicksPerSecond) {
+        final double G = 9.81;
+
         // horizontal distance to hive, inches -> meters
-        double x = Math.hypot(hiveX - posX, hiveY - posY) * 0.0254;
+        double x = distanceInches * 0.0254;
 
         // target height relative to where the ball leaves the shooter (placeholders), inches -> meters
         double y = (MapSpecs.HIVE_HEIGHT - RobotSpecs.HOOD_HEIGHT) * 0.0254;

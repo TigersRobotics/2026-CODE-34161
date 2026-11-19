@@ -1,25 +1,22 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import static org.firstinspires.ftc.teamcode.constants.HardwareNames.ODOMETRY_NAME;
+import static org.firstinspires.ftc.teamcode.constants.HardwareNames.TURRET_UP_ANGLE_SERVO_NAME;
 import static org.firstinspires.ftc.teamcode.utils.VectorMath.calculateHoodAngle;
 import static org.firstinspires.ftc.teamcode.utils.VectorMath.calculateTurretAngle;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.constants.MapSpecs;
-import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
-import org.firstinspires.ftc.teamcode.controller.CustomController;
-import org.firstinspires.ftc.teamcode.controller.Presets;
+import org.firstinspires.ftc.teamcode.field.Field;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
 import org.firstinspires.ftc.teamcode.robotControllers.UptakeController;
+import org.firstinspires.ftc.teamcode.sensors.FieldOdometry;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
@@ -27,16 +24,16 @@ import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
 import java.io.File;
-
 import java.util.List;
 
 @TeleOp
 public class TeleOpMain extends OpMode {
+    private boolean tipped;
+    private double trim;
     final boolean ENABLE_TURRET_CONTROLLER = true;
     final boolean ENABLE_DRIVE_CONTROLLER = true;
     final boolean ENABLE_UPTAKE_CONTROLLER = true;
     final boolean ENABLE_INTAKE_CONTROLLER = true;
-    final boolean ENABLE_WEBCAM = false;
     /// Degrees the turret moves for one tap of dpad left/right
     static final double YAW_NUDGE_DEG = 1.0;
     /// How long dpad left/right has to be held before the turret starts sweeping
@@ -51,7 +48,7 @@ public class TeleOpMain extends OpMode {
     boolean toggleFlywheel = false;
     double targetVel = 1200;
 
-    GoBildaOdometry odometry;
+    FieldOdometry odometry;
     int hiveIndex = 1;
     List<LynxModule> hubs;
 
@@ -60,6 +57,7 @@ public class TeleOpMain extends OpMode {
     double posY;
     double heading = 90;
     double intakePower;
+    double hoodOffset;
 
     @Override
     public void init() {
@@ -77,8 +75,8 @@ public class TeleOpMain extends OpMode {
         UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
 
-        odometry = new GoBildaOdometry(hardwareMap, ODOMETRY_NAME);
-        odometry.setHeading(heading, AngleUnit.DEGREES);
+        hoodServo = hardwareMap.get(Servo.class, TURRET_UP_ANGLE_SERVO_NAME);
+        odometry = new FieldOdometry(new GoBildaOdometry(hardwareMap, ODOMETRY_NAME));
 
         PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
 
@@ -86,13 +84,13 @@ public class TeleOpMain extends OpMode {
         telemetry.update();
     }
 
+    Servo hoodServo;
 
     private void updateCache() {
         // One pose object per loop instead of a new one for each of x, y and heading
-        Pose2D pose = odometry.getPose();
-        posx = pose.getX(DistanceUnit.INCH);
-        posY = pose.getY(DistanceUnit.INCH);
-        heading = pose.getHeading(AngleUnit.RADIANS);
+        posx = odometry.getX();
+        posY = odometry.getY();
+        heading = odometry.getHeading();
     }
     @Override
     public void loop() {
@@ -124,7 +122,7 @@ public class TeleOpMain extends OpMode {
     }
 
     private void handleDriverInputs() {
-        if(gamepad1.leftTriggerWasPressed()) enableIntake = !enableIntake;
+        if(gamepad1.leftBumperWasPressed()) enableIntake = !enableIntake;
         intakePower = enableIntake ? 1 : 0;
     }
 
@@ -141,6 +139,11 @@ public class TeleOpMain extends OpMode {
         if(gamepad1.dpadRightWasPressed()) yaw += YAW_NUDGE_DEG;
         if(gamepad1.dpadLeftWasPressed()) yaw -= YAW_NUDGE_DEG;
 
+        if(gamepad2.dpadUpWasPressed()) hoodOffset += 0.25;
+        if(gamepad2.dpadDownWasPressed()) hoodOffset -= 0.25;
+        TimedTelemetry.addData("Angle", hoodOffset);
+
+
         dpadRightHeldMs = gamepad1.dpad_right ? dpadRightHeldMs + Timer.DTime() : 0;
         dpadLeftHeldMs = gamepad1.dpad_left ? dpadLeftHeldMs + Timer.DTime() : 0;
         if(dpadRightHeldMs > YAW_HOLD_DELAY_MS) yaw += Timer.DTime() * YAW_HOLD_DEG_PER_MS;
@@ -149,20 +152,29 @@ public class TeleOpMain extends OpMode {
     }
 
     private void handleTurret() {
+
+        double[] t = Field.upCell(true, tipped);
+        double fieldDeg = Math.toDegrees(Math.atan2(t[1] - odometry.getY(), t[0] - odometry.getX())); // deg
+        double turret = wrap(Math.toDegrees(odometry.getHeading()) - fieldDeg + trim); // deg
+        if (odometry.isZeroed()) PollenTurretController.setYaw(turret);
+
         double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
         double calculatedYawDeg = Math.toDegrees(calculatedYaw);
 
         double calculatedHoodAngle = calculateHoodAngle(hiveIndex, posx, posY, PollenTurretController.getVelocity());
 
-        PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
-        if(!Double.isNaN(calculatedYawDeg)) PollenTurretController.setHoodAngle(calculatedHoodAngle);
+        calculatedHoodAngle += hoodOffset;
 
-        yaw = wrapDegrees(yaw);
-        double realYaw = wrapDegrees(calculatedYawDeg - yaw);
-        PollenTurretController.setYaw(realYaw);
+        hoodServo.setPosition(hoodOffset/20);
+
+        TimedTelemetry.addData("Hood angle: ", calculatedHoodAngle);
+
+        PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
+        PollenTurretController.setHoodAngle(hoodOffset);
+
+
 
         TimedTelemetry.addData("GoBilda Heading ", heading);
-        TimedTelemetry.addData("Target Yaw: ", realYaw);
     }
     /// Brings any angle in degrees into the range -180 to 180
     private static double wrapDegrees(double degrees) {
@@ -178,5 +190,13 @@ public class TeleOpMain extends OpMode {
         PollenTurretController.stop();
         UptakeController.stop();
         SingleIntakeController.stop();
+    }
+
+
+    static double wrap(double deg) {
+        deg %= 360;
+        if (deg > 180) deg -= 360;
+        if (deg < -180) deg += 360;
+        return deg;
     }
 }
