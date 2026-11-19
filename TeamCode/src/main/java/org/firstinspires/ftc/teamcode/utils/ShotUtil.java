@@ -17,6 +17,7 @@ public class ShotUtil {
         public boolean valid;
         public String reason = "";
         public double hoodDeg;
+        public boolean haveHood;
         public double rpmTarget;
         public double yawFieldDeg;
         public double vPerp;
@@ -112,6 +113,16 @@ public class ShotUtil {
         result.vPerp = vPerp(x, y, vx, vy);
         result.rpmTarget = rpmTarget(rCalc);
         result.ballSpeed = ballSpeed(measuredRpm, rCalc);
+
+        double aimSpeed = ballSpeed(measuredRpm, rCalc);
+        double[] aim = launchAngles(aimSpeed, rCalc);
+        if (aim != null) {
+            result.thetaDeg = aim[0];
+            result.phiDeg = entryAngle(aim[0], rCalc);
+            result.hoodDeg = hoodFor(aim[0], beta);
+            result.steepArc = true;
+            result.haveHood = true;
+        }
 
         if (rCalc <= 1e-9) {
             result.reason = "too close/fast";

@@ -29,6 +29,7 @@ import java.util.List;
 public class DriveTrackingTest extends OpMode {
     static final double START_HEADING_DEG = 90; // deg
     static final double MIN_STEP = 0.1; // deg
+    static final double RPM_BUMP = 100;
     static final String LOG_NAME = "drive-tracking-shots.csv";
 
     GoBildaOdometry odometry;
@@ -43,7 +44,9 @@ public class DriveTrackingTest extends OpMode {
     double step = TurretConstants.TRIM_STEP_START; // deg
     int lastDirection;
     String lastResult = "";
-    double hoodCommand;
+    double hoodBase = 15; // deg
+    double hoodCommand = 15; // deg
+    double flywheelRpm = TurretConstants.RPM_A;
     int makes;
     int attempts;
 
@@ -73,16 +76,18 @@ public class DriveTrackingTest extends OpMode {
         for (LynxModule hub : hubs) hub.clearBulkCache();
         Timer.update();
 
-        if (gamepad1.dpadUpWasPressed()) flywheelOn = !flywheelOn;
+        if (gamepad1.dpadUpWasPressed()) flywheelRpm += RPM_BUMP;
+        if (gamepad1.dpadDownWasPressed()) flywheelRpm -= RPM_BUMP;
+        flywheelRpm = Math.max(0, Math.min(TurretConstants.FLYWHEEL_RPM_MAX, flywheelRpm));
+        if (gamepad1.squareWasPressed()) flywheelOn = !flywheelOn;
         if (gamepad1.dpadLeftWasPressed()) movingComp = !movingComp;
+        if (gamepad1.dpadRightWasPressed()) zeroPose();
 
         odometry.update();
         if (needZero && odometry.getStatus() != GoBildaPinpointDriver.DeviceStatus.NOT_READY) {
             zeroPose();
             needZero = false;
         }
-        if (gamepad1.dpadDownWasPressed()) zeroPose();
-
         Pose2D pose = odometry.getPose();
         double x = pose.getX(DistanceUnit.METER); // m
         double y = pose.getY(DistanceUnit.METER); // m
@@ -95,7 +100,7 @@ public class DriveTrackingTest extends OpMode {
                 UtilMethods.expo(-gamepad1.left_stick_x, 2),
                 UtilMethods.expo(-gamepad1.right_stick_x, 2));
 
-        ShotUtil.ShotResult r = ShotUtil.compute(x, y, vx, vy, TurretController.getRpm(), movingComp);
+        ShotUtil.ShotResult r = ShotUtil.compute(x, y, vx, vy, flywheelRpm, movingComp);
         double relX = x - TurretConstants.HIVE_X;
         double relY = y - TurretConstants.HIVE_Y;
         double beta = Math.toDegrees(Math.atan2(Math.abs(relX), Math.abs(relY))); // deg
@@ -117,12 +122,11 @@ public class DriveTrackingTest extends OpMode {
             lastResult = "hits cleared";
         }
 
-        double hoodSent = r.hoodDeg + fitTrim(r.range, beta) + searchOffset; // deg
-        TurretController.setRpm(flywheelOn ? r.rpmTarget : 0);
-        if (r.valid) {
-            TurretController.setHood(hoodSent);
-            hoodCommand = hoodSent;
-        }
+        if (r.haveHood) hoodBase = r.hoodDeg;
+        double hoodSent = hoodBase + fitTrim(r.range, beta) + searchOffset; // deg
+        TurretController.setRpm(flywheelOn ? flywheelRpm : 0);
+        TurretController.setHood(hoodSent);
+        hoodCommand = hoodSent;
         TurretController.setYawFieldCentric(
                 r.yawFieldDeg,
                 heading,
@@ -157,8 +161,8 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("theta", "%.1f deg", 1, r.thetaDeg);
         TimedTelemetry.addData("phi", "%.1f deg", 1, r.phiDeg);
         TimedTelemetry.addData("hood", "%.1f deg", 1, r.hoodDeg);
-        TimedTelemetry.addData("hood sent", "%.1f deg", 1, r.valid ? hoodSent : hoodCommand);
-        TimedTelemetry.addData("rpm target", "%.0f", 1, r.rpmTarget);
+        TimedTelemetry.addData("hood sent", "%.1f deg", 1, hoodSent);
+        TimedTelemetry.addData("rpm target", "%.0f", 1, flywheelRpm);
         TimedTelemetry.addData("rpm", "%.0f", 1, TurretController.getRpm());
         TimedTelemetry.addData("target yaw", "%.1f deg", 1, TurretController.getTargetYaw());
         TimedTelemetry.addData("actual yaw", "%.1f deg", 1, TurretController.getYaw());
@@ -173,7 +177,7 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("fit", "a0 %.2f  a1 %.2f  a2 %.3f", 1, a0, a1, a2);
         double pct = attempts == 0 ? 0 : 100.0 * makes / attempts;
         TimedTelemetry.addData("hits", makes + " / " + attempts + "  " + Math.round(pct) + "%");
-        TimedTelemetry.addLine("dpadU fly | dpadL move | dpadD zero | RT over | LT under | O top | △ bottom | X lock | LB undo | RB reset");
+        TimedTelemetry.addLine("dpadU rpm+ | dpadD rpm- | □ fly | dpadL move | dpadR zero | RT over | LT under | O top | △ bottom | X lock | LB undo | RB reset");
         TimedTelemetry.update();
         telemetry.update();
     }
