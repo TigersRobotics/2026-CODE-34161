@@ -11,6 +11,7 @@ public class ShotUtil {
     private static long rpmChangedAtMs;
     private static boolean haveArc;
     private static boolean lastSteep;
+    private static boolean behind;
 
     public static class ShotResult {
         public boolean valid;
@@ -25,6 +26,7 @@ public class ShotUtil {
         public double flightTime;
         public boolean steepArc;
         public double range;
+        public boolean behind;
     }
 
     public static class Ready {
@@ -90,13 +92,19 @@ public class ShotUtil {
         ShotResult result = new ShotResult();
         x -= TurretConstants.HIVE_X;
         y -= TurretConstants.HIVE_Y;
+        if (behind) {
+            if (y > TurretConstants.BEHIND_HYST) behind = false;
+        } else if (y < -TurretConstants.BEHIND_HYST) {
+            behind = true;
+        }
+        result.behind = behind;
         if (moving) {
             x += vx * TurretConstants.T_LAT;
             y += vy * TurretConstants.T_LAT;
         }
 
         double r = Math.hypot(x, y);
-        double beta = Math.toDegrees(Math.atan2(Math.abs(x), y)); // deg
+        double beta = Math.toDegrees(Math.atan2(Math.abs(x), Math.abs(y))); // deg
         double rCalc = moving ? effectiveRange(r, vPar(x, y, vx, vy), lastTf) : r;
 
         result.range = r;
@@ -119,13 +127,20 @@ public class ShotUtil {
         boolean tooFast = false;
         boolean tooSlow = false;
         boolean rising = false;
+        boolean behindShallow = false;
         double bestDelta = Double.POSITIVE_INFINITY;
         boolean found = false;
-        for (int i = 0; i < angles.length; i++) {
+        int arcCount = result.behind ? 1 : angles.length;
+        for (int i = 0; i < arcCount; i++) {
             double theta = angles[i];
             double phi = entryAngle(theta, rCalc);
             double hood = hoodFor(theta, beta);
-            if (phi <= 0) {
+            if (result.behind) {
+                if (phi <= TurretConstants.BEHIND_MIN_PHI) {
+                    behindShallow = true;
+                    continue;
+                }
+            } else if (phi <= 0) {
                 rising = true;
                 continue;
             }
@@ -151,7 +166,8 @@ public class ShotUtil {
         }
 
         if (!found) {
-            if (tooFast) result.reason = "too fast";
+            if (behindShallow) result.reason = "behind too shallow";
+            else if (tooFast) result.reason = "too fast";
             else if (tooSlow) result.reason = "too slow";
             else if (rising) result.reason = "arc rising";
             else result.reason = "too slow";
@@ -255,5 +271,6 @@ public class ShotUtil {
         rpmChangedAtMs = 0;
         haveArc = false;
         lastSteep = false;
+        behind = false;
     }
 }

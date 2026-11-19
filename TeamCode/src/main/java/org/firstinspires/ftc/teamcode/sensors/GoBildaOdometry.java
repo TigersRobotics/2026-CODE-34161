@@ -52,6 +52,12 @@ public class GoBildaOdometry {
     public double getHeading(AngleUnit unit) {
         return odo.getPosition().getHeading(unit);
     }
+    public double getVelX(DistanceUnit unit) {
+        return odo.getVelocity().getX(unit); // per second
+    }
+    public double getVelY(DistanceUnit unit) {
+        return odo.getVelocity().getY(unit); // per second
+    }
     public void reset() {
         odo.resetPosAndIMU();
     }

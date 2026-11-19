@@ -50,4 +50,7 @@ public class TurretConstants {
     public static double HOOD_EDGE_DEG = 0.5;
     public static double MAX_MOVING_SPEED = 1.0; // m/s
     public static double MAX_LEAD_RATIO = 0.5;
+
+    public static double BEHIND_HYST = 0.05; // m
+    public static double BEHIND_MIN_PHI = 60; // deg
 }
