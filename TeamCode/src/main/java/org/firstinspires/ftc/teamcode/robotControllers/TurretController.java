@@ -23,6 +23,8 @@ public class TurretController {
     private static boolean hoodIsServo;
     private static double turretYaw;
     private static double flywheelRPM;
+    private static boolean yawSpinning;
+    private static double yawSpinPower;
 
     private static int sentYawTicks = Integer.MIN_VALUE;
     private static double sentTicksPerSecond = Double.NaN;
@@ -92,6 +94,23 @@ public class TurretController {
         return turretYaw; // deg
     }
 
+    public static void spinYaw(double power) {
+        yawSpinning = true;
+        yawSpinPower = power;
+    }
+
+    public static void holdYaw() {
+        if (!yawSpinning) return;
+        yawSpinning = false;
+        if (rotation == null) return;
+        int ticks = rotation.getCurrentPosition();
+        turretYaw = ticks * 360.0 / TurretConstants.YAW_TICKS_PER_REV;
+        rotation.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotation.setTargetPosition(ticks);
+        rotation.setPower(1);
+        sentYawTicks = ticks;
+    }
+
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
         ShotUtil.reset();
         if(actuallyEnabled) {
@@ -100,11 +119,14 @@ public class TurretController {
             flywheel.setDirection(DcMotor.Direction.FORWARD);
 
             rotation = hardwareMap.get(DcMotorEx.class, "yawMotor");
-            rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            turretYaw = 0;
+            rotation.setDirection(DcMotor.Direction.FORWARD);
+            rotation.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             rotation.setTargetPosition(0);
+            rotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rotation.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rotation.setPower(1);
+            turretYaw = 0;
+            yawSpinning = false;
 
             hoodServo = hardwareMap.get(Servo.class, "turretUp");
 
@@ -149,10 +171,22 @@ public class TurretController {
             sentF = TurretConstants.FLYWHEEL_F;
         }
 
-        int yawTicks = (int) Math.round(turretYaw * TurretConstants.YAW_TICKS_PER_REV / 360.0);
-        if (yawTicks != sentYawTicks) {
-            rotation.setTargetPosition(yawTicks);
-            sentYawTicks = yawTicks;
+        if (yawSpinning) {
+            if (rotation.getMode() != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
+                rotation.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
+            rotation.setPower(yawSpinPower);
+            sentYawTicks = Integer.MIN_VALUE;
+        } else {
+            int yawTicks = (int) Math.round(turretYaw * TurretConstants.YAW_TICKS_PER_REV / 360.0);
+            if (yawTicks != sentYawTicks) {
+                if (rotation.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+                    rotation.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
+                rotation.setTargetPosition(yawTicks);
+                rotation.setPower(1);
+                sentYawTicks = yawTicks;
+            }
         }
 
         long now = System.nanoTime();

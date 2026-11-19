@@ -11,14 +11,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
-import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.TurretController;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.ShotUtil;
-import org.firstinspires.ftc.teamcode.utils.VectorMath;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
@@ -132,8 +130,9 @@ public class DriveTrackingTest extends OpMode {
             attempts++;
             lastResult = "in";
         }
-        if (gamepad1.leftBumperWasPressed()) undo();
-        if (gamepad1.rightBumperWasPressed()) resetSearch();
+        if (gamepad1.left_bumper) TurretController.spinYaw(-0.6);
+        else if (gamepad1.right_bumper) TurretController.spinYaw(0.6);
+        else TurretController.holdYaw();
         if (gamepad1.backWasPressed()) {
             makes = 0;
             attempts = 0;
@@ -148,19 +147,9 @@ public class DriveTrackingTest extends OpMode {
         TurretController.setRpm(flywheelOn ? flywheelRpm : 0);
         TurretController.setHoodServo(hoodServo);
         hoodCommand = hoodSent;
-        double inchX = pose.getX(DistanceUnit.INCH);
-        double inchY = pose.getY(DistanceUnit.INCH);
-        double yawDeg = Math.toDegrees(VectorMath.calculateTurretAngle(
-                closerHive(inchX, inchY),
-                inchX,
-                inchY,
-                pose.getHeading(AngleUnit.RADIANS)));
-        TurretController.setYaw(
-                yawDeg,
-                (movingComp && r.valid) ? r.vPerp : 0,
-                r.ballSpeed,
-                r.thetaDeg,
-                TurretConstants.W_T);
+        if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
+            TurretController.setYaw(TurretController.getYaw(), 0, 0, 0, 0);
+        }
         ShotUtil.Ready ready = ShotUtil.readyToShoot(
                 r,
                 TurretController.getYaw(),
@@ -192,6 +181,7 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("hood servo", "%.3f", 1, hoodServo);
         TimedTelemetry.addData("rpm target", "%.0f", 1, flywheelRpm);
         TimedTelemetry.addData("rpm", "%.0f", 1, TurretController.getRpm());
+        TimedTelemetry.addData("bumper", gamepad1.left_bumper ? "LEFT" : gamepad1.right_bumper ? "RIGHT" : "none");
         TimedTelemetry.addData("target yaw", "%.1f deg", 1, TurretController.getTargetYaw());
         TimedTelemetry.addData("actual yaw", "%.1f deg", 1, TurretController.getYaw());
         TimedTelemetry.addData("valid", r.valid + " " + r.reason);
@@ -205,7 +195,7 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("fit", "a0 %.2f  a1 %.2f  a2 %.3f", 1, a0, a1, a2);
         double pct = attempts == 0 ? 0 : 100.0 * makes / attempts;
         TimedTelemetry.addData("hits", makes + " / " + attempts + "  " + Math.round(pct) + "%");
-        TimedTelemetry.addLine("dpadU rpm+ | dpadD rpm- | □ fly | dpadL move | dpadR zero | RT over | LT under | O top | △ bottom | X lock | opt in | LB undo | RB reset");
+        TimedTelemetry.addLine("dpadU rpm+ | dpadD rpm- | □ fly | LB yaw- | RB yaw+ | RT over | LT under | opt in");
         TimedTelemetry.update();
         telemetry.update();
     }
@@ -218,21 +208,6 @@ public class DriveTrackingTest extends OpMode {
 
     private void zeroPose() {
         odometry.setPose(new Pose2D(DistanceUnit.INCH, CLOSE_X_IN, 0, AngleUnit.DEGREES, CLOSE_HEADING_DEG));
-    }
-
-    private int closerHive(double inchX, double inchY) {
-        double best = Double.POSITIVE_INFINITY;
-        int hive = 0;
-        for (int i = 0; i < MapSpecs.HIVE_COORDINATES.length; i++) {
-            double dx = MapSpecs.HIVE_COORDINATES[i].getX() - inchX;
-            double dy = MapSpecs.HIVE_COORDINATES[i].getY() - inchY;
-            double distance = dx * dx + dy * dy;
-            if (distance < best) {
-                best = distance;
-                hive = i;
-            }
-        }
-        return hive;
     }
 
     private void adjust(ShotUtil.ShotResult r, boolean shorter, boolean half, boolean make) {
