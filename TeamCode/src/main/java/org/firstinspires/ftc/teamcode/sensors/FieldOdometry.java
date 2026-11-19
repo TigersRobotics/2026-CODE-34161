@@ -59,6 +59,9 @@ public class FieldOdometry {
         y = startY + dx * Math.sin(a) + dy * Math.cos(a);
         heading = startHeading + (rh - rawH0);
     }
+    public void reset() {
+
+    }
 
     public double getX() { return x; } // in
     public double getY() { return y; } // in

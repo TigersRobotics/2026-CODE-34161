@@ -8,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.constants.RobotSpecs.TICKS_PER_REV;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -63,7 +64,7 @@ public class PollenTurretController {
         if(actuallyEnabled) {
             flywheel = (DcMotorEx) hardwareMap.get(DcMotor.class, FLYWHEEL_NAME);
             flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            flywheel.setDirection(DcMotor.Direction.REVERSE);
+            flywheel.setDirection(DcMotor.Direction.FORWARD);
 
             rotation = (DcMotorEx) hardwareMap.get(DcMotor.class, TURRET_YAW_MOTOR_NAME);
             rotation.setTargetPosition(0);

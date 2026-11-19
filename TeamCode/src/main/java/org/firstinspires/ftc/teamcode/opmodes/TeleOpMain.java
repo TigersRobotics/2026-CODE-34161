@@ -57,7 +57,7 @@ public class TeleOpMain extends OpMode {
     double posY;
     double heading = 90;
     double intakePower;
-    double hoodOffset;
+    double angle;
 
     @Override
     public void init() {
@@ -127,22 +127,18 @@ public class TeleOpMain extends OpMode {
     }
 
     private void handleTechnicianInputs() {
-        if(gamepad2.dpadUpWasPressed()) targetVel += 10;
-        if(gamepad2.dpadDownWasPressed()) targetVel -= 10;
+//        if(gamepad2.dpadUpWasPressed()) targetVel += 10;
+//        if(gamepad2.dpadDownWasPressed()) targetVel -= 10;
         if(gamepad1.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
         if(gamepad2.circleWasPressed()) toggleFlywheel = !toggleFlywheel;
 
-
+        if(gamepad2.rightBumperWasPressed()) angle += 0.5;
+        if(gamepad2.leftBumperWasPressed()) angle -= 0.5;
 
         // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
         // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
         if(gamepad1.dpadRightWasPressed()) yaw += YAW_NUDGE_DEG;
         if(gamepad1.dpadLeftWasPressed()) yaw -= YAW_NUDGE_DEG;
-
-        if(gamepad2.dpadUpWasPressed()) hoodOffset += 0.25;
-        if(gamepad2.dpadDownWasPressed()) hoodOffset -= 0.25;
-        TimedTelemetry.addData("Angle", hoodOffset);
-
 
         dpadRightHeldMs = gamepad1.dpad_right ? dpadRightHeldMs + Timer.DTime() : 0;
         dpadLeftHeldMs = gamepad1.dpad_left ? dpadLeftHeldMs + Timer.DTime() : 0;
@@ -163,14 +159,12 @@ public class TeleOpMain extends OpMode {
 
         double calculatedHoodAngle = calculateHoodAngle(hiveIndex, posx, posY, PollenTurretController.getVelocity());
 
-        calculatedHoodAngle += hoodOffset;
-
-        hoodServo.setPosition(hoodOffset/20);
+        hoodServo.setPosition(UtilMethods.clip(angle/20, 0, 0.75));
 
         TimedTelemetry.addData("Hood angle: ", calculatedHoodAngle);
 
         PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
-        PollenTurretController.setHoodAngle(hoodOffset);
+//        PollenTurretController.setHoodAngle(hoodOffset);
 
 
 
