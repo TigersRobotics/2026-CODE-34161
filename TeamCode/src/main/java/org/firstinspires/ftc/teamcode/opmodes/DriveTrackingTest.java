@@ -33,6 +33,7 @@ public class DriveTrackingTest extends OpMode {
     static final double CLOSE_HEADING_DEG = 0; // deg, same zero teleop uses
     static final double MIN_STEP = 0.1; // deg
     static final double RPM_BUMP = 100;
+    static final double HOOD_NUDGE = 0.04;
     static final String LOG_NAME = "drive-tracking-shots.csv";
 
     GoBildaOdometry odometry;
@@ -44,6 +45,7 @@ public class DriveTrackingTest extends OpMode {
     boolean leftDown;
 
     double searchOffset; // deg
+    double hoodNudge;
     double step = TurretConstants.TRIM_STEP_START; // deg
     int lastDirection;
     String lastResult = "";
@@ -110,8 +112,16 @@ public class DriveTrackingTest extends OpMode {
 
         boolean over = gamepad1.right_trigger > 0.5;
         boolean under = gamepad1.left_trigger > 0.5;
-        if (over && !rightDown) adjust(r, true, false, false);
-        if (under && !leftDown) adjust(r, false, false, false);
+        if (over && !rightDown) {
+            hoodNudge -= HOOD_NUDGE;
+            lastResult = "over";
+        }
+        if (under && !leftDown) {
+            hoodNudge += HOOD_NUDGE;
+            lastResult = "under";
+        }
+        if (hoodNudge < -0.4) hoodNudge = -0.4;
+        if (hoodNudge > 0.4) hoodNudge = 0.4;
         rightDown = over;
         leftDown = under;
         if (gamepad1.circleWasPressed()) adjust(r, true, true, true);
@@ -132,8 +142,11 @@ public class DriveTrackingTest extends OpMode {
 
         if (r.haveHood) hoodBase = r.hoodDeg;
         double hoodSent = hoodBase + fitTrim(r.range, beta) + searchOffset; // deg
+        double hoodServo = 0.20 + (hoodBase / 90.0) * 0.25 + hoodNudge;
+        if (hoodServo < 0) hoodServo = 0;
+        if (hoodServo > 1) hoodServo = 1;
         TurretController.setRpm(flywheelOn ? flywheelRpm : 0);
-        TurretController.setHood(hoodSent);
+        TurretController.setHoodServo(hoodServo);
         hoodCommand = hoodSent;
         double inchX = pose.getX(DistanceUnit.INCH);
         double inchY = pose.getY(DistanceUnit.INCH);
@@ -176,6 +189,7 @@ public class DriveTrackingTest extends OpMode {
         TimedTelemetry.addData("phi", "%.1f deg", 1, r.phiDeg);
         TimedTelemetry.addData("hood", "%.1f deg", 1, r.hoodDeg);
         TimedTelemetry.addData("hood sent", "%.1f deg", 1, hoodSent);
+        TimedTelemetry.addData("hood servo", "%.3f", 1, hoodServo);
         TimedTelemetry.addData("rpm target", "%.0f", 1, flywheelRpm);
         TimedTelemetry.addData("rpm", "%.0f", 1, TurretController.getRpm());
         TimedTelemetry.addData("target yaw", "%.1f deg", 1, TurretController.getTargetYaw());

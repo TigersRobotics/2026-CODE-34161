@@ -19,6 +19,8 @@ public class TurretController {
     private static final long VELOCITY_RESEND_NS = 500_000_000L;
 
     private static double hoodPosition;
+    private static double hoodServoCommand;
+    private static boolean hoodIsServo;
     private static double turretYaw;
     private static double flywheelRPM;
 
@@ -66,6 +68,14 @@ public class TurretController {
     public static void setHood(double degrees) {
         if (Double.isNaN(degrees)) return;
         hoodPosition = degrees;
+        hoodIsServo = false;
+    }
+
+    public static void setHoodServo(double position) {
+        if (position < 0) position = 0;
+        if (position > 1) position = 1;
+        hoodServoCommand = position;
+        hoodIsServo = true;
     }
 
     public static double getRpm() {
@@ -153,7 +163,7 @@ public class TurretController {
             velocitySentAtNs = now;
         }
 
-        double servo = hoodPosition / 270.0;
+        double servo = hoodIsServo ? hoodServoCommand : hoodPosition / 270.0;
         if (servo < 0) servo = 0;
         if (servo > 1) servo = 1;
         hoodServo.setPosition(servo);
