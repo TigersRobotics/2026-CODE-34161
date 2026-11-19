@@ -33,6 +33,7 @@ public class FlywheelPIDFTuning extends OpMode {
     private int stepIndex = 1;
 
     private Servo hoodServo;
+    private double servoPower = 1;
 
     @Override
     public void init() {
@@ -52,7 +53,7 @@ public class FlywheelPIDFTuning extends OpMode {
 
     @Override
     public void loop() {
-        hoodServo.setPosition(1);
+        hoodServo.setPosition(servoPower);
         //Change target Velocity
         if(gamepad1.circleWasPressed()) currentTargetVelocity += 10;
         if(gamepad1.crossWasPressed()) currentTargetVelocity -= 10;
@@ -83,6 +84,9 @@ public class FlywheelPIDFTuning extends OpMode {
             flywheel.setVelocity(currentTargetVelocity);
             sentTargetVelocity = currentTargetVelocity;
         }
+
+        if(gamepad1.left_stick_y > 0.75) servoPower += 0.001;
+        if(gamepad1.left_stick_y < -0.75) servoPower -= 0.001;
 
         double currVel = flywheel.getVelocity();
         double err = currentTargetVelocity - currVel;
