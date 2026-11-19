@@ -33,7 +33,7 @@ public class GoBildaOdometry {
     public void update() {
         if (odo.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.NOT_READY) return;
         if (!setInitYet) {
-            setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), AngleUnit.DEGREES, 0));
+            setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), 0, AngleUnit.DEGREES, 0));
             setInitYet = true;
         }
 
