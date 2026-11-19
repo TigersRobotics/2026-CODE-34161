@@ -116,8 +116,16 @@ public class VectorMath {
         double calculatedYaw = heading -Math.atan2(dy, dx);
 
 
+        TimedTelemetry.addData("Pos X: ", posX);
+        TimedTelemetry.addData("Pos Y: ", posY);
+        TimedTelemetry.addData("DX: ", dx);
+        TimedTelemetry.addData("DY: ", dy);
+        TimedTelemetry.addData("Angle: ", calculatedYaw);
+
         while(calculatedYaw > Math.PI) calculatedYaw -= 2 * Math.PI;
         while(calculatedYaw < -Math.PI) calculatedYaw += 2* Math.PI;
+
+
 
 
         return calculatedYaw;
