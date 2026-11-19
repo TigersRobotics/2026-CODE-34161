@@ -34,16 +34,16 @@ public class OdometryTest extends OpMode {
         double x = -gamepad1.left_stick_x;
         double y = gamepad1.left_stick_y;
         double turn = -gamepad1.right_stick_x;
-        MecanumDriveTrainController.update(VectorMath.rotateVector(x, y, -odometry.getHeading(AngleUnit.DEGREES), false)[1], VectorMath.rotateVector(x, y, -odometry.getHeading(AngleUnit.DEGREES), false)[0], turn);
+        MecanumDriveTrainController.update(VectorMath.rotateVector(x, y, odometry.getHeading(AngleUnit.DEGREES), false)[1], VectorMath.rotateVector(x, y, -odometry.getHeading(AngleUnit.DEGREES), false)[0], turn);
         TimedTelemetry.addData("X: ", odometry.getX(DistanceUnit.INCH));
         TimedTelemetry.addData("Y: ", odometry.getY(DistanceUnit.INCH));
         TimedTelemetry.addData("Heading: ", odometry.getHeading(AngleUnit.DEGREES));
         TimedTelemetry.update();
         if (gamepad1.circleWasPressed()) {
-            TimedTelemetry.addData("Start Y", PathGenV3.tileToIN(Competition.STARTING_Y_Tiles), 1000);
+            TimedTelemetry.addData("Start Y", PathGenV3.tileToIN(Competition.STARTING_Y_TILES), 1000);
             odometry.setPose(new Pose2D(DistanceUnit.INCH,
                     PathGenV3.tileToIN(Competition.STARTING_X_TILES),
-                    PathGenV3.tileToIN(Competition.STARTING_Y_Tiles),
+                    PathGenV3.tileToIN(Competition.STARTING_Y_TILES),
                     AngleUnit.DEGREES, 0));
         }
 

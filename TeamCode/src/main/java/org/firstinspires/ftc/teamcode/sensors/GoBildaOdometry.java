@@ -37,6 +37,15 @@ public class GoBildaOdometry {
             setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), 0, AngleUnit.DEGREES, 0));
             setInitYet = true;
         }
+
+    }
+
+    public double getVelX(DistanceUnit unit) {
+        return odo.getVelX(unit); // per second
+    }
+
+    public double getVelY(DistanceUnit unit) {
+        return odo.getVelY(unit); // per second
     }
 
     public Pose2D getPose() {
@@ -50,12 +59,6 @@ public class GoBildaOdometry {
     }
     public double getHeading(AngleUnit unit) {
         return odo.getPosition().getHeading(unit);
-    }
-    public double getVelX(DistanceUnit unit) {
-        return odo.getVelX(unit); // per second
-    }
-    public double getVelY(DistanceUnit unit) {
-        return odo.getVelY(unit); // per second
     }
     public void reset() {
         odo.resetPosAndIMU();

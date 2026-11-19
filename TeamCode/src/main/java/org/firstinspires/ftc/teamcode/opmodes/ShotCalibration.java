@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -26,6 +27,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+@Deprecated
+@Disabled
 @TeleOp(name = "Shot Calibration", group = "Tuning")
 public class ShotCalibration extends OpMode {
     private static final int LOOP_STOPS = 9;
@@ -107,11 +110,11 @@ public class ShotCalibration extends OpMode {
     private File tuningFile;
 
     private Phase phase = Phase.PRESS;
-    private RouteMode route = RouteMode.LOOP;
+    private final RouteMode route = RouteMode.LOOP;
     private int spotIndex = 0;
-    private int loopNumber = 1;
-    private int freshLeft = 0;
-    private int resumeAt = -1;
+    private final int loopNumber = 1;
+    private final int freshLeft = 0;
+    private final int resumeAt = -1;
     private int totalShots = 0;
     private int effStepsThisVisit = 0;
     private int pendingConfirm = -1;
@@ -140,16 +143,16 @@ public class ShotCalibration extends OpMode {
     private final int[] hiveOf = new int[STOPS];
     private final boolean[] steep = new boolean[STOPS];
     private final double[] spotDistanceIn = new double[STOPS];
-    private double leftHiveX = 58;
-    private double leftHiveY = 60;
-    private double rightHiveX = 91;
-    private double rightHiveY = 60;
-    private double approachX = 28;
-    private double approachY = 28;
-    private double pressTargetX = -8;
-    private double pressTargetY = -8;
-    private double poseX = 9;
-    private double poseY = 9;
+    private final double leftHiveX = 58;
+    private final double leftHiveY = 60;
+    private final double rightHiveX = 91;
+    private final double rightHiveY = 60;
+    private final double approachX = 28;
+    private final double approachY = 28;
+    private final double pressTargetX = -8;
+    private final double pressTargetY = -8;
+    private final double poseX = 9;
+    private final double poseY = 9;
 
     private ShotCalculator.Shot[] choices = new ShotCalculator.Shot[0];
     private ShotCalculator.Shot shot = null;

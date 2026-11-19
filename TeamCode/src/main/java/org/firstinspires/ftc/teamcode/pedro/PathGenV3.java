@@ -11,7 +11,6 @@ import com.skeletonarmy.marrow.zones.Zone;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.Competition;
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
@@ -28,6 +27,14 @@ public class PathGenV3 {
     private static boolean on;
     public static void setOn (boolean on){
         PathGenV3.on = on;
+        if (!on) {
+            TimedTelemetry.addLine("Follower turned off");
+            follower.stop();
+        }
+    }
+
+    public static void switchOn() {
+        setOn(!on);
     }
 
     private static boolean autonMode;
@@ -52,7 +59,8 @@ public class PathGenV3 {
         //        COLLECTING,
         IDLE,
         FLOWER_COLLECTING1,
-        FLOWER_COLLECTING2
+        FLOWER_COLLECTING2,
+        PAUSE
     }
 
     public static Pose destination;
@@ -66,8 +74,8 @@ public class PathGenV3 {
         PathGenV3.odometry = odometry;
 
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
-                .robotWidth(RobotSpecs.LENGTH_X_M / 2.54)
-                .robotHeight(RobotSpecs.HEIGHT_M / 2.54).
+                .robotWidth(RobotSpecs.LENGTH_X_M * 100 / 2.54)
+                .robotHeight(RobotSpecs.HEIGHT_M * 100 / 2.54).
                 clearance(RobotSpecs.CLEARANCE_IN));
         TimedTelemetry.addLine("PathGenV3 initialized!!! YAY!", 1000);
         timeUntilUpdate = 0;
@@ -77,7 +85,7 @@ public class PathGenV3 {
         follower.update(Timer.DTime());
         TimedTelemetry.addData("Current State", currentState);
         TimedTelemetry.addData("Previous State", previousState);
-        TimedTelemetry.addData("Follower Stats", follower.following());
+        TimedTelemetry.addData("Following: ", follower.following());
         TimedTelemetry.addData("Current Pose", getCurrentPose());
         TimedTelemetry.addData("Destination", destination);
         if (timeUntilUpdate >= 1) {
@@ -87,9 +95,9 @@ public class PathGenV3 {
         timeUntilUpdate = RobotSpecs.MS_PER_PATH_UPDATE;
 
         if (follower.isBusy())
-            TimedTelemetry.addLine("Robot is moving!", (int) (RobotSpecs.MS_PER_PATH_UPDATE - 20));
+            TimedTelemetry.addLine("Robot is moving!", (int) (RobotSpecs.MS_PER_PATH_UPDATE - 10));
         else
-            TimedTelemetry.addLine("Robot is awaiting commands! :) ", (int) (RobotSpecs.MS_PER_PATH_UPDATE - 20));
+            TimedTelemetry.addLine("Robot is awaiting commands! :) ", (int) (RobotSpecs.MS_PER_PATH_UPDATE - 10));
 
         if (!on) {
             TimedTelemetry.addLine("Path generation is sleeping... zzz...");
@@ -101,7 +109,7 @@ public class PathGenV3 {
         if (currentState == State.IDLE) return;
         if (currentState != previousState) {
             currentState = previousState;
-            updateMovement();
+            if (currentState != State.PAUSE) updateMovement();
         }
 
     }
@@ -118,17 +126,17 @@ public class PathGenV3 {
     public static void checkSomeStates() {
 //        switch (currentState) {
 //            case MOVING_TO_SHOOT:
-//                if (follower.holding()) {
+//                if (!follower.isBusy()) {
 //                    currentState = State.SHOOTING;
 //                }
 //                break;
 //            case PARKING:
-//                if (follower.holding()) {
+//                if (!follower.isBusy()) {
 //                    currentState = State.IDLE;
 //                }
 //                break;
 //            case FLOWER_COLLECTING1:
-//                if (follower.holding())
+//                if (!follower.isBusy())
 //                    currentState = State.FLOWER_COLLECTING2;
 //                break;
 //        }
@@ -142,7 +150,7 @@ public class PathGenV3 {
         notPathYet.end(PedroPathingConverter.toPoint(destination));
         PathResult almostPath = notPathYet.build();
         try {
-            TimedTelemetry.addLine("Follower followed", 1000);
+            TimedTelemetry.addLine("Follower followed", 2000);
             follower.follow(PedroPathingConverter.toPath(almostPath.getPath()));
         } catch (NullPointerException | IllegalArgumentException e) {
             TimedTelemetry.addLine("Path Gen failed... (╥﹏╥) (˶˃⤙˂˶)!", 1000);
@@ -151,7 +159,7 @@ public class PathGenV3 {
 
     public static Pose getCurrentPose() {
         return new Pose(odometry.getX(DistanceUnit.INCH),
-                odometry.getY(DistanceUnit.INCH),
+                odometry.getY(DistanceUnit.INCH) + Competition.STARTING_Y_TILES,
                 odometry.getHeading(AngleUnit.DEGREES));
     }
 

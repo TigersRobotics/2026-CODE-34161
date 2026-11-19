@@ -4,8 +4,8 @@ import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
 public class Competition {
-    public static final double STARTING_X_TILES = 6.5;
-    public static final double STARTING_Y_Tiles = 9;
+    public static final double STARTING_X_TILES = 0.5;
+    public static final double STARTING_Y_TILES = 1.5;
     public static final double STARTING_HEADING_DRIVER_OFFSET = 90;
 
     public static final PolygonZone DISABLED_SIDE = new PolygonZone(

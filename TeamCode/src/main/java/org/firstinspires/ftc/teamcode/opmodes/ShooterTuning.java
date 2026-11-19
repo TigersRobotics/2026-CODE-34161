@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -50,6 +51,9 @@ import com.qualcomm.robotcore.util.RobotLog;
  *   Dpad up ......... feed pulse (a short timed feeder run)
  *   Start ........... flywheel on/off
  */
+
+@Deprecated
+@Disabled
 @TeleOp(name = "Flywheel PIDF Tuning (Recovery)")
 public class ShooterTuning extends OpMode {
 

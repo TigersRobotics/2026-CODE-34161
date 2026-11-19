@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
+@Deprecated
 @TeleOp(name = "Intake Test")
 public class IntakeTest extends OpMode {
     GoBildaOdometry odometry;

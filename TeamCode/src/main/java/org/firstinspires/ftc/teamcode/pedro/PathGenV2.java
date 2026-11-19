@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.utils.Timer;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class PathGenV2 {
     /// because I didn't like the original one
     private static GoBildaOdometry odometry;
