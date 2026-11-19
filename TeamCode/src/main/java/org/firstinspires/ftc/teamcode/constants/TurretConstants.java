@@ -22,5 +22,32 @@ public class TurretConstants {
     public static double FLYWHEEL_F = 0;
 
     // Shooting
-    
+    public static double G = 9.80665; // m/s^2
+    public static double DRAG_K = 0.0458; // 1/m
+    public static double WHEEL_DIAMETER = 0.090; // m
+    public static double HIVE_Z = 1.5129; // m
+    public static double SHOOTER_Z = 0.305; // m
+    public static double HIVE_X = 0; // m
+    public static double HIVE_Y = 0; // m
+
+    public static double W_V = 0.5;
+    public static double W_D = 1.0;
+    public static double W_H1 = -1.0;
+    public static double W_H0 = 90.0;
+    public static double W_BETA = 0.0;
+    public static double PHI_STAR = 30.0; // deg
+    public static double W_T = 1.0;
+    public static double T_LAT = 0.05; // s
+
+    public static double RPM_A = 0;
+    public static double RPM_B = 0; // rpm per m
+
+    public static double YAW_TOL = 0.15; // m
+    public static double HOOD_SETTLE_DEG = 0.5;
+    public static long HOOD_SETTLE_MS = 150;
+    public static double RPM_STABLE = 50;
+    public static long RPM_STABLE_MS = 100;
+    public static double HOOD_EDGE_DEG = 0.5;
+    public static double MAX_MOVING_SPEED = 1.0; // m/s
+    public static double MAX_LEAD_RATIO = 0.5;
 }

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
+import org.firstinspires.ftc.teamcode.utils.ShotUtil;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 public class TurretController {
@@ -30,16 +31,30 @@ public class TurretController {
     private static double sentF = Double.NaN;
     private static long velocitySentAtNs;
 
-    public static void setYaw(double degrees) {
+    public static void setYaw(double degrees, double perpendicularVelocity, double ballSpeed,
+            double trajectoryDegrees, double weight) {
         if (Double.isNaN(degrees)) return;
+        degrees -= leadDegrees(perpendicularVelocity, ballSpeed, trajectoryDegrees, weight);
         degrees %= 360;
         if (degrees > 180) degrees -= 360;
         if (degrees < -180) degrees += 360;
         turretYaw = Math.round(degrees / TurretConstants.YAW_STEP_DEG) * TurretConstants.YAW_STEP_DEG;
     }
 
-    public static void setYawFieldCentric(double fieldDegrees, double robotHeadingDegrees) {
-        setYaw(fieldDegrees - robotHeadingDegrees);
+    public static void setYawFieldCentric(double fieldDegrees, double robotHeadingDegrees,
+            double perpendicularVelocity, double ballSpeed, double trajectoryDegrees, double weight) {
+        setYaw(fieldDegrees - robotHeadingDegrees, perpendicularVelocity, ballSpeed, trajectoryDegrees, weight);
+    }
+
+    private static double leadDegrees(double perpendicularVelocity, double ballSpeed,
+            double trajectoryDegrees, double weight) {
+        double horizontalSpeed = ballSpeed * Math.cos(Math.toRadians(trajectoryDegrees));
+        if (Double.isNaN(perpendicularVelocity) || Double.isNaN(horizontalSpeed) || Math.abs(horizontalSpeed) < 1e-6) {
+            return 0;
+        }
+        double ratio = weight * perpendicularVelocity / horizontalSpeed;
+        ratio = Math.max(-1, Math.min(1, ratio));
+        return Math.toDegrees(Math.asin(ratio));
     }
 
     public static void setRpm(double rpm) {
@@ -59,7 +74,17 @@ public class TurretController {
         return flywheel.getVelocity() * 60.0 / TurretConstants.FLYWHEEL_TICKS_PER_REV;
     }
 
+    public static double getYaw() {
+        if (rotation == null) return 0;
+        return rotation.getCurrentPosition() * 360.0 / TurretConstants.YAW_TICKS_PER_REV; // deg
+    }
+
+    public static double getTargetYaw() {
+        return turretYaw; // deg
+    }
+
     public static void init(HardwareMap hardwareMap, boolean actuallyEnabled) {
+        ShotUtil.reset();
         if(actuallyEnabled) {
             flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
             flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
