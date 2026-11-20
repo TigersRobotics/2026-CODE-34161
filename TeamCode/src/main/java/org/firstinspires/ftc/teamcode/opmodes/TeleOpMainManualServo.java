@@ -36,7 +36,7 @@ public class TeleOpMainManualServo extends OpMode {
         Timer.init();
         TimedTelemetry.init(telemetry);
 
-        MecanumDriveTrainController.init(hardwareMap, true);
+        MecanumDriveTrainController.init(hardwareMap, true, true);
 
         yawMotor = hardwareMap.get(DcMotorEx.class, HardwareNames.TURRET_YAW_MOTOR_NAME);
         yawMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -64,7 +64,8 @@ public class TeleOpMainManualServo extends OpMode {
         MecanumDriveTrainController.update(
                 UtilMethods.expo(gamepad1.left_stick_y, 2),
                 UtilMethods.expo(-gamepad1.left_stick_x, 2),
-                UtilMethods.expo(-gamepad1.right_stick_x, 2));
+                UtilMethods.expo(-gamepad1.right_stick_x, 2),
+                0);
 
         double spin = gamepad2.left_stick_x;
         if (Math.abs(spin) < STICK_DEADBAND) spin = 0;

@@ -69,7 +69,7 @@ public class TeleOpMain extends OpMode {
         hubs = hardwareMap.getAll(LynxModule.class);
         for(LynxModule hub : hubs) hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
-        MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER);
+        MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER, true);
         ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
         UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
@@ -113,7 +113,7 @@ public class TeleOpMain extends OpMode {
         // lets the turret carry on round instead of sticking at +/-180
 
 
-        MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0));
+        MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0), odometry.getHeading());
         PollenTurretController.update();
         UptakeController.update(gamepad1.right_trigger - gamepad1.left_trigger);
         SingleIntakeController.update(intakePower);
