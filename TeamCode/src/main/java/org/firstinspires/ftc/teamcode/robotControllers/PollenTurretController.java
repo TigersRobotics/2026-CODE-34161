@@ -169,7 +169,8 @@ public class PollenTurretController {
     public static void setHoodAngle(double degrees) {
         if(hoodServo == null || Double.isNaN(degrees)) return;
 
-        double position = UtilMethods.clip(degrees / HOOD_SERVO_RANGE_DEG, 0, 1);
+
+        double position = UtilMethods.clip((degrees - HOOD_SERVO_RANGE_DEG/2 - 5) / HOOD_SERVO_RANGE_DEG * 2, -1, 1);
         if(position != sentHoodPosition) {
             hoodServo.setPosition(position);
             sentHoodPosition = position;

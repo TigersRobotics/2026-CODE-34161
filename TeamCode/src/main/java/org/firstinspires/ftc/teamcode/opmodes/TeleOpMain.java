@@ -34,17 +34,9 @@ public class TeleOpMain extends OpMode {
     final boolean ENABLE_DRIVE_CONTROLLER = true;
     final boolean ENABLE_UPTAKE_CONTROLLER = true;
     final boolean ENABLE_INTAKE_CONTROLLER = true;
-    /// Degrees the turret moves for one tap of dpad left/right
-    static final double YAW_NUDGE_DEG = 1.0;
-    /// How long dpad left/right has to be held before the turret starts sweeping
-    static final double YAW_HOLD_DELAY_MS = 250;
-    /// Sweep speed while dpad left/right is held (0.03 = 30 degrees per second)
-    static final double YAW_HOLD_DEG_PER_MS = 0.03;
 
     boolean enableIntake = false;
     double yaw = 0;
-    double dpadRightHeldMs = 0;
-    double dpadLeftHeldMs = 0;
     boolean toggleFlywheel = false;
     double targetVel = 1320;
 
