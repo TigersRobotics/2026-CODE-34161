@@ -46,7 +46,7 @@ public class TeleOpMain extends OpMode {
     double dpadRightHeldMs = 0;
     double dpadLeftHeldMs = 0;
     boolean toggleFlywheel = false;
-    double targetVel = 1200;
+    double targetVel = 1320;
 
     FieldOdometry odometry;
     int hiveIndex = 1;
@@ -57,7 +57,7 @@ public class TeleOpMain extends OpMode {
     double posY;
     double heading = 90;
     double intakePower;
-    double angle;
+    double angle = 15;
 
     @Override
     public void init() {
@@ -77,6 +77,7 @@ public class TeleOpMain extends OpMode {
 
         hoodServo = hardwareMap.get(Servo.class, TURRET_UP_ANGLE_SERVO_NAME);
         odometry = new FieldOdometry(new GoBildaOdometry(hardwareMap, ODOMETRY_NAME));
+        odometry.zero(-72 + 6.5, -72 + 9, 90);
 
         PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
 
@@ -127,8 +128,8 @@ public class TeleOpMain extends OpMode {
     }
 
     private void handleTechnicianInputs() {
-//        if(gamepad2.dpadUpWasPressed()) targetVel += 10;
-//        if(gamepad2.dpadDownWasPressed()) targetVel -= 10;
+        if(gamepad2.dpadUpWasPressed()) targetVel += 10;
+        if(gamepad2.dpadDownWasPressed()) targetVel -= 10;
         if(gamepad1.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
         if(gamepad2.circleWasPressed()) toggleFlywheel = !toggleFlywheel;
 
@@ -137,13 +138,7 @@ public class TeleOpMain extends OpMode {
 
         // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
         // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
-        if(gamepad1.dpadRightWasPressed()) yaw += YAW_NUDGE_DEG;
-        if(gamepad1.dpadLeftWasPressed()) yaw -= YAW_NUDGE_DEG;
-
-        dpadRightHeldMs = gamepad1.dpad_right ? dpadRightHeldMs + Timer.DTime() : 0;
-        dpadLeftHeldMs = gamepad1.dpad_left ? dpadLeftHeldMs + Timer.DTime() : 0;
-        if(dpadRightHeldMs > YAW_HOLD_DELAY_MS) yaw += Timer.DTime() * YAW_HOLD_DEG_PER_MS;
-        if(dpadLeftHeldMs > YAW_HOLD_DELAY_MS) yaw -= Timer.DTime() * YAW_HOLD_DEG_PER_MS;
+        yaw += gamepad2.right_stick_x * Timer.DTime() *0.25;
 
     }
 
@@ -152,7 +147,7 @@ public class TeleOpMain extends OpMode {
         double[] t = Field.upCell(true, tipped);
         double fieldDeg = Math.toDegrees(Math.atan2(t[1] - odometry.getY(), t[0] - odometry.getX())); // deg
         double turret = wrap(Math.toDegrees(odometry.getHeading()) - fieldDeg + trim); // deg
-        if (odometry.isZeroed()) PollenTurretController.setYaw(turret);
+        if (odometry.isZeroed()) PollenTurretController.setYaw(turret + yaw);
 
         double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
         double calculatedYawDeg = Math.toDegrees(calculatedYaw);
