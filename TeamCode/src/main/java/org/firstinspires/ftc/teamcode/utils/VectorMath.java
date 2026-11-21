@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import org.firstinspires.ftc.teamcode.constants.MapSpecs;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
+import org.firstinspires.ftc.teamcode.sensors.FieldOdometry;
 
 public class VectorMath {
 
@@ -109,7 +110,11 @@ public class VectorMath {
      */
 
 
-    public static double calculateTurretAngle(int hiveIndex, double posX, double posY, double heading) {
+    public static double calculateTurretAngle(int hiveIndex, FieldOdometry odometry) {
+        double posX = odometry.getX();
+        double posY = odometry.getY();
+        double heading = odometry.getHeading();
+
         double hiveX = MapSpecs.HIVE_COORDINATES[hiveIndex].getX();
         double hiveY = MapSpecs.HIVE_COORDINATES[hiveIndex].getY();
 
@@ -117,7 +122,6 @@ public class VectorMath {
         double dy = hiveY - posY;
 
         double calculatedYaw = heading -Math.atan2(dy, dx);
-
 
         TimedTelemetry.addData("Pos X: ", posX);
         TimedTelemetry.addData("Pos Y: ", posY);

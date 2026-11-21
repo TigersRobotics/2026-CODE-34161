@@ -17,8 +17,11 @@ import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
+import org.firstinspires.ftc.teamcode.opmodes.OdometryTest;
+import org.firstinspires.ftc.teamcode.sensors.FieldOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
+import org.firstinspires.ftc.teamcode.utils.VectorMath;
 
 
 /**
@@ -92,6 +95,11 @@ public class PollenTurretController {
 
     public static void init(HardwareMap hardwareMap) {
         init(hardwareMap, true);
+    }
+
+    public static void aim(int hiveIndex, FieldOdometry odometry) {
+        double yaw = VectorMath.calculateTurretAngle(hiveIndex, odometry);
+        setYaw(yaw);
     }
 
 

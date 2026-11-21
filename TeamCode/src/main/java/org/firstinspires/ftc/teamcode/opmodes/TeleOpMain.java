@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.field.Field;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
@@ -28,6 +29,7 @@ import java.util.List;
 
 @TeleOp
 public class TeleOpMain extends OpMode {
+    private static final double HOOD_SERVO_RANGE_DEG = 20;
     private boolean tipped;
     private double trim;
     final boolean ENABLE_TURRET_CONTROLLER = true;
@@ -40,6 +42,7 @@ public class TeleOpMain extends OpMode {
     boolean toggleFlywheel = false;
     double targetVel = 1320;
 
+    double targetVelOffset = 0;
     FieldOdometry odometry;
     int hiveIndex = 1;
     List<LynxModule> hubs;
@@ -50,6 +53,8 @@ public class TeleOpMain extends OpMode {
     double heading = 90;
     double intakePower;
     double angle = 15;
+
+    double P = TuningConstants.FLYWHEEL_P_VALUE, I = TuningConstants.FLYWHEEL_I_VALUE, D = TuningConstants.FLYWHEEL_D_VALUE, F = TuningConstants.FLYWHEEL_F_VALUE;
 
     @Override
     public void init() {
@@ -71,7 +76,7 @@ public class TeleOpMain extends OpMode {
         odometry = new FieldOdometry(new GoBildaOdometry(hardwareMap, ODOMETRY_NAME));
         odometry.zero(-72 + 6.5, -72 + 9, 90);
 
-        PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
+        PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, 0, D, TuningConstants.FLYWHEEL_F_VALUE);
 
         TimedTelemetry.update();
         telemetry.update();
@@ -120,10 +125,19 @@ public class TeleOpMain extends OpMode {
     }
 
     private void handleTechnicianInputs() {
-        if(gamepad2.dpadUpWasPressed()) targetVel += 10;
-        if(gamepad2.dpadDownWasPressed()) targetVel -= 10;
-        if(gamepad1.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
+        if(gamepad2.dpadUpWasPressed()) targetVelOffset += 10;
+        if(gamepad2.dpadDownWasPressed()) targetVelOffset -= 10;
+        if(gamepad2.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
         if(gamepad2.circleWasPressed()) toggleFlywheel = !toggleFlywheel;
+
+        if(gamepad2.dpadRightWasPressed()) {
+            I += 0.01;
+            PollenTurretController.setPFCoefficients(P, I, D, F);
+        };
+        if(gamepad2.dpadLeftWasPressed()) {
+            I -= 0.01;
+            PollenTurretController.setPFCoefficients(P, I, D, F);
+        }
 
         if(gamepad2.rightBumperWasPressed()) angle += 0.5;
         if(gamepad2.leftBumperWasPressed()) angle -= 0.5;
@@ -141,18 +155,33 @@ public class TeleOpMain extends OpMode {
         double turret = wrap(Math.toDegrees(odometry.getHeading()) - fieldDeg + trim); // deg
         if (odometry.isZeroed()) PollenTurretController.setYaw(turret + yaw);
 
-        double calculatedYaw = calculateTurretAngle(hiveIndex, posx, posY, heading);
-        double calculatedYawDeg = Math.toDegrees(calculatedYaw);
+        double closestSpeed = targetVel;
+        double val = Double.MAX_VALUE;
+
+        for (int[] pos :TuningConstants.positions) {
+            double flywheelSpeed = pos[0];
+            double x = pos[1];
+            double y = pos[2];
+
+            double dist = 0;
+            dist += x + y;
+            if(dist < val) {
+                val = dist;
+                closestSpeed = flywheelSpeed;
+            }
+
+
+        }
+        closestSpeed += targetVel;
+
 
         double calculatedHoodAngle = calculateHoodAngle(hiveIndex, posx, posY, PollenTurretController.getVelocity());
 
-        hoodServo.setPosition(UtilMethods.clip(angle/20, 0, 0.75));
 
+        setHoodAngle(20);
         TimedTelemetry.addData("Hood angle: ", calculatedHoodAngle);
 
-        PollenTurretController.setTargetVel(toggleFlywheel ? targetVel : 0);
-//        PollenTurretController.setHoodAngle(hoodOffset);
-
+        PollenTurretController.setTargetVel(toggleFlywheel ? closestSpeed + targetVelOffset : 0);
 
 
         TimedTelemetry.addData("GoBilda Heading ", heading);
@@ -176,8 +205,15 @@ public class TeleOpMain extends OpMode {
 
     static double wrap(double deg) {
         deg %= 360;
-        if (deg > 180) deg -= 360;
-        if (deg < -180) deg += 360;
+        while (deg > 180) deg -= 360;
+        while (deg < -70) deg += 90;
         return deg;
+    }
+
+    public void setHoodAngle(double degrees) {
+        if (hoodServo == null || Double.isNaN(degrees)) return;
+
+        double position = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / HOOD_SERVO_RANGE_DEG, 0, 1);
+        hoodServo.setPosition(position);
     }
 }

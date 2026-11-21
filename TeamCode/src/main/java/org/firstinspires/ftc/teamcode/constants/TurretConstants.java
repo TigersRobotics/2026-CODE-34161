@@ -16,9 +16,9 @@ public class TurretConstants {
     // Tuned Constants
 
     // PIDF
-    public static double FLYWHEEL_P = 10;
-    public static double FLYWHEEL_I = 0;
-    public static double FLYWHEEL_D = 0;
+    public static double FLYWHEEL_P = 118.5;
+    public static double FLYWHEEL_I = 0.01;
+    public static double FLYWHEEL_D = -0.4;
     public static double FLYWHEEL_F = 32767.0 / (FLYWHEEL_RPM_MAX * FLYWHEEL_TICKS_PER_REV / 60.0);
 
     // Shooting
