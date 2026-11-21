@@ -14,7 +14,8 @@ import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
-    double P = 118.5, I = 0.01, D = -0.4, F = 15.1;
+    private static final double HOOD_SERVO_RANGE_DEG = 20;
+    double P = 0.0, I = 0.0, D = 0.0, F = 0.0;
     DcMotorEx flywheel;
     Servo hood;
     double angle =  20;
@@ -39,7 +40,6 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setDirection(DcMotor.Direction.FORWARD);
-        setHoodAngle(angle);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
             justTurnedUpI = false;
         }
         if(gamepad1.right_stick_y < -0.75) {
-            if(!justTurnedDownI) I -= stepSize[stepIndex];
+            if(!justTurnedUpI) I -= stepSize[stepIndex];
             justTurnedDownI = true;
 
         } else {
@@ -98,11 +98,9 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         double error = targetedSpeed - flywheel.getVelocity();
 
-        if(gamepad2.circleWasPressed()) angle += TurretConstants.HOOD_STEP_DEG;
-        if(gamepad2.triangleWasPressed()) angle -= TurretConstants.HOOD_STEP_DEG;
-        angle = UtilMethods.clip(angle, TurretConstants.HOOD_MIN_DEG, TurretConstants.HOOD_MAX_DEG);
-
         setHoodAngle(angle);
+
+
 
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);
@@ -112,20 +110,16 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         telemetry.addData("Step Size: ", stepSize[stepIndex]);
         telemetry.addData("Current Velocity: ", flywheel.getVelocity());
         telemetry.addData("Error: ", error);
-        telemetry.addData("Hood Angle: ", angle);
-        telemetry.addData("Hood Servo: ", hoodPosition);
 
 
 
         telemetry.update();
     }
-    double hoodPosition;
-
     public void setHoodAngle(double degrees) {
         if (hood == null || Double.isNaN(degrees)) return;
 
-        hoodPosition = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / 20.0, 0, 1);
-        hood.setPosition(hoodPosition);
+        double position = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / HOOD_SERVO_RANGE_DEG, 0, 1);
+        hood.setPosition(position);
     }
 
 }
