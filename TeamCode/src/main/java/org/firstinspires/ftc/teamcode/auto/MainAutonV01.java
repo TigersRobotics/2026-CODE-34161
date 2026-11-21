@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
@@ -13,15 +13,16 @@ import org.firstinspires.ftc.teamcode.utils.Timer;
 
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "V2A - Timed Based")
-public class MainAutonV02A extends LinearOpMode {
-    // this moves to the next action using a timer
-    // less error-prone
+@Autonomous(name = "Just go park")
+public class MainAutonV01 extends OpMode {
     GoBildaOdometry odometry;
     Follower follower;
 
+    private boolean parkYet = false;
+
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void init() {
+//        PathGenV2.init(odometry, );
         Timer.init();
         TimedTelemetry.init(telemetry);
         odometry = new GoBildaOdometry(hardwareMap, HardwareNames.ODOMETRY_NAME);
@@ -29,34 +30,21 @@ public class MainAutonV02A extends LinearOpMode {
         PathGenV3.init(odometry, follower, true);
         TimedTelemetry.update();
         telemetry.update();
-
-        waitForStart();
-        Timer.reset();
-        Timer.update();
-        PathGenV3.goShoot(PathGenV3.Hive.NEAREST);
-        while (Timer.getTime(TimeUnit.MILLISECONDS) < 10000) {
-            if (!opModeIsActive()) return;
-            update();
-        }
-        // Shoot TODO add shoot here
-        while (Timer.getTime(TimeUnit.MILLISECONDS) < 20000) {
-            if (!opModeIsActive()) return;
-
-            // shooter update (if needed)
-            update();
-        }
-
-        PathGenV3.goPark();
-        while (opModeIsActive()) {
-            update();
-        }
-
     }
 
-    public void update() {
+    @Override
+    public void loop() {
         Timer.update();
-        PathGenV3.update();
+
+        if (Timer.getTime(TimeUnit.MILLISECONDS) > 10000) {
+            if (!parkYet) PathGenV3.goPark();
+            parkYet = true;
+        }
+
+
+        PathGenV3.update(gamepad1.right_trigger > 0.5);
         TimedTelemetry.update();
         telemetry.update();
+
     }
 }

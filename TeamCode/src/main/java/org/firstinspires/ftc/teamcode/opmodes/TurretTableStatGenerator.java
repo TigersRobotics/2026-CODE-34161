@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
+import org.firstinspires.ftc.teamcode.constants.TuningConstants;
 import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainController;
 import org.firstinspires.ftc.teamcode.robotControllers.PollenTurretController;
 import org.firstinspires.ftc.teamcode.robotControllers.SingleIntakeController;
@@ -43,6 +44,8 @@ public class TurretTableStatGenerator extends LinearOpMode {
         SingleIntakeController.init(hardwareMap);
         odometry.zero(-72 + 6.5, -72 + 9, 90);
         Timer.init();
+
+        PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_I_VALUE, TuningConstants.FLYWHEEL_D_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
 
 
         boolean running = true;
