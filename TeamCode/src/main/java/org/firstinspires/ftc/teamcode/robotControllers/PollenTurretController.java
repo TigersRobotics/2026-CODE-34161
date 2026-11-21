@@ -144,6 +144,17 @@ public class PollenTurretController {
         }
     }
 
+    /// Only talks to the hub when the coefficients are different to the ones it already has
+    public static void setPFCoefficients(double P, double I, double D, double F) {
+        if(isInitialized) {
+            PollenTurretController.P = P;
+            PollenTurretController.F = F;
+            PollenTurretController.I = I;
+            PollenTurretController.D = D;
+            applyPFCoefficients();
+        }
+    }
+
     public static double getTargetVel() {
         return targetVel;
     }
