@@ -98,10 +98,11 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         double error = targetedSpeed - flywheel.getVelocity();
 
-        setHoodAngle(angle);
+        if(gamepad2.circleWasPressed()) angle += TurretConstants.HOOD_STEP_DEG;
+        if(gamepad2.triangleWasPressed()) angle -= TurretConstants.HOOD_STEP_DEG;
+        angle = UtilMethods.clip(angle, TurretConstants.HOOD_MIN_DEG, TurretConstants.HOOD_MAX_DEG);
 
-        if(gamepad2.circleWasPressed()) angle += stepSize[stepIndex];
-        if(gamepad2.squareWasPressed()) angle -= stepSize[stepIndex];
+        setHoodAngle(angle);
 
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);
@@ -111,6 +112,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         telemetry.addData("Step Size: ", stepSize[stepIndex]);
         telemetry.addData("Current Velocity: ", flywheel.getVelocity());
         telemetry.addData("Error: ", error);
+        telemetry.addData("Hood Angle: ", angle);
 
 
 
