@@ -65,7 +65,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
             justTurnedUpI = false;
         }
         if(gamepad1.right_stick_y < -0.75) {
-            if(!justTurnedUpI) I -= stepSize[stepIndex];
+            if(!justTurnedDownI) I -= stepSize[stepIndex];
             justTurnedDownI = true;
 
         } else {
@@ -100,7 +100,8 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         setHoodAngle(angle);
 
-
+        if(gamepad2.circleWasPressed()) angle += stepSize[stepIndex];
+        if(gamepad2.squareWasPressed()) angle -= stepSize[stepIndex];
 
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);

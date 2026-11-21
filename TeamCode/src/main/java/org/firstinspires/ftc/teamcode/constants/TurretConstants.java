@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.constants;
 
 public class TurretConstants {
     public static final double HOOD_MIN_DEG = 5;
-    public static final double HOOD_MAX_DEG = 25;
+    public static final double HOOD_MAX_DEG = 22.5;
     public static final double HOOD_STEP_DEG = 0.5;
 
     public static final double FLYWHEEL_TICKS_PER_REV = 28;
