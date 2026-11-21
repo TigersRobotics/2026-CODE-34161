@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     private static final double HOOD_SERVO_RANGE_DEG = 20;
-    double P = 199, I = 0.0, D = 0.0, F = 15.892;
+    double P = 0.0, I = 0.0, D = 0.0, F = 0.0;
     DcMotorEx flywheel;
     Servo hood;
     double angle =  20;
