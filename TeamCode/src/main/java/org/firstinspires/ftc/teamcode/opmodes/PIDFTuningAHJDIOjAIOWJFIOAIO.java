@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -61,34 +62,31 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         if(gamepad1.triangleWasPressed()) F += stepSize[stepIndex];
         if(gamepad1.crossWasPressed()) F -= stepSize[stepIndex];
+        // Re-arm below 0.4 so the stick does not have to return all the way to center.
+        // A stick resting above 0.75 would otherwise lock that direction after one step.
         if(gamepad1.right_stick_y > 0.75) {
             if(!justTurnedUpI) I += stepSize[stepIndex];
             justTurnedUpI = true;
-
-        } else {
+        } else if(gamepad1.right_stick_y < 0.4) {
             justTurnedUpI = false;
         }
         if(gamepad1.right_stick_y < -0.75) {
             if(!justTurnedDownI) I -= stepSize[stepIndex];
             justTurnedDownI = true;
-
-        } else {
+        } else if(gamepad1.right_stick_y > -0.4) {
             justTurnedDownI = false;
         }
-
 
         if(gamepad1.left_stick_y > 0.75) {
             if(!justTurnedUpD) D += stepSize[stepIndex];
             justTurnedUpD = true;
-
-        } else {
+        } else if(gamepad1.left_stick_y < 0.4) {
             justTurnedUpD = false;
         }
         if(gamepad1.left_stick_y < -0.75) {
             if(!justTurnedDownD) D -= stepSize[stepIndex];
             justTurnedDownD = true;
-
-        } else {
+        } else if(gamepad1.left_stick_y > -0.4) {
             justTurnedDownD = false;
         }
 
@@ -97,9 +95,9 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         double targetedSpeed = isNormalSpeed ? targetSpeed : lowSpeed;
         double error = targetedSpeed - flywheel.getVelocity();
 
-        // I winds up while the wheel is still climbing from a stop. Hold it off until the
-        // wheel is at speed, which is what happens when these numbers are dialed in by hand.
-        if (targetedSpeed != iArmTarget) {
+        // Only the big low/high speed switch restarts the spin-up hold. Bumper steps of 5
+        // must not turn I back off, or tapping the speed up leaves positive I dead.
+        if (Double.isNaN(iArmTarget) || Math.abs(targetedSpeed - iArmTarget) > 100) {
             iArmed = false;
             iArmTarget = targetedSpeed;
             speedCommandAtNs = System.nanoTime();
@@ -110,7 +108,8 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         double appliedI = iArmed ? I : 0;
 
         if (P != sentP || appliedI != sentI || D != sentD || F != sentF) {
-            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, appliedI, D, F));
+            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
+                    new PIDFCoefficients(P, appliedI, D, F, MotorControlAlgorithm.LegacyPID));
             sentP = P;
             sentI = appliedI;
             sentD = D;
@@ -128,6 +127,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);
         telemetry.addData("I applied", appliedI);
+        telemetry.addData("I stick", gamepad1.right_stick_y);
         telemetry.addData("D", D);
         telemetry.addData("F", F);
         telemetry.addData("Target Velocity:", targetSpeed);
