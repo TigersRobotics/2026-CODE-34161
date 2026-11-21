@@ -10,11 +10,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
+import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
+
+import java.io.File;
 
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
-    private static final double HOOD_SERVO_RANGE_DEG = 20;
     double P = 0.0, I = 0.0, D = 0.0, F = 0.0;
     DcMotorEx flywheel;
     Servo hood;
@@ -34,12 +36,15 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
     @Override
     public void init() {
+        ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
+
         flywheel = hardwareMap.get(DcMotorEx.class, HardwareNames.FLYWHEEL_NAME);
         hood = hardwareMap.get(Servo.class, HardwareNames.TURRET_UP_ANGLE_SERVO_NAME);
         uptake = hardwareMap.get(DcMotor.class, HardwareNames.UPTAKE_MOTOR_NAME);
 
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setDirection(DcMotor.Direction.FORWARD);
+        setHoodAngle(angle);
     }
 
     @Override
@@ -113,16 +118,19 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         telemetry.addData("Current Velocity: ", flywheel.getVelocity());
         telemetry.addData("Error: ", error);
         telemetry.addData("Hood Angle: ", angle);
+        telemetry.addData("Hood Servo: ", hoodPosition);
 
 
 
         telemetry.update();
     }
+    double hoodPosition;
+
     public void setHoodAngle(double degrees) {
         if (hood == null || Double.isNaN(degrees)) return;
 
-        double position = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / HOOD_SERVO_RANGE_DEG, 0, 1);
-        hood.setPosition(position);
+        hoodPosition = ShotCalculator.hoodServoPosition(degrees);
+        hood.setPosition(hoodPosition);
     }
 
 }
