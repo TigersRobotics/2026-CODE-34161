@@ -17,7 +17,7 @@ import java.io.File;
 
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
-    double P = 0.0, I = 0.0, D = 0.0, F = 0.0;
+    double P = 118.5, I = 0.01, D = -0.4, F = 15.1;
     DcMotorEx flywheel;
     Servo hood;
     double angle =  20;
