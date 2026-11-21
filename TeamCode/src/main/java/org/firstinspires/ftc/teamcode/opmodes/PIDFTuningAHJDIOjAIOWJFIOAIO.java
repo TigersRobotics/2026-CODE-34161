@@ -29,6 +29,8 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     boolean justTurnedDownI = false;
     boolean justTurnedUpD = false;
     boolean justTurnedDownD = false;
+    boolean isNormalSpeed = false;
+    double lowSpeed = 900;
 
     @Override
     public void init() {
@@ -87,11 +89,18 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         }
 
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
-        flywheel.setVelocity(targetSpeed);
 
+        if(gamepad1.leftStickButtonWasPressed()) isNormalSpeed = !isNormalSpeed;
 
+        double targetedSpeed = isNormalSpeed ? targetSpeed : lowSpeed;
+
+        flywheel.setVelocity(targetedSpeed);
+
+        double error = targetedSpeed - flywheel.getVelocity();
 
         setHoodAngle(angle);
+
+
 
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);
@@ -100,6 +109,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         telemetry.addData("Target Velocity:", targetSpeed);
         telemetry.addData("Step Size: ", stepSize[stepIndex]);
         telemetry.addData("Current Velocity: ", flywheel.getVelocity());
+        telemetry.addData("Error: ", error);
 
 
 
