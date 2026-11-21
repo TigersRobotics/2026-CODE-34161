@@ -51,8 +51,15 @@ public class PathGenV3 {
     }
 
     private static State currentState = State.IDLE;
-    private static final State previousState = State.IDLE;
 
+    public static State getCurrentState() {
+        return currentState;
+    }
+
+    private static State previousState = State.IDLE;
+
+    private static State storedState = State.IDLE;
+    private static boolean experimentalMode;
 
     public enum State {
         MOVING_TO_SHOOT,
@@ -62,17 +69,20 @@ public class PathGenV3 {
         IDLE,
         FLOWER_COLLECTING1,
         FLOWER_COLLECTING2,
-        PAUSE
+        PAUSE,
+        GO_TO_SPOT
     }
 
     public static Pose destination;
 
-    public static void init(GoBildaOdometry odometry, Follower follower, boolean autonMode) {
+    public static void init(GoBildaOdometry odometry, Follower follower, boolean autonMode, boolean experimentalThing) {
         PathGenV3.autonMode = autonMode;
         on = autonMode;
+        PathGenV3.experimentalMode = experimentalThing;
         currentState = State.IDLE;
+        previousState = State.IDLE;
         PathGenV3.follower = follower;
-        follower.setPose(new Pose(tileToIN(Competition.STARTING_X_TILES), 0, 0));
+        follower.setPose(new Pose(tileToIN(Competition.STARTING_X_TILES), 0, Competition.STARTING_HEADING));
         PathGenV3.odometry = odometry;
 
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
@@ -83,8 +93,12 @@ public class PathGenV3 {
         timeUntilUpdate = 0;
     }
 
+    public static void init(GoBildaOdometry odometry, Follower follower, boolean autonMode) {
+        init(odometry, follower, autonMode, false);
+    }
+
     public static void update() {
-        follower.update(Timer.DTime());
+        follower.update();
         TimedTelemetry.addData("Current State", currentState);
         TimedTelemetry.addData("Previous State", previousState);
         TimedTelemetry.addData("Following: ", follower.following());
@@ -110,7 +124,7 @@ public class PathGenV3 {
         TimedTelemetry.addData("Follower Stats", follower.following());
         if (currentState == State.IDLE) return;
         if (currentState != previousState) {
-            currentState = previousState;
+            previousState = currentState;
             if (currentState != State.PAUSE) updateMovement();
         }
 
@@ -121,33 +135,39 @@ public class PathGenV3 {
             update();
         } else {
             follower.stop();
+            if (currentState != State.PAUSE) {
+                storedState = currentState;
+                currentState = State.PAUSE;
+            }
             TimedTelemetry.addLine("Path Gen paused -_-");
         }
+
     }
 
     public static void checkSomeStates() {
-//        switch (currentState) {
-//            case MOVING_TO_SHOOT:
-//                if (!follower.isBusy()) {
-//                    currentState = State.SHOOTING;
-//                }
-//                break;
-//            case PARKING:
-//                if (!follower.isBusy()) {
-//                    currentState = State.IDLE;
-//                }
-//                break;
-//            case FLOWER_COLLECTING1:
-//                if (!follower.isBusy()) {
-//                    currentState = State.FLOWER_COLLECTING2;
-//                    if ((getCurrentPose().heading() - Math.toRadians(110) < 0)) {
-//                        destination = new Pose(getCurrentPose().x(), getCurrentPose().y() + 36, Math.toRadians(90));
-//                    } else {
-//                        destination = new Pose(getCurrentPose().x() + 36, getCurrentPose().y(), Math.toRadians(180));
-//                    }
-//                }
-//                break;
-//        }
+        if (!experimentalMode) return;
+        switch (currentState) {
+            case MOVING_TO_SHOOT:
+                if (!follower.isBusy()) {
+                    currentState = State.SHOOTING;
+                }
+                break;
+            case PARKING:
+                if (!follower.isBusy()) {
+                    currentState = State.IDLE;
+                }
+                break;
+            case FLOWER_COLLECTING1:
+                if (!follower.isBusy()) {
+                    currentState = State.FLOWER_COLLECTING2;
+                    if ((getCurrentPose().heading() - Math.toRadians(110) < 0)) {
+                        destination = new Pose(getCurrentPose().x(), getCurrentPose().y() + 36, Math.toRadians(90));
+                    } else {
+                        destination = new Pose(getCurrentPose().x() + 36, getCurrentPose().y(), Math.toRadians(180));
+                    }
+                }
+                break;
+        }
     }
 
     public static void updateMovement() {
@@ -157,7 +177,7 @@ public class PathGenV3 {
             notPathYet = notPathYet.addObstacle(obstacle);
         if (autonMode)
             notPathYet = notPathYet.addObstacle(MapSpecs.OTHER_SIDE).addObstacle(Competition.DISABLED_SIDE);
-        if (currentState != State.FLOWER_COLLECTING1 || currentState != State.FLOWER_COLLECTING2)
+        if (currentState != State.FLOWER_COLLECTING1 && currentState != State.FLOWER_COLLECTING2)
             for (Zone flower : MapSpecs.FLOWERS) notPathYet = notPathYet.addObstacle(flower);
         notPathYet = notPathYet.end(PedroPathingConverter.toPoint(destination));
         PathResult almostPath = notPathYet.build();
@@ -172,7 +192,8 @@ public class PathGenV3 {
     public static Pose getCurrentPose() {
         return new Pose(odometry.getX(DistanceUnit.INCH),
                 odometry.getY(DistanceUnit.INCH) + Competition.STARTING_Y_TILES,
-                odometry.getHeading(AngleUnit.DEGREES));
+                odometry.getHeading(AngleUnit.RADIANS));
+
     }
 
     public enum Hive {

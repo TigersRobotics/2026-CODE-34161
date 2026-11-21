@@ -18,6 +18,10 @@ public class MapSpecs {
     public static final double APRIL_TAG_HIVE_OFFSET_H = 1;
     public static final double APRIL_TAG_HIVE_OFFSET_D = 1;
 
+    public static final Pose SPOT = new Pose(
+            48, 36, Math.toRadians(90)
+    );
+
     public static final PolygonZone LEFT_SHOOTING = new PolygonZone(
             new Point(tileToIN(1.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
             new Point(tileToIN(0.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),

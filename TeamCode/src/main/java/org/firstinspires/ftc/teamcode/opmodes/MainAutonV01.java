@@ -38,7 +38,6 @@ public class MainAutonV01 extends OpMode {
     @Override
     public void loop() {
         Timer.update();
-        odometry.update();
 
         if (Timer.getTime(TimeUnit.MILLISECONDS) > 10000) {
             if (!parkYet) PathGenV3.goPark();

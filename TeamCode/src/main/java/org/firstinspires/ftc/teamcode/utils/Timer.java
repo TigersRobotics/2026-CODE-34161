@@ -15,6 +15,10 @@ public class Timer {
         return timer.time(unit);
     }
 
+    public static void reset() {
+        timer.reset();
+    }
+
     public static void init(){
         timer.reset();
         timedTriggers.clear();

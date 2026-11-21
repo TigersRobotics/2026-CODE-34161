@@ -157,9 +157,9 @@ public class MecanumDriveTrainController{
         if(power == 0) return sentPower != 0;
         return Math.abs(power - sentPower) >= POWER_WRITE_TOLERANCE;
     }
-    private static boolean driverOrientate = true;
-    private static boolean buttonHold = false;
-    private static double driverOffset = Competition.STARTING_HEADING_DRIVER_OFFSET;
+    private static final boolean driverOrientate = true;
+    private static final boolean buttonHold = false;
+    private static final double driverOffset = Competition.STARTING_HEADING_DRIVER_OFFSET_RAD;
 
 
     public static void toggleDriverOrientation(boolean on){

@@ -37,7 +37,6 @@ public class PedroTest extends OpMode {
     @Override
     public void loop() {
         Timer.update();
-        odometry.update();
         double x = -gamepad1.left_stick_x;
         double y = gamepad1.left_stick_y;
         double turn = -gamepad1.right_stick_x;

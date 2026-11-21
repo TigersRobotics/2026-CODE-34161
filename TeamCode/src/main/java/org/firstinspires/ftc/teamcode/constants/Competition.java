@@ -4,9 +4,16 @@ import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
 public class Competition {
+
+
     public static final double STARTING_X_TILES = 0.25;
     public static final double STARTING_Y_TILES = 0.5;
-    public static final double STARTING_HEADING_DRIVER_OFFSET = 90;
+    /// divide by 24 if using inches
+    /// measured from the CENTER of the robot
+
+    public static final double STARTING_HEADING = Math.toRadians(90);
+    /// FROM DRIVER POV RIGHT (POINTING AT GARDEN) HEADING = 0
+    public static final double STARTING_HEADING_DRIVER_OFFSET_RAD = Math.toRadians(90) - STARTING_HEADING;
 
 //    public static final PolygonZone DISABLED_SIDE = new PolygonZone(
 //            new Point(3, 0), new Point(3, 3),
