@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.PathGenV3;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
+import org.firstinspires.ftc.teamcode.utils.Shoot;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
@@ -42,7 +43,7 @@ public class MainAutonV02B extends LinearOpMode {
         }
         // Shoot TODO add shooting here
         while (Timer.getTime(TimeUnit.MILLISECONDS) < 20000) {
-            // shooter update if needed
+            Shoot.shoot(hardwareMap, true);
             update();
         }
 
