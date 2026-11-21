@@ -31,6 +31,9 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     boolean justTurnedDownD = false;
     boolean isNormalSpeed = false;
     double lowSpeed = 900;
+    PIDFCoefficients hubPidf = new PIDFCoefficients();
+    long lastReadbackNs = 0;
+    double sentP = Double.NaN, sentI = Double.NaN, sentD = Double.NaN, sentF = Double.NaN;
 
     @Override
     public void init() {
@@ -65,7 +68,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
             justTurnedUpI = false;
         }
         if(gamepad1.right_stick_y < -0.75) {
-            if(!justTurnedUpI) I -= stepSize[stepIndex];
+            if(!justTurnedDownI) I -= stepSize[stepIndex];
             justTurnedDownI = true;
 
         } else {
@@ -90,13 +93,23 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
 
+        // Read back what the hub is really running. Read right after the values change and
+        // twice a second otherwise; each read is a round trip to the hub, so not every loop.
+        boolean changed = P != sentP || I != sentI || D != sentD || F != sentF;
+        if (changed || System.nanoTime() - lastReadbackNs > 500_000_000L) {
+            hubPidf = flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+            lastReadbackNs = System.nanoTime();
+            sentP = P; sentI = I; sentD = D; sentF = F;
+        }
+
         if(gamepad1.leftStickButtonWasPressed()) isNormalSpeed = !isNormalSpeed;
 
         double targetedSpeed = isNormalSpeed ? targetSpeed : lowSpeed;
 
         flywheel.setVelocity(targetedSpeed);
 
-        double error = targetedSpeed - flywheel.getVelocity();
+        double velocity = flywheel.getVelocity();
+        double error = targetedSpeed - velocity;
 
         setHoodAngle(angle);
 
@@ -107,9 +120,20 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
         telemetry.addData("D", D);
         telemetry.addData("F", F);
         telemetry.addData("Target Velocity:", targetSpeed);
+        // targetSpeed is only sent while normal speed is on (left stick button); otherwise lowSpeed is.
+        telemetry.addData("Commanded Velocity", "%.0f (%s)", targetedSpeed, isNormalSpeed ? "normal" : "LOW");
         telemetry.addData("Step Size: ", stepSize[stepIndex]);
-        telemetry.addData("Current Velocity: ", flywheel.getVelocity());
+        telemetry.addData("Current Velocity: ", velocity);
         telemetry.addData("Error: ", error);
+        telemetry.addData("Hub PIDF", "P %.3f I %.3f D %.3f F %.3f %s",
+                hubPidf.p, hubPidf.i, hubPidf.d, hubPidf.f, hubPidf.algorithm);
+        telemetry.addData("Hub matches tuner", Math.abs(hubPidf.p - P) < 0.001 && Math.abs(hubPidf.i - I) < 0.001
+                && Math.abs(hubPidf.d - D) < 0.001 && Math.abs(hubPidf.f - F) < 0.001);
+        telemetry.addData("Mode", flywheel.getMode());
+        telemetry.addData("Motor", "port %d, %s", flywheel.getPortNumber(), flywheel.getMotorType().getName());
+        // Power the F term alone asks for. If velocity tracks this open-loop guess instead of the
+        // target, P and I are not acting on the hub.
+        telemetry.addData("F-only power", "%.3f", F * targetedSpeed / 32767.0);
 
 
 
