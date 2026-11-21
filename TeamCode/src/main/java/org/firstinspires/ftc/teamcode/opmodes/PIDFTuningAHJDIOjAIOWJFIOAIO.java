@@ -5,17 +5,19 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
+import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
+
+import java.io.File;
 
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
-    double P = 118.5, I = 0, D = -0.4, F = 15.1;
+    double P = 0.0, I = 0.0, D = 0.0, F = 0.0;
     DcMotorEx flywheel;
     Servo hood;
     double angle =  20;
@@ -31,13 +33,11 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     boolean justTurnedDownD = false;
     boolean isNormalSpeed = false;
     double lowSpeed = 900;
-    double sentP = Double.NaN, sentI = Double.NaN, sentD = Double.NaN, sentF = Double.NaN;
-    boolean iArmed = false;
-    double iArmTarget = Double.NaN;
-    long speedCommandAtNs;
 
     @Override
     public void init() {
+        ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
+
         flywheel = hardwareMap.get(DcMotorEx.class, HardwareNames.FLYWHEEL_NAME);
         hood = hardwareMap.get(Servo.class, HardwareNames.TURRET_UP_ANGLE_SERVO_NAME);
         uptake = hardwareMap.get(DcMotor.class, HardwareNames.UPTAKE_MOTOR_NAME);
@@ -62,61 +62,46 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         if(gamepad1.triangleWasPressed()) F += stepSize[stepIndex];
         if(gamepad1.crossWasPressed()) F -= stepSize[stepIndex];
-        // Re-arm below 0.4 so the stick does not have to return all the way to center.
-        // A stick resting above 0.75 would otherwise lock that direction after one step.
         if(gamepad1.right_stick_y > 0.75) {
             if(!justTurnedUpI) I += stepSize[stepIndex];
             justTurnedUpI = true;
-        } else if(gamepad1.right_stick_y < 0.4) {
+
+        } else {
             justTurnedUpI = false;
         }
         if(gamepad1.right_stick_y < -0.75) {
             if(!justTurnedDownI) I -= stepSize[stepIndex];
             justTurnedDownI = true;
-        } else if(gamepad1.right_stick_y > -0.4) {
+
+        } else {
             justTurnedDownI = false;
         }
+
 
         if(gamepad1.left_stick_y > 0.75) {
             if(!justTurnedUpD) D += stepSize[stepIndex];
             justTurnedUpD = true;
-        } else if(gamepad1.left_stick_y < 0.4) {
+
+        } else {
             justTurnedUpD = false;
         }
         if(gamepad1.left_stick_y < -0.75) {
             if(!justTurnedDownD) D -= stepSize[stepIndex];
             justTurnedDownD = true;
-        } else if(gamepad1.left_stick_y > -0.4) {
+
+        } else {
             justTurnedDownD = false;
         }
+
+        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
 
         if(gamepad1.leftStickButtonWasPressed()) isNormalSpeed = !isNormalSpeed;
 
         double targetedSpeed = isNormalSpeed ? targetSpeed : lowSpeed;
-        double error = targetedSpeed - flywheel.getVelocity();
-
-        // Only the big low/high speed switch restarts the spin-up hold. Bumper steps of 5
-        // must not turn I back off, or tapping the speed up leaves positive I dead.
-        if (Double.isNaN(iArmTarget) || Math.abs(targetedSpeed - iArmTarget) > 100) {
-            iArmed = false;
-            iArmTarget = targetedSpeed;
-            speedCommandAtNs = System.nanoTime();
-        }
-        if (!iArmed && (Math.abs(error) < 150 || System.nanoTime() - speedCommandAtNs > 2_000_000_000L)) {
-            iArmed = true;
-        }
-        double appliedI = iArmed ? I : 0;
-
-        if (P != sentP || appliedI != sentI || D != sentD || F != sentF) {
-            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
-                    new PIDFCoefficients(P, appliedI, D, F, MotorControlAlgorithm.PIDF));
-            sentP = P;
-            sentI = appliedI;
-            sentD = D;
-            sentF = F;
-        }
 
         flywheel.setVelocity(targetedSpeed);
+
+        double error = targetedSpeed - flywheel.getVelocity();
 
         if(gamepad2.circleWasPressed()) angle += TurretConstants.HOOD_STEP_DEG;
         if(gamepad2.triangleWasPressed()) angle -= TurretConstants.HOOD_STEP_DEG;
@@ -126,8 +111,6 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);
-        telemetry.addData("I applied", appliedI);
-        telemetry.addData("I stick", gamepad1.right_stick_y);
         telemetry.addData("D", D);
         telemetry.addData("F", F);
         telemetry.addData("Target Velocity:", targetSpeed);
@@ -146,7 +129,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     public void setHoodAngle(double degrees) {
         if (hood == null || Double.isNaN(degrees)) return;
 
-        hoodPosition = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / 20.0, 0, 1);
+        hoodPosition = ShotCalculator.hoodServoPosition(degrees);
         hood.setPosition(hoodPosition);
     }
 

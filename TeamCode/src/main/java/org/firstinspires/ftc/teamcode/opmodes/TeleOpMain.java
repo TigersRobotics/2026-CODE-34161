@@ -68,7 +68,7 @@ public class TeleOpMain extends OpMode {
         SingleIntakeController.init(hardwareMap, ENABLE_INTAKE_CONTROLLER);
 
         hoodServo = hardwareMap.get(Servo.class, TURRET_UP_ANGLE_SERVO_NAME);
-        hoodServo.setPosition(UtilMethods.clip(angle / 20.0, 0, 0.75));
+        hoodServo.setPosition(ShotCalculator.hoodServoPosition(angle));
         odometry = new FieldOdometry(new GoBildaOdometry(hardwareMap, ODOMETRY_NAME));
         odometry.zero(-72 + 6.5, -72 + 9, 90);
 
@@ -147,7 +147,8 @@ public class TeleOpMain extends OpMode {
 
         double calculatedHoodAngle = calculateHoodAngle(hiveIndex, posx, posY, PollenTurretController.getVelocity());
 
-        double hoodPosition = UtilMethods.clip(angle / 20.0, 0, 0.75);
+        angle = UtilMethods.clip(angle, ShotCalculator.MIN_HOOD_DEG, ShotCalculator.MAX_HOOD_DEG);
+        double hoodPosition = ShotCalculator.hoodServoPosition(angle);
         hoodServo.setPosition(hoodPosition);
 
         TimedTelemetry.addData("Hood angle: ", angle);
