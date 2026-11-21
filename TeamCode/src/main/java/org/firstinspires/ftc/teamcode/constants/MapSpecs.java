@@ -31,7 +31,7 @@ public class MapSpecs {
             new Point(tileToIN(5.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
             new Point(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES)));
 
-    public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(1), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(0));
+    public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(0), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(0));
     public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(180));
 
     public static final ArrayList<Zone> SHOOTING_ZONES = new ArrayList<>(
