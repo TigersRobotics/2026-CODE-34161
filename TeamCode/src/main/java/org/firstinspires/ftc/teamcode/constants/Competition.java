@@ -24,7 +24,7 @@ public class Competition {
     public static final PolygonZone DISABLED_SIDE = new PolygonZone(
             new Point(-1,-1), new Point(-2,-2), new Point(-3,-3)
     );
-//    use this if everywhere is free
+//    use this if our half is free or if we want to use both sides temporarily
 
 
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedro;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
+import com.skeletonarmy.marrow.weaver.HeadingPolicy;
 import com.skeletonarmy.marrow.weaver.PathConfig;
 import com.skeletonarmy.marrow.weaver.PathResult;
 import com.skeletonarmy.marrow.weaver.PedroPathingConverter;
@@ -179,7 +180,12 @@ public class PathGenV3 {
             notPathYet = notPathYet.addObstacle(MapSpecs.OTHER_SIDE).addObstacle(Competition.DISABLED_SIDE);
         if (currentState != State.FLOWER_COLLECTING1 && currentState != State.FLOWER_COLLECTING2)
             for (Zone flower : MapSpecs.FLOWERS) notPathYet = notPathYet.addObstacle(flower);
-        notPathYet = notPathYet.end(PedroPathingConverter.toPoint(destination));
+        if (currentState == State.MOVING_TO_SHOOT) {
+            notPathYet = notPathYet.end(PedroPathingConverter.toPoint(destination), HeadingPolicy.LOCKED);
+
+        } else {
+            notPathYet = notPathYet.end(PedroPathingConverter.toPoint(destination));
+        }
         PathResult almostPath = notPathYet.build();
         try {
             TimedTelemetry.addLine("Follower followed", 2000);

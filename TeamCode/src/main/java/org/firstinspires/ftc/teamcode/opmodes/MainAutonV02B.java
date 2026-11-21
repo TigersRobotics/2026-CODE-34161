@@ -52,7 +52,7 @@ public class MainAutonV02B extends LinearOpMode {
 
     public void update() {
         Timer.update();
-        follower.update(Timer.DTime());
+        PathGenV3.update();
         TimedTelemetry.update();
         telemetry.update();
     }

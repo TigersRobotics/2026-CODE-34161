@@ -35,21 +35,27 @@ public class MainAutonV02A extends LinearOpMode {
         Timer.update();
         PathGenV3.goShoot(PathGenV3.Hive.NEAREST);
         while (Timer.getTime(TimeUnit.MILLISECONDS) < 10000) {
+            if (!opModeIsActive()) return;
             update();
         }
         // Shoot TODO add shoot here
         while (Timer.getTime(TimeUnit.MILLISECONDS) < 20000) {
+            if (!opModeIsActive()) return;
+
             // shooter update (if needed)
             update();
         }
 
         PathGenV3.goPark();
+        while (opModeIsActive()) {
+            update();
+        }
 
     }
 
     public void update() {
         Timer.update();
-        follower.update(Timer.DTime());
+        PathGenV3.update();
         TimedTelemetry.update();
         telemetry.update();
     }
