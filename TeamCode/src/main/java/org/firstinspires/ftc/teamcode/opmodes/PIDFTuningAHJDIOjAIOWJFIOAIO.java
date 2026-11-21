@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
-    double P = 118.5, I = 0.01, D = -0.4, F = 15.1;
+    double P = 118.5, I = 0, D = -0.4, F = 15.1;
     DcMotorEx flywheel;
     Servo hood;
     double angle =  20;
@@ -30,6 +30,10 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     boolean justTurnedDownD = false;
     boolean isNormalSpeed = false;
     double lowSpeed = 900;
+    double sentP = Double.NaN, sentI = Double.NaN, sentD = Double.NaN, sentF = Double.NaN;
+    boolean iArmed = false;
+    double iArmTarget = Double.NaN;
+    long speedCommandAtNs;
 
     @Override
     public void init() {
@@ -88,15 +92,32 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
             justTurnedDownD = false;
         }
 
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
-
         if(gamepad1.leftStickButtonWasPressed()) isNormalSpeed = !isNormalSpeed;
 
         double targetedSpeed = isNormalSpeed ? targetSpeed : lowSpeed;
+        double error = targetedSpeed - flywheel.getVelocity();
+
+        // I winds up while the wheel is still climbing from a stop. Hold it off until the
+        // wheel is at speed, which is what happens when these numbers are dialed in by hand.
+        if (targetedSpeed != iArmTarget) {
+            iArmed = false;
+            iArmTarget = targetedSpeed;
+            speedCommandAtNs = System.nanoTime();
+        }
+        if (!iArmed && (Math.abs(error) < 150 || System.nanoTime() - speedCommandAtNs > 2_000_000_000L)) {
+            iArmed = true;
+        }
+        double appliedI = iArmed ? I : 0;
+
+        if (P != sentP || appliedI != sentI || D != sentD || F != sentF) {
+            flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, appliedI, D, F));
+            sentP = P;
+            sentI = appliedI;
+            sentD = D;
+            sentF = F;
+        }
 
         flywheel.setVelocity(targetedSpeed);
-
-        double error = targetedSpeed - flywheel.getVelocity();
 
         if(gamepad2.circleWasPressed()) angle += TurretConstants.HOOD_STEP_DEG;
         if(gamepad2.triangleWasPressed()) angle -= TurretConstants.HOOD_STEP_DEG;
@@ -106,6 +127,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         telemetry.addData("P: ", P);
         telemetry.addData("I", I);
+        telemetry.addData("I applied", appliedI);
         telemetry.addData("D", D);
         telemetry.addData("F", F);
         telemetry.addData("Target Velocity:", targetSpeed);
