@@ -14,7 +14,9 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
+import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
+import org.firstinspires.ftc.teamcode.constants.TurretConstants;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
@@ -167,11 +169,10 @@ public class PollenTurretController {
 
     /// Sets the hood angle in degrees. NaN (no valid shot) keeps the hood where it is.
     public static void setHoodAngle(double degrees) {
-        if(hoodServo == null || Double.isNaN(degrees)) return;
+        if (hoodServo == null || Double.isNaN(degrees)) return;
 
-
-        double position = UtilMethods.clip((degrees - HOOD_SERVO_RANGE_DEG/2 - 5) / HOOD_SERVO_RANGE_DEG * 2, -1, 1);
-        if(position != sentHoodPosition) {
+        double position = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / HOOD_SERVO_RANGE_DEG, 0, 1);
+        if (position != sentHoodPosition) {
             hoodServo.setPosition(position);
             sentHoodPosition = position;
         }

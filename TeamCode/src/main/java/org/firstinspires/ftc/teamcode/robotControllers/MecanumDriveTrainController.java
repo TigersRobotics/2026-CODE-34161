@@ -100,12 +100,13 @@ public class MecanumDriveTrainController{
      */
     public static void update(double driveY, double driveX, double turn, double heading) {
         if(isInitialized) {
+            double headingRad = Math.toRadians(heading);
             double fieldCentricX = driveX;
             double fieldCentricY = driveY;
 
             if(isFieldCentric) {
-                fieldCentricX = driveX * Math.cos(heading) + driveY * Math.sin(heading);
-                fieldCentricY = driveY * Math.cos(heading) - driveX * Math.sin(heading);
+                fieldCentricX = driveX * Math.cos(headingRad) + driveY * Math.sin(headingRad);
+                fieldCentricY = driveY * Math.cos(headingRad) - driveX * Math.sin(headingRad);
             }
 
             TimedTelemetry.addData("driveY: ", driveY);

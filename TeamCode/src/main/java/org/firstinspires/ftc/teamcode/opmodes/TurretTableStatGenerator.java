@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.robotControllers.UptakeController;
 import org.firstinspires.ftc.teamcode.sensors.FieldOdometry;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
+import org.firstinspires.ftc.teamcode.utils.Timer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -41,77 +42,85 @@ public class TurretTableStatGenerator extends LinearOpMode {
         UptakeController.init(hardwareMap);
         SingleIntakeController.init(hardwareMap);
         odometry.zero(-72 + 6.5, -72 + 9, 90);
+        Timer.init();
+
 
         boolean running = true;
-        while(running) {
-            odometry.update();
-            MecanumDriveTrainController.update(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, odometry.getHeading());
-            PollenTurretController.update();
-            SingleIntakeController.update(toggleIntake ? 1 : 0);
+        waitForStart();
 
-            if(gamepad1.leftBumperWasPressed()) toggleIntake = !toggleIntake;
+        try {
 
-            if(gamepad1.dpadUpWasPressed()) {
-                print();
-                data.clear();
-                angle += 0.5;
+
+            while (running) {
+                odometry.update();
+                MecanumDriveTrainController.update(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, odometry.getHeading());
+                PollenTurretController.update();
+                SingleIntakeController.update(toggleIntake ? 1 : 0);
+
+                if (gamepad1.leftBumperWasPressed()) toggleIntake = !toggleIntake;
+
+                if (gamepad2.rightBumperWasPressed()) {
+                    print();
+                    data.clear();
+                    angle += 0.5;
+                }
+                if (gamepad2.leftBumperWasPressed()) {
+                    print();
+                    data.clear();
+
+                    angle -= 0.5;
+                }
+
+                if (gamepad1.triangleWasPressed()) {
+                    flywheelSpeed += 5;
+                }
+                if (gamepad1.squareWasPressed()) {
+                    flywheelSpeed -= 5;
+                }
+
+                UptakeController.update(gamepad1.right_trigger - gamepad1.left_trigger);
+
+                PollenTurretController.setTargetVel(flywheelSpeed);
+                PollenTurretController.setHoodAngle(angle);
+
+                if (gamepad1.circleWasPressed()) {
+                    ///Add the current x, y, angle, and flywheel speed to the list
+                    double x = odometry.getX();
+                    double y = odometry.getY();
+
+                    ArrayList<String> row = new ArrayList<>(List.of(String.valueOf(angle), String.valueOf(x), String.valueOf(y), String.valueOf(flywheelSpeed)));
+                    data.add(row);
+                }
+                if (gamepad2.crossWasPressed() || isStopRequested()) running = false;
+                TimedTelemetry.addData("Target Flywheel Speed: ", flywheelSpeed);
+                TimedTelemetry.addData("Current Flywheel Speed: ", PollenTurretController.getVelocity());
+                TimedTelemetry.addData("X: ", odometry.getX());
+                TimedTelemetry.addData("Y: ", odometry.getY());
+                TimedTelemetry.addData("Hood Angle: ", angle);
+
+                Timer.update();
+                TimedTelemetry.update();
+                telemetry.update();
             }
-            if(gamepad1.dpadDownWasPressed()) {
-                print();
-                data.clear();
-
-                angle -= 0.5;
-            }
-
-            if(gamepad1.triangleWasPressed()) {
-                flywheelSpeed += 5;
-            }
-            if(gamepad1.squareWasPressed()) {
-                flywheelSpeed -= 5;
-            }
-
-            UptakeController.update(gamepad1.right_trigger - gamepad1.left_trigger);
-
-            PollenTurretController.setTargetVel(flywheelSpeed);
-            PollenTurretController.setHoodAngle(angle);
-
-            if(gamepad1.circleWasPressed()) {
-                ///Add the current x, y, angle, and flywheel speed to the list
-                double x = odometry.getX();
-                double y = odometry.getY();
-
-                ArrayList<String> row = new ArrayList<>(List.of(String.valueOf(angle), String.valueOf(x), String.valueOf(y), String.valueOf(flywheelSpeed)));
-                data.add(row);
-            }
-            if(gamepad2.crossWasPressed()) running = false;
-            TimedTelemetry.addData("Flywheel Speed: ", flywheelSpeed);
-            TimedTelemetry.addData("X: ", odometry.getX());
-            TimedTelemetry.addData("Y: ", odometry.getY());
-            TimedTelemetry.addData("Hood Angle: ", angle);
-
-
-            TimedTelemetry.update();
-            telemetry.update();
+        } finally {
+            print();
         }
-
-        print();
-
 
     }
     void print() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter( new File(AppUtil.FIRST_FOLDER.getName() + angle + "shots.csv")), true)) {
+        if (data.isEmpty()) return;
+        File file = new File(AppUtil.FIRST_FOLDER, angle + "shots.csv");
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {  // true = append
             for (List<String> row : data) {
                 writer.println(String.join(",", row));
-                TimedTelemetry.addData("Added List",  row.toString(), 10000);
+                TimedTelemetry.addData("Data: ", data.toString(), 10000);
+
+
             }
-
-            TimedTelemetry.addLine("Table Generated Successfully");
-
-
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            telemetry.addData("Save error", e.getMessage());
+            telemetry.update();
         }
-
     }
 }
 
