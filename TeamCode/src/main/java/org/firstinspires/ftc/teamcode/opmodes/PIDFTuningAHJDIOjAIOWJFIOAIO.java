@@ -10,10 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
-import org.firstinspires.ftc.teamcode.utils.ShotCalculator;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
-
-import java.io.File;
 
 @TeleOp
 public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
@@ -36,8 +33,6 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
     @Override
     public void init() {
-        ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
-
         flywheel = hardwareMap.get(DcMotorEx.class, HardwareNames.FLYWHEEL_NAME);
         hood = hardwareMap.get(Servo.class, HardwareNames.TURRET_UP_ANGLE_SERVO_NAME);
         uptake = hardwareMap.get(DcMotor.class, HardwareNames.UPTAKE_MOTOR_NAME);
@@ -129,7 +124,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
     public void setHoodAngle(double degrees) {
         if (hood == null || Double.isNaN(degrees)) return;
 
-        hoodPosition = ShotCalculator.hoodServoPosition(degrees);
+        hoodPosition = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / 20.0, 0, 1);
         hood.setPosition(hoodPosition);
     }
 
