@@ -53,6 +53,7 @@ public class TeleOpMain extends OpMode {
     double heading = 90;
     double intakePower;
     double angle = 15;
+    boolean reverseIntake = false;
 
     double P = TuningConstants.FLYWHEEL_P_VALUE, I = TuningConstants.FLYWHEEL_I_VALUE, D = TuningConstants.FLYWHEEL_D_VALUE, F = TuningConstants.FLYWHEEL_F_VALUE;
 
@@ -103,7 +104,6 @@ public class TeleOpMain extends OpMode {
         handleTurret();
 
 
-        TimedTelemetry.addData("Target Velocity: ", targetVel);
 
 
         // Wrapping the offset stops it winding up past a full turn, and wrapping the final angle
@@ -112,7 +112,7 @@ public class TeleOpMain extends OpMode {
 
         MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0), odometry.getHeading());
         PollenTurretController.update();
-        UptakeController.update(gamepad1.right_trigger - gamepad1.left_trigger);
+        UptakeController.update(gamepad2.right_trigger - gamepad2.left_trigger);
         SingleIntakeController.update(intakePower);
         TimedTelemetry.update();
 
@@ -121,31 +121,30 @@ public class TeleOpMain extends OpMode {
 
     private void handleDriverInputs() {
         if(gamepad1.leftBumperWasPressed()) enableIntake = !enableIntake;
-        intakePower = enableIntake ? 1 : 0;
+        if(gamepad1.rightBumperWasPressed()) reverseIntake = !reverseIntake;
+        intakePower = enableIntake ? reverseIntake ? -1 : 1 : 0;
     }
 
     private void handleTechnicianInputs() {
-        if(gamepad2.dpadUpWasPressed()) targetVelOffset += 10;
-        if(gamepad2.dpadDownWasPressed()) targetVelOffset -= 10;
+        if(gamepad2.rightBumperWasPressed()) targetVelOffset += 5;
+        if(gamepad2.leftBumperWasPressed()) targetVelOffset -= 5;
         if(gamepad2.triangleWasPressed()) hiveIndex = (hiveIndex + 1) % 2;
         if(gamepad2.circleWasPressed()) toggleFlywheel = !toggleFlywheel;
 
         if(gamepad2.dpadRightWasPressed()) {
             I += 0.01;
             PollenTurretController.setPFCoefficients(P, I, D, F);
-        };
+        }
         if(gamepad2.dpadLeftWasPressed()) {
             I -= 0.01;
             PollenTurretController.setPFCoefficients(P, I, D, F);
         }
 
-        if(gamepad2.rightBumperWasPressed()) angle += 0.5;
-        if(gamepad2.leftBumperWasPressed()) angle -= 0.5;
-
         // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
         // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
-        yaw += gamepad2.right_stick_x * Timer.DTime() *0.25;
+        yaw += UtilMethods.expo(gamepad2.right_stick_x * Timer.DTime() *0.25, 3);
 
+        TimedTelemetry.addData("I Value: ", I);
     }
 
     private void handleTurret() {
@@ -160,11 +159,11 @@ public class TeleOpMain extends OpMode {
 
         for (int[] pos :TuningConstants.positions) {
             double flywheelSpeed = pos[0];
-            double x = pos[1];
-            double y = pos[2];
+            double x = pos[1] - Math.abs(odometry.getX());
+            double y = pos[2] - Math.abs(odometry.getY());
 
             double dist = 0;
-            dist += x + y;
+            dist += x*x + y*y;
             if(dist < val) {
                 val = dist;
                 closestSpeed = flywheelSpeed;
@@ -172,27 +171,17 @@ public class TeleOpMain extends OpMode {
 
 
         }
-        closestSpeed += targetVel;
-
-
-        double calculatedHoodAngle = calculateHoodAngle(hiveIndex, posx, posY, PollenTurretController.getVelocity());
-
+        closestSpeed += targetVelOffset;
 
         setHoodAngle(20);
-        TimedTelemetry.addData("Hood angle: ", calculatedHoodAngle);
 
         PollenTurretController.setTargetVel(toggleFlywheel ? closestSpeed + targetVelOffset : 0);
+        TimedTelemetry.addData("Target Velocity: ", toggleFlywheel ? closestSpeed + targetVelOffset : 0);
 
 
         TimedTelemetry.addData("GoBilda Heading ", heading);
     }
-    /// Brings any angle in degrees into the range -180 to 180
-    private static double wrapDegrees(double degrees) {
-        degrees %= 360;
-        if(degrees > 180) degrees -= 360;
-        if(degrees < -180) degrees += 360;
-        return degrees;
-    }
+
 
     @Override
     public void stop() {
