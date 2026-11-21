@@ -109,7 +109,7 @@ public class PIDFTuningAHJDIOjAIOWJFIOAIO extends OpMode {
 
         if (P != sentP || appliedI != sentI || D != sentD || F != sentF) {
             flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
-                    new PIDFCoefficients(P, appliedI, D, F, MotorControlAlgorithm.LegacyPID));
+                    new PIDFCoefficients(P, appliedI, D, F, MotorControlAlgorithm.PIDF));
             sentP = P;
             sentI = appliedI;
             sentD = D;
