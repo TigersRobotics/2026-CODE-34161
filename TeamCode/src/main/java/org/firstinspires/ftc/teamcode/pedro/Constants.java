@@ -15,8 +15,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.constants.HardwareNames;
-import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 
 public class Constants {
     public static Follower create(HardwareMap h) {

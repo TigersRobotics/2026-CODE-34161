@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,6 +12,8 @@ import org.firstinspires.ftc.teamcode.sensors.FieldOdometry;
 import org.firstinspires.ftc.teamcode.sensors.GoBildaOdometry;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
+@Disabled
+@Deprecated
 @TeleOp(name = "Hive Tracking Test")
 public class HiveTracking extends OpMode {
     FieldOdometry odo;

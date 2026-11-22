@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ReadWriteFile;
@@ -25,6 +26,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@Disabled
+@Deprecated
 @TeleOp(name = "Drive Tracking Test")
 public class DriveTrackingTest extends OpMode {
     static final double CLOSE_X_IN = -12; // in, left corner. Teleop's start is the right corner.

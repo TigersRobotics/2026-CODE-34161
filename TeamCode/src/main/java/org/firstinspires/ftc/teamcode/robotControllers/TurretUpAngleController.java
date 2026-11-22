@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
+@Deprecated
 public class TurretUpAngleController {
     private static boolean isInitialized = false;
     private static float targetAngle = 0F;

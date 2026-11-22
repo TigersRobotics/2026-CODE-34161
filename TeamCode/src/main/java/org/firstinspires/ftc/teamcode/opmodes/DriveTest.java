@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -7,6 +8,8 @@ import org.firstinspires.ftc.teamcode.robotControllers.MecanumDriveTrainControll
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
+@Disabled
+@Deprecated
 @TeleOp (name = "Driving Test")
 public class DriveTest extends OpMode {
     @Override

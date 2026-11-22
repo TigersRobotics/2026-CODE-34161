@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
+@Deprecated
 public class UptakeServoController {
     private static boolean isInitialized = false;
     private static Servo upTakeServo;

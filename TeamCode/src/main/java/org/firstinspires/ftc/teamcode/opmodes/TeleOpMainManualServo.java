@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,6 +17,8 @@ import org.firstinspires.ftc.teamcode.utils.Timer;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;
 
 @TeleOp(name = "TeleOpMain manual servo")
+@Disabled
+@Deprecated
 public class TeleOpMainManualServo extends OpMode {
     static final double STICK_DEADBAND = 0.08;
     static final double HOOD_PER_MS = 0.0005;

@@ -8,16 +8,13 @@ import static org.firstinspires.ftc.teamcode.constants.RobotSpecs.TICKS_PER_REV;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.constants.HardwareNames;
-import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.constants.TuningConstants;
 import org.firstinspires.ftc.teamcode.constants.TurretConstants;
-import org.firstinspires.ftc.teamcode.opmodes.OdometryTest;
 import org.firstinspires.ftc.teamcode.sensors.FieldOdometry;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.UtilMethods;

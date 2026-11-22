@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import static org.firstinspires.ftc.teamcode.constants.HardwareNames.ODOMETRY_NAME;
 import static org.firstinspires.ftc.teamcode.constants.HardwareNames.TURRET_UP_ANGLE_SERVO_NAME;
-import static org.firstinspires.ftc.teamcode.utils.VectorMath.calculateHoodAngle;
-import static org.firstinspires.ftc.teamcode.utils.VectorMath.calculateTurretAngle;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;

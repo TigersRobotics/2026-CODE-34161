@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.constants.HardwareNames;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
+@Deprecated
 public class TurretUpAngleControllerV2 {
     private static boolean isInitialized = false;
     private static float targetAngle = 0.0074074074f;

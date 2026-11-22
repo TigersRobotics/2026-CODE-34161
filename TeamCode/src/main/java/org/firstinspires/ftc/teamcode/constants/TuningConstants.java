@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.constants;
 
-import com.pedropathing.math.Pose;
-
 public class TuningConstants {
     public static final double[] FLYWHEEL_POLLEN_POSITIONS = {2.0}; //In mm
     public static final double[] FLYWHEEL_NECTAR_POSITIONS = {10.0}; //In mm

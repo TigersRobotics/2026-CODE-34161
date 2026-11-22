@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.constants.Competition;
-import org.firstinspires.ftc.teamcode.controller.CustomController;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
 

@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.sensors.Colour;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 
+@Deprecated
 public class Spindexer {
     private static boolean isInitialized = false;
     public static Colour.DetectedColour[] balls = {Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY, Colour.DetectedColour.EMPTY};

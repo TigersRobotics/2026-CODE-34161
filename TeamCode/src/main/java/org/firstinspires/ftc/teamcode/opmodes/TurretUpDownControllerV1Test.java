@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -7,7 +8,8 @@ import org.firstinspires.ftc.teamcode.robotControllers.TurretUpAngleController;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
 import org.firstinspires.ftc.teamcode.utils.Timer;
 
-
+@Disabled
+@Deprecated
 @TeleOp (name = "Turret Up/Down Controller Test")
 public class TurretUpDownControllerV1Test extends OpMode {
     @Override
