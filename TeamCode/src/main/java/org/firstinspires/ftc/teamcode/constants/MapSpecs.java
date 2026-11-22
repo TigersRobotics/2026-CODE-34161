@@ -32,12 +32,12 @@ public class MapSpecs {
             new Point(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES)));
 
     public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(0), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(0));
-    public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(180));
+    public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5.5), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(180));
 
     public static final ArrayList<Zone> SHOOTING_ZONES = new ArrayList<>(
             List.of(LEFT_SHOOTING, RIGHT_SHOOTING));
 
-    public static final Pose PARKING = new Pose(tileToIN(1.5), tileToIN(0.8 - Competition.STARTING_Y_TILES), Math.toRadians(90));
+    public static final Pose PARKING = new Pose(tileToIN(1.0), tileToIN(0.8 - Competition.STARTING_Y_TILES), Math.toRadians(90));
     public static final Pose GARDEN = new Pose(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES));
     public static final ArrayList<Zone> FLOWERS = new ArrayList<>(List.of(
             new CircleZone(new Point(2.5, 48), 2.5),
@@ -52,19 +52,37 @@ public class MapSpecs {
             new Point(72, 11 - tileToIN(Competition.STARTING_Y_TILES), Math.toRadians(180))
     ));
     public static final ArrayList<Zone> OBSTACLES = new ArrayList<>(List.of(
-            // these are just setting what bounds of the arena is
-            new PolygonZone(new Point(tileToIN(0), tileToIN(0 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(6), tileToIN(0 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(3), tileToIN(-2 - Competition.STARTING_Y_TILES))),
-            new PolygonZone(new Point(tileToIN(0), tileToIN(0 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(0), tileToIN(6 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(-2), tileToIN(3 - Competition.STARTING_Y_TILES))),
-            new PolygonZone(new Point(tileToIN(6), tileToIN(0 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(6), tileToIN(6 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(8), tileToIN(3 - Competition.STARTING_Y_TILES))),
-            new PolygonZone(new Point(tileToIN(0), tileToIN(6 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(6), tileToIN(6 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(3), tileToIN(8 - Competition.STARTING_Y_TILES))),
+            // Bottom polygon
+            new PolygonZone(
+                    new Point(tileToIN(-1), tileToIN(0 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(7), tileToIN(0 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(7), tileToIN(-2 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(-1), tileToIN(-2 - Competition.STARTING_Y_TILES))
+            ),
+
+            // Left polygon
+            new PolygonZone(
+                    new Point(tileToIN(0), tileToIN(-1 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(0), tileToIN(7 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(-2), tileToIN(7 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(-2), tileToIN(-1 - Competition.STARTING_Y_TILES))
+            ),
+
+                // Right polygon
+            new PolygonZone(
+                    new Point(tileToIN(6), tileToIN(-1 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(6), tileToIN(7 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(8), tileToIN(7 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(8), tileToIN(-1 - Competition.STARTING_Y_TILES))
+            ),
+
+// Top polygon
+            new PolygonZone(
+                    new Point(tileToIN(-1), tileToIN(6 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(7), tileToIN(6 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(7), tileToIN(8 - Competition.STARTING_Y_TILES)),
+                    new Point(tileToIN(-1), tileToIN(8 - Competition.STARTING_Y_TILES))
+            ),
 
             // the stand of the hives
             new PolygonZone(
@@ -96,6 +114,8 @@ public class MapSpecs {
                     new Point(tileToIN(2.4), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
                     new Point(tileToIN(3.8), tileToIN(2.5 - Competition.STARTING_Y_TILES))
             };
+
+
 
 
     public static final double HIVE_HEIGHT = 53.5; ///Inches

@@ -48,13 +48,15 @@ public class MainAutonV02B extends LinearOpMode {
         waitForStart();
         Timer.reset();
         Timer.update();
-        PathGenV3.goShoot(PathGenV3.Hive.NEAREST);
+        PollenTurretController.update();
+        PathGenV3.goShoot(PathGenV3.Hive.RIGHT_HIVE);
         while (Timer.getTime(TimeUnit.MILLISECONDS) < 500) {
 
             update();
         }
         while (PathGenV3.getCurrentState() != PathGenV3.State.SHOOTING) {
             PollenTurretController.setPFCoefficients(TuningConstants.FLYWHEEL_P_VALUE, TuningConstants.FLYWHEEL_I_VALUE, TuningConstants.FLYWHEEL_D_VALUE, TuningConstants.FLYWHEEL_F_VALUE);
+            PollenTurretController.update();
             update();
         }
         // Shoot TODO add shooting here

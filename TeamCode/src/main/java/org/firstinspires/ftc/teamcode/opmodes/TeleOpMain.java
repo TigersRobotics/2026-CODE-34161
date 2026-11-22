@@ -31,7 +31,6 @@ import java.util.List;
 public class TeleOpMain extends OpMode {
     private static final double HOOD_SERVO_RANGE_DEG = 20;
     private boolean tipped;
-    private double trim;
     final boolean ENABLE_TURRET_CONTROLLER = true;
     final boolean ENABLE_DRIVE_CONTROLLER = true;
     final boolean ENABLE_UPTAKE_CONTROLLER = true;
@@ -55,7 +54,7 @@ public class TeleOpMain extends OpMode {
     double angle = 15;
     boolean reverseIntake = false;
 
-    double P = TuningConstants.FLYWHEEL_P_VALUE, I = TuningConstants.FLYWHEEL_I_VALUE, D = TuningConstants.FLYWHEEL_D_VALUE, F = TuningConstants.FLYWHEEL_F_VALUE;
+    double P = TuningConstants.FLYWHEEL_P_VALUE, I = 0  , D = TuningConstants.FLYWHEEL_D_VALUE, F = TuningConstants.FLYWHEEL_F_VALUE;
 
     @Override
     public void init() {
@@ -67,7 +66,7 @@ public class TeleOpMain extends OpMode {
         hubs = hardwareMap.getAll(LynxModule.class);
         for(LynxModule hub : hubs) hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
-        MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER, true);
+        MecanumDriveTrainController.init(hardwareMap, ENABLE_DRIVE_CONTROLLER, false);
         ShotCalculator.loadTuning(new File(hardwareMap.appContext.getFilesDir(), "shot-tuning.txt"));
         PollenTurretController.init(hardwareMap, ENABLE_TURRET_CONTROLLER);
         UptakeController.init(hardwareMap, ENABLE_UPTAKE_CONTROLLER);
@@ -110,7 +109,7 @@ public class TeleOpMain extends OpMode {
         // lets the turret carry on round instead of sticking at +/-180
 
 
-        MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0), odometry.getHeading());
+        MecanumDriveTrainController.update(UtilMethods.expo(gamepad1.left_stick_y,2), UtilMethods.expo(-gamepad1.left_stick_x, 2.0), UtilMethods.expo(-gamepad1.right_stick_x,2.0), Math.toDegrees(odometry.getHeading()));
         PollenTurretController.update();
         UptakeController.update(gamepad2.right_trigger - gamepad2.left_trigger);
         SingleIntakeController.update(intakePower);
@@ -142,17 +141,18 @@ public class TeleOpMain extends OpMode {
 
         // Manual turret offset. A tap is a fixed small step, and it uses the buffered button press
         // so a tap shorter than one loop is not lost. Holding the button sweeps after a short delay.
-        yaw += UtilMethods.expo(gamepad2.right_stick_x * Timer.DTime() *0.25, 3);
+        yaw += UtilMethods.expo(gamepad2.right_stick_x , 3) * Timer.DTime() * 0.25;
 
         TimedTelemetry.addData("I Value: ", I);
+
     }
 
     private void handleTurret() {
 
         double[] t = Field.upCell(true, tipped);
         double fieldDeg = Math.toDegrees(Math.atan2(t[1] - odometry.getY(), t[0] - odometry.getX())); // deg
-        double turret = wrap(Math.toDegrees(odometry.getHeading()) - fieldDeg + trim); // deg
-        if (odometry.isZeroed()) PollenTurretController.setYaw(turret + yaw);
+        double turret = wrap(Math.toDegrees(odometry.getHeading()) - fieldDeg + yaw); // deg
+        if (odometry.isZeroed()) PollenTurretController.setYaw(turret);
 
         double closestSpeed = targetVel;
         double val = Double.MAX_VALUE;
@@ -177,15 +177,15 @@ public class TeleOpMain extends OpMode {
 
         PollenTurretController.setTargetVel(toggleFlywheel ? closestSpeed + targetVelOffset : 0);
         TimedTelemetry.addData("Target Velocity: ", toggleFlywheel ? closestSpeed + targetVelOffset : 0);
-
-
-        TimedTelemetry.addData("GoBilda Heading ", heading);
+        TimedTelemetry.addData("Error: ", closestSpeed - PollenTurretController.getVelocity());
     }
 
 
     @Override
     public void stop() {
+        PollenTurretController.setYaw(0);
         MecanumDriveTrainController.stop();
+
         PollenTurretController.stop();
         UptakeController.stop();
         SingleIntakeController.stop();
@@ -194,8 +194,8 @@ public class TeleOpMain extends OpMode {
 
     static double wrap(double deg) {
         deg %= 360;
-        while (deg > 180) deg -= 360;
-        while (deg < -70) deg += 90;
+        while (deg > 160) deg -= 360;
+        while (deg < -190) deg += 360;
         return deg;
     }
 
@@ -205,4 +205,5 @@ public class TeleOpMain extends OpMode {
         double position = UtilMethods.clip((degrees - TurretConstants.HOOD_MIN_DEG) / HOOD_SERVO_RANGE_DEG, 0, 1);
         hoodServo.setPosition(position);
     }
+
 }
