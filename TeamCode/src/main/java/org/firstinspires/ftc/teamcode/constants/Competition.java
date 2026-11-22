@@ -6,8 +6,8 @@ import com.skeletonarmy.marrow.zones.PolygonZone;
 public class Competition {
 
 
-    public static final double STARTING_X_TILES = 0.25;
-    public static final double STARTING_Y_TILES = 0.5;
+    public static final double STARTING_X_INCHES = 6;
+    public static final double STARTING_Y_INCHES = 12;
     /// divide by 24 if using inches
     /// measured from the CENTER of the robot
 

@@ -6,7 +6,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.constants.Competition;
-import org.firstinspires.ftc.teamcode.constants.RobotSpecs;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.PathGenV3;
 import org.firstinspires.ftc.teamcode.utils.TimedTelemetry;
@@ -35,7 +34,7 @@ public class GoBildaOdometry {
         if (odo.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.NOT_READY) return;
         if (!setInitYet) {
             TimedTelemetry.addLine("Pose Set");
-            setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_TILES), 0, AngleUnit.DEGREES, Competition.STARTING_HEADING));
+            setPose(new Pose2D(DistanceUnit.INCH, PathGenV3.tileToIN(Competition.STARTING_X_INCHES), 0, AngleUnit.DEGREES, Competition.STARTING_HEADING));
             setInitYet = true;
         }
 

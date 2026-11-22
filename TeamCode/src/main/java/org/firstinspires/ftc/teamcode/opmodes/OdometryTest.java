@@ -42,10 +42,10 @@ public class OdometryTest extends OpMode {
         TimedTelemetry.addData("Heading: ", odometry.getHeading(AngleUnit.DEGREES));
         TimedTelemetry.update();
         if (gamepad1.circleWasPressed()) {
-            TimedTelemetry.addData("Start Y", PathGenV3.tileToIN(Competition.STARTING_Y_TILES), 1000);
+            TimedTelemetry.addData("Start Y", PathGenV3.tileToIN(Competition.STARTING_Y_INCHES), 1000);
             odometry.setPose(new Pose2D(DistanceUnit.INCH,
-                    PathGenV3.tileToIN(Competition.STARTING_X_TILES),
-                    PathGenV3.tileToIN(Competition.STARTING_Y_TILES),
+                    PathGenV3.tileToIN(Competition.STARTING_X_INCHES),
+                    PathGenV3.tileToIN(Competition.STARTING_Y_INCHES),
                     AngleUnit.DEGREES, 0));
         }
 

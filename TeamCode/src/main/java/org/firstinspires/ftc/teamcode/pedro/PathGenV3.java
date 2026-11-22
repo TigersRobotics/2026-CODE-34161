@@ -83,7 +83,7 @@ public class PathGenV3 {
         currentState = State.IDLE;
         previousState = State.IDLE;
         PathGenV3.follower = follower;
-        follower.setPose(new Pose(tileToIN(Competition.STARTING_X_TILES), 0, Competition.STARTING_HEADING));
+        follower.setPose(new Pose(tileToIN(Competition.STARTING_X_INCHES), 0, Competition.STARTING_HEADING));
         PathGenV3.odometry = odometry;
 
         Weaver.setConfig(new PathConfig().intakeWidth(RobotSpecs.INTAKE_WIDTH_SHORTENED_CM / 2.54)
@@ -197,7 +197,7 @@ public class PathGenV3 {
 
     public static Pose getCurrentPose() {
         return new Pose(odometry.getX(DistanceUnit.INCH),
-                odometry.getY(DistanceUnit.INCH) + Competition.STARTING_Y_TILES,
+                odometry.getY(DistanceUnit.INCH) + Competition.STARTING_Y_INCHES,
                 odometry.getHeading(AngleUnit.RADIANS));
 
     }

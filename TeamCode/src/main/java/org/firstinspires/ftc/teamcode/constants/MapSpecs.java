@@ -1,121 +1,169 @@
 package org.firstinspires.ftc.teamcode.constants;
 
-
-import static org.firstinspires.ftc.teamcode.pedro.PathGenV3.tileToIN;
-
 import com.pedropathing.math.Pose;
-import com.skeletonarmy.marrow.zones.CircleZone;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 import com.skeletonarmy.marrow.zones.Zone;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MapSpecs {
     /// this is a class containing constants of the map, such as the hive entrance/april tag offset,
     /// and the locations of various POIs
-    public static final double APRIL_TAG_HIVE_OFFSET_H = 1;
-    public static final double APRIL_TAG_HIVE_OFFSET_D = 1;
 
-    public static final Pose SPOT = new Pose(
-            48, 36, Math.toRadians(90)
-    );
-
-    public static final PolygonZone LEFT_SHOOTING = new PolygonZone(
-            new Point(tileToIN(1.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(0.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(0.5), tileToIN(0.5 - Competition.STARTING_Y_TILES)));
-    public static final PolygonZone RIGHT_SHOOTING = new PolygonZone(
-            new Point(tileToIN(4.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(5.5), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES)));
-
-    public static final Pose LEFT_SHOOT_POS = new Pose(tileToIN(0), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(0));
-    public static final Pose RIGHT_SHOOT_POS = new Pose(tileToIN(5.5), tileToIN(2.5 - Competition.STARTING_Y_TILES), Math.toRadians(180));
-
-    public static final ArrayList<Zone> SHOOTING_ZONES = new ArrayList<>(
-            List.of(LEFT_SHOOTING, RIGHT_SHOOTING));
-
-    public static final Pose PARKING = new Pose(tileToIN(1.0), tileToIN(0.8 - Competition.STARTING_Y_TILES), Math.toRadians(90));
-    public static final Pose GARDEN = new Pose(tileToIN(5.5), tileToIN(0.5 - Competition.STARTING_Y_TILES));
-    public static final ArrayList<Zone> FLOWERS = new ArrayList<>(List.of(
-            new CircleZone(new Point(2.5, 48), 2.5),
-            new CircleZone(new Point(96, 2.5), 2.5),
-            new CircleZone(new Point(141.5, 96), 2.5),
-            new CircleZone(new Point(48, 141.5), 2.5)
-
-    ));
-
-    public static final ArrayList<Point> FLOWER_COLLECTION_START = new ArrayList<>(List.of(
-            new Point(11, 24 - tileToIN(Competition.STARTING_Y_TILES), Math.toRadians(90)),
-            new Point(72, 11 - tileToIN(Competition.STARTING_Y_TILES), Math.toRadians(180))
-    ));
-    public static final ArrayList<Zone> OBSTACLES = new ArrayList<>(List.of(
-            // Bottom polygon
+    public static final Zone[] OBSTACLES = {
+            // Walls
             new PolygonZone(
-                    new Point(tileToIN(-1), tileToIN(0 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(7), tileToIN(0 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(7), tileToIN(-2 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(-1), tileToIN(-2 - Competition.STARTING_Y_TILES))
-            ),
-
-            // Left polygon
-            new PolygonZone(
-                    new Point(tileToIN(0), tileToIN(-1 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(0), tileToIN(7 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(-2), tileToIN(7 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(-2), tileToIN(-1 - Competition.STARTING_Y_TILES))
-            ),
-
-                // Right polygon
-            new PolygonZone(
-                    new Point(tileToIN(6), tileToIN(-1 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(6), tileToIN(7 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(8), tileToIN(7 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(8), tileToIN(-1 - Competition.STARTING_Y_TILES))
-            ),
-
-// Top polygon
-            new PolygonZone(
-                    new Point(tileToIN(-1), tileToIN(6 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(7), tileToIN(6 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(7), tileToIN(8 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(-1), tileToIN(8 - Competition.STARTING_Y_TILES))
-            ),
-
-            // the stand of the hives
-            new PolygonZone(
-                    new Point(46, 47 - tileToIN(Competition.STARTING_Y_TILES)),
-                    new Point(46, 49 - tileToIN(Competition.STARTING_Y_TILES)),
-                    new Point(98, 47 - tileToIN(Competition.STARTING_Y_TILES)),
-                    new Point(98, 49 - tileToIN(Competition.STARTING_Y_TILES))
-
+                    new Point(-24, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(168, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(168, -48 - Competition.STARTING_Y_INCHES),
+                    new Point(-24, -48 - Competition.STARTING_Y_INCHES)
             ),
             new PolygonZone(
-                    new Point(46, 95 - tileToIN(Competition.STARTING_Y_TILES)),
-                    new Point(46, 97 - tileToIN(Competition.STARTING_Y_TILES)),
-                    new Point(98, 95 - tileToIN(Competition.STARTING_Y_TILES)),
-                    new Point(98, 97 - tileToIN(Competition.STARTING_Y_TILES))
+                    new Point(0, -24 - Competition.STARTING_Y_INCHES),
+                    new Point(0, 168 - Competition.STARTING_Y_INCHES),
+                    new Point(-48, 168 - Competition.STARTING_Y_INCHES),
+                    new Point(-48, -24 - Competition.STARTING_Y_INCHES)
+            ),
+            new PolygonZone(
+                    new Point(144, -24 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 168 - Competition.STARTING_Y_INCHES),
+                    new Point(192, 168 - Competition.STARTING_Y_INCHES),
+                    new Point(192, -24 - Competition.STARTING_Y_INCHES)
+            ),
+            new PolygonZone(
+                    new Point(-24, 144 - Competition.STARTING_Y_INCHES),
+                    new Point(168, 144 - Competition.STARTING_Y_INCHES),
+                    new Point(168, 192 - Competition.STARTING_Y_INCHES),
+                    new Point(-24, 192 - Competition.STARTING_Y_INCHES)
             )
+    };
 
-    )
-    );
+    public static final Zone[] HIVE_BOTTOMS = {
+            // Hive Bottoms
+            new PolygonZone(
+                    new Point(52.8, 47 - Competition.STARTING_Y_INCHES),
+                    new Point(90.7, 47 - Competition.STARTING_Y_INCHES),
+                    new Point(90.7, 49 - Competition.STARTING_Y_INCHES),
+                    new Point(52.8, 49 - Competition.STARTING_Y_INCHES)
+            ),
+            new PolygonZone(
+                    new Point(52.8, 95 - Competition.STARTING_Y_INCHES),
+                    new Point(90.7, 95 - Competition.STARTING_Y_INCHES),
+                    new Point(90.7, 97 - Competition.STARTING_Y_INCHES),
+                    new Point(52.8, 97 - Competition.STARTING_Y_INCHES)
+            )
+    };
+
+    public static final Zone[] FLOWERS = {
+            // Left wall flower
+            new PolygonZone(
+                    new Point(0, 37.5 - Competition.STARTING_Y_INCHES),
+                    new Point(5, 37.5 - Competition.STARTING_Y_INCHES),
+                    new Point(5, 42.5 - Competition.STARTING_Y_INCHES),
+                    new Point(0, 42.5 - Competition.STARTING_Y_INCHES)
+            ),
+            // Top wall flower
+            new PolygonZone(
+                    new Point(45.5, 139 - Competition.STARTING_Y_INCHES),
+                    new Point(50.5, 139 - Competition.STARTING_Y_INCHES),
+                    new Point(50.5, 144 - Competition.STARTING_Y_INCHES),
+                    new Point(45.5, 144 - Competition.STARTING_Y_INCHES)
+            ),
+            // Right wall flower
+            new PolygonZone(
+                    new Point(139, 93.5 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 93.5 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 98.5 - Competition.STARTING_Y_INCHES),
+                    new Point(139, 98.5 - Competition.STARTING_Y_INCHES)
+            ),
+            // Bottom wall flower
+            new PolygonZone(
+                    new Point(93.5, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(98.5, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(98.5, 5 - Competition.STARTING_Y_INCHES),
+                    new Point(93.5, 5 - Competition.STARTING_Y_INCHES)
+            )
+    };
+
+
+    public static final Pose PARKING = new Pose(36, 6);
+
+    public static final Zone PARKING_ZONE =
+            // Bottom-left loading zone
+            new PolygonZone(
+                    new Point(24, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(48, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(48, 12 - Competition.STARTING_Y_INCHES),
+                    new Point(24, 12 - Competition.STARTING_Y_INCHES)
+            );
+    public static final Zone OPP_PARKING_ZONE =
+            // Top-right loading zone
+            new PolygonZone(
+                    new Point(96, 132 - Competition.STARTING_Y_INCHES),
+                    new Point(120, 132 - Competition.STARTING_Y_INCHES),
+                    new Point(120, 144 - Competition.STARTING_Y_INCHES),
+                    new Point(96, 144 - Competition.STARTING_Y_INCHES)
+            );
+
+
+    public static final Zone[] GARDENS = {
+            // Bottom-right garden
+            new PolygonZone(
+                    new Point(139.2, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 24 - Competition.STARTING_Y_INCHES),
+                    new Point(139.2, 24 - Competition.STARTING_Y_INCHES)
+            ),
+            // Top-left garden
+            new PolygonZone(
+                    new Point(0, 120 - Competition.STARTING_Y_INCHES),
+                    new Point(4.8, 120 - Competition.STARTING_Y_INCHES),
+                    new Point(4.8, 144 - Competition.STARTING_Y_INCHES),
+                    new Point(0, 144 - Competition.STARTING_Y_INCHES)
+            )
+    };
+
+    public static final Zone[] SHOOTING_ZONES = {
+            // Left shooting zone
+            new PolygonZone(
+                    new Point(0, 72 - Competition.STARTING_Y_INCHES),
+                    new Point(40, 72 - Competition.STARTING_Y_INCHES),
+                    new Point(40, 40 - Competition.STARTING_Y_INCHES),
+                    new Point(0, 0 - Competition.STARTING_Y_INCHES)
+            ),
+            // Right shooting zone
+            new PolygonZone(
+                    new Point(104, 72 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 72 - Competition.STARTING_Y_INCHES),
+                    new Point(144, 0 - Competition.STARTING_Y_INCHES),
+                    new Point(104, 40 - Competition.STARTING_Y_INCHES)
+            )
+    };
 
     public static final Zone OTHER_SIDE = new PolygonZone(
-            new Point(tileToIN(3), tileToIN(0 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(6), tileToIN(0 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(6), tileToIN(3 - Competition.STARTING_Y_TILES)),
-            new Point(tileToIN(6), tileToIN(6 - Competition.STARTING_Y_TILES))
+            new Point(144, 144 - Competition.STARTING_Y_INCHES),
+            new Point(0, 144 - Competition.STARTING_Y_INCHES),
+            new Point(0, 72 - Competition.STARTING_Y_INCHES),
+            new Point(144, 72 - Competition.STARTING_Y_INCHES)
     );
 
-    public static final Point[] HIVE_COORDINATES =
-            {
-                    new Point(tileToIN(2.4), tileToIN(2.5 - Competition.STARTING_Y_TILES)),
-                    new Point(tileToIN(3.8), tileToIN(2.5 - Competition.STARTING_Y_TILES))
-            };
+    public static final Point[] FLOWER_COLLECTION_START = {
+            // Left wall flower -> facing left (180°)
+            new Point(16, 40 - Competition.STARTING_Y_INCHES, Math.toRadians(180)),
+            // Top wall flower -> facing up (90°)
+            new Point(48, 128 - Competition.STARTING_Y_INCHES, Math.toRadians(90)),
+            // Right wall flower -> facing right (0°)
+            new Point(128, 96 - Competition.STARTING_Y_INCHES, Math.toRadians(0)),
+            // Bottom wall flower -> facing down (-90°)
+            new Point(96, 16 - Competition.STARTING_Y_INCHES, Math.toRadians(-90))
+    };
 
+    public static final Point[] HIVE_COORDINATES = {
+            new Point(48, 60 - Competition.STARTING_Y_INCHES),
+            new Point(96, 60 - Competition.STARTING_Y_INCHES)
+    };
 
+    public static final Pose LEFT_SHOOT_POS = new Pose(9, 60 - Competition.STARTING_Y_INCHES, Math.toRadians(0));
+    public static final Pose RIGHT_SHOOT_POS = new Pose(135, 60 - Competition.STARTING_Y_INCHES, Math.toRadians(180));
 
 
     public static final double HIVE_HEIGHT = 53.5; ///Inches
