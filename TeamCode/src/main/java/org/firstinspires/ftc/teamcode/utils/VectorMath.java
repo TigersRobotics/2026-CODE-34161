@@ -25,35 +25,36 @@ public class VectorMath {
     }
 
 
-    public static double[] shotAngle(double d, double h, double r, double camAngle) {
-/// returns turret vertical angle, and the horizonal angle. Input angleFromTag: facing right is pos
-/// all angles are in degrees, lengths are in meters, speeds are in m/s
-        double [] nV = addV(new double[]{d, camAngle}, new double[]{MapSpecs.APRIL_TAG_HIVE_OFFSET_D, 180-r});
-        double y = h + MapSpecs.APRIL_TAG_HIVE_OFFSET_H;
-        double x = nV[0];
+//    public static double[] shotAngle(double d, double h, double r, double camAngle) {
 
-        // it will try to calculate the angle for trajectory
-        double angle = angleCalc((byte) -1, x, y);
-        double nAngle;
-
-        // checks if the angle is valid
-        if (angle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
-                angle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(angle)){
-
-            // invalid initial angle will return a second angle
-            nAngle = angleCalc((byte) 1, x, y);
-            if (nAngle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
-                    nAngle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)){
-
-                // will log that it cannot find valid angle, shows init angle and backup angle
-                TimedTelemetry.addLine(("No valid angle found: " + angle + " " + nAngle));
-                return new double[] {Double.NaN};
-            }
-            return new double[] {nAngle, nV[1]};
-        }
-
-        return new double[] {angle, nV[1]};
-    }
+    /// // returns turret vertical angle, and the horizonal angle. Input angleFromTag: facing right is pos
+    /// // all angles are in degrees, lengths are in meters, speeds are in m/s
+//        double [] nV = addV(new double[]{d, camAngle}, new double[]{MapSpecs.APRIL_TAG_HIVE_OFFSET_D, 180-r});
+//        double y = h + MapSpecs.APRIL_TAG_HIVE_OFFSET_H;
+//        double x = nV[0];
+//
+//        // it will try to calculate the angle for trajectory
+//        double angle = angleCalc((byte) -1, x, y);
+//        double nAngle;
+//
+//        // checks if the angle is valid
+//        if (angle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
+//                angle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(angle)){
+//
+//            // invalid initial angle will return a second angle
+//            nAngle = angleCalc((byte) 1, x, y);
+//            if (nAngle >= RobotSpecs.MAX_TURRET_ANGLE_UP ||
+//                    nAngle <= RobotSpecs.MAX_TURRET_ANGLE_DOWN || Double.isNaN(nAngle)){
+//
+//                // will log that it cannot find valid angle, shows init angle and backup angle
+//                TimedTelemetry.addLine(("No valid angle found: " + angle + " " + nAngle));
+//                return new double[] {Double.NaN};
+//            }
+//            return new double[] {nAngle, nV[1]};
+//        }
+//
+//        return new double[] {angle, nV[1]};
+//    }
 
     private static double angleCalc(byte add, double x, double y) {
         double g = 9.800665;

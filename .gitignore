@@ -79,3 +79,6 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# Some ascii
+TeamCode/src/main/java/org/firstinspires/ftc/teamcode/constants/Ascii.java

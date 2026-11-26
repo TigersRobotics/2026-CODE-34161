@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 
 /**
- * This is used for having telemetry show for a certain amount of time. It is static so taht it is accessible anwhere
+ * This is used for having telemetry show for a certain amount of time. It is static so that it is accessible without passing it as a
  * @author Jason Xia
  * @version 1.0.0
  */
@@ -29,6 +29,8 @@ public class TimedTelemetry {
 
     public static void init(Telemetry telemetry){
         TimedTelemetry.telemetry = telemetry;
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
         telemetryList.clear();
 
     }
@@ -75,6 +77,7 @@ public class TimedTelemetry {
     public static void addData(String caption, String format, int timeMillis, Object... args){
         addData(caption, format, timeMillis, false, args);
     }
+
 
 }
 
