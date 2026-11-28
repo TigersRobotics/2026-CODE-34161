@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.opmodes.depreciated;
 
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;

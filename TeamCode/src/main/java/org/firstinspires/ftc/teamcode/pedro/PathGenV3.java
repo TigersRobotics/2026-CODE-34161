@@ -267,4 +267,48 @@ public class PathGenV3 {
             TimedTelemetry.addLine("I'm already going to park! ᕙ( ᗒᗣᗕ )ᕗ", 1000);
         currentState = State.PARKING;
     }
+
+    public static void goToPoint(Pose dest) {
+        destination = dest;
+
+        currentState = State.GO_TO_SPOT;
+
+    }
+
+    enum TypeTing {
+        ADDITION,
+        SUBTRACTION,
+        NEITHER
+    }
+    public static void goToZone(Zone zone) {
+        Point robot = PedroPathingConverter.toPoint(getCurrentPose());
+        Point center = zone.getPosition(); // must be inside the zone
+
+        if (zone.contains(robot)) {
+            destination = new Pose(robot.getX(), robot.getY(), center.getHeadingRad());
+            return;
+        }
+
+        double x = center.getX();
+        double y = center.getY();
+
+        //Searches for closest ish point using binary search
+        // X search
+        for (double delta = 72; delta > 0.5; delta /= 2) {
+            // step toward the robot, at most delta, never past it
+            double step = Math.max(-delta, Math.min(delta, robot.getX() - x));
+            if (zone.contains(new Point(x + step, y))) x += step;
+        }
+
+        // Y search
+        for (double delta = 72; delta > 0.5; delta /= 2) {
+            double step = Math.max(-delta, Math.min(delta, robot.getY() - y));
+            if (zone.contains(new Point(x, y + step))) y += step;
+        }
+
+        destination = new Pose(x, y, center.getHeadingRad());
+    }
+
+
 }
+

@@ -173,8 +173,8 @@ public class TeleOpMain extends OpMode {
 
         setHoodAngle(20);
 
-        PollenTurretController.setTargetVel(toggleFlywheel ? closestSpeed + targetVelOffset : 0);
-        TimedTelemetry.addData("Target Velocity: ", toggleFlywheel ? closestSpeed + targetVelOffset : 0);
+        PollenTurretController.setTargetVel(toggleFlywheel ? closestSpeed : 0);
+        TimedTelemetry.addData("Target Velocity: ", toggleFlywheel ? closestSpeed : 0);
         TimedTelemetry.addData("Error: ", closestSpeed - PollenTurretController.getVelocity());
     }
 
